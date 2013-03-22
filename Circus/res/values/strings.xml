@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">Circus</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="button_send">Send</string>
+    <string name="menu_settings">SettingZ</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_feed">Feed</string>
+
+</resources>
