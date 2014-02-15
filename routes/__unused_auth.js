@@ -1,8 +1,5 @@
 
-/*
- * GET users listing.
- */
-//	TODO: Set environment vars
+//	TODO: DELETE?
 var url = require('url');
 var FBAPP = {
   id: process.env.FACEBOOK_APP_ID || '609051335829720',

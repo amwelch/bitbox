@@ -3,10 +3,33 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>The belief in <%= title %></p>
-    <a href="/auth/facebook">Login with Facebook</a>
+    <div id="left_panel">
+      <header>
+        <hgroup>
+          <h1><%= title %></h1>
+          <h2>The belief in <%= title %></h2>
+        </hgroup>
+        <section id="navigation_parent">
+        <% if (content.authenticated) { %>
+          <%- include generic/in/header.ejs %>
+        <% } else { %>
+          <%- include generic/out/header.ejs %>
+        <% } %>
+        </section>
+      </header>
+      <footer>
+        <%- include generic/out/footer.ejs %>
+      </footer>
+    </div>
+    <div id="right_panel">
+    <% if (content.page == 'login') { %>
+      <%- include liftoff/login.ejs %>
+    <% } else if (content.page == 'index') { %>
+      <%- include liftoff/index.ejs %>
+    <% } %>
+    </div>
   </body>
 </html>
