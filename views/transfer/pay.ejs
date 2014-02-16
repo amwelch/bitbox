@@ -1,1 +1,55 @@
-PAY
+  <div id="fb-root"></div>
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId: '609051335829720'
+      });
+
+      $('#fb-login').on('click', function() {
+        FB.login();
+      });
+
+      FB.Event.subscribe('auth.authResponseChange', function(response) {
+        if (response.status === 'connected') {
+          $('#login').remove();
+
+          // No Avatars
+          $('#fb-input2').facebookAutocomplete({
+              showAvatars: false,
+              onpick: function(friend) { 
+                //createFriendElement(friend).insertBefore($(this)).next().remove();
+              }
+          });
+
+        } else {
+          $('#demos').remove();
+        }
+      });
+    };
+
+    function createFriendElement(friend) {
+      var $img = $('<img>').attr('src', friend.picture),
+          $name = $('<h3>').text(friend.name),
+          $friend = $('<div>').addClass('friend').append($img, $name);
+      return $friend;
+    }
+
+    // Load the SDK asynchronously
+    (function(d){
+     var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement('script'); js.id = id; js.async = true;
+     js.src = "//connect.facebook.net/en_US/all.js";
+     ref.parentNode.insertBefore(js, ref);
+    }(document));
+  </script>
+
+  <div id="demos">
+    <div class="demo">
+      <h2>Balance: 2.38483923 BTC</h2>
+      To: 
+      <input type="text" id="fb-input2" style="width: 30%; padding: 10px" placeholder="friend name"/>&nbsp;&nbsp;
+      Amount: <input type="text" style="width: 10%; padding: 10px" placeholder="bitcoins">
+      <button style="background-color: blue; color: white; padding: 10px">Submit</button>
+    </div>
+  </div>

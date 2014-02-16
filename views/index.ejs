@@ -4,6 +4,9 @@
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
+    <script src="autocomplete/jquery.js"></script>
+    <script src="autocomplete/facebook-friend-autocomplete.js"></script>
+    <link rel="stylesheet" href="autocomplete/facebook-friend-autocomplete.css">
   </head>
   <body>
     <div id="left_panel">
@@ -25,6 +28,7 @@
       </footer>
     </div>
     <div id="right_panel">
+      <main>
     <% if (content.base == 'transfer') { %>
       <%- include transfer/index.ejs %>
     <% } else if (content.base == 'history') { %>
@@ -32,6 +36,7 @@
     <% } else { %>
       <%- include liftoff/index.ejs %>
     <% } %>
+      </main>
     </div>
   </body>
 </html>
