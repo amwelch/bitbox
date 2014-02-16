@@ -1,6 +1,17 @@
-    <nav>
-      <a href="/history">Overview</a>
-      <a href="/history/payments">Payments</a>
-      <a href="/history/withdrawals">Withdrawals</a>
-      <a href="/history/deposits">Deposits</a>
-    </nav>
+<nav>
+  <a <% if (content.view == 'index') { %> class="selected"<% } %> href="/history">Overview</a>
+  <a <% if (content.view == 'payments') { %> class="selected"<% } %> href="/history/payments">Payments</a>
+  <a <% if (content.view == 'withdrawals') { %> class="selected"<% } %> href="/history/withdrawals">Withdrawals</a>
+  <a <% if (content.view == 'deposits') { %> class="selected"<% } %> href="/history/deposits">Deposits</a>
+</nav>
+<section>
+<% if (content.view == 'payments') { %>
+  <%- include payments.ejs %>
+<% } else if (content.view == 'withdrawals') { %>
+  <%- include withdrawals.ejs %>
+<% } else if (content.view == 'deposits') { %>
+  <%- include deposits.ejs %>
+<% } else { %>
+  OVERVIEW 
+<% } %> 
+</section>

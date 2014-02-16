@@ -25,9 +25,11 @@
       </footer>
     </div>
     <div id="right_panel">
-    <% if (content.page == 'login') { %>
-      <%- include liftoff/login.ejs %>
-    <% } else if (content.page == 'index') { %>
+    <% if (content.base == 'transfer') { %>
+      <%- include transfer/index.ejs %>
+    <% } else if (content.base == 'history') { %>
+      <%- include history/index.ejs %>
+    <% } else { %>
       <%- include liftoff/index.ejs %>
     <% } %>
     </div>

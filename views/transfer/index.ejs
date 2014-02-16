@@ -1,1 +1,15 @@
-TRANSFER
+<nav>
+  <a <% if (content.view == 'pay') { %> class="selected"<% } %> href="/transfer/pay">Pay</a>
+  <a <% if (content.view == 'withdraw') { %> class="selected"<% } %> href="/transfer/withdraw">Withdraw</a>
+  <a <% if (content.view == 'deposit') { %> class="selected"<% } %> href="/transfer/deposit">Deposit</a>
+</nav>
+<section>
+<% if (content.view == 'pay') { %>
+  <%- include pay.ejs %>
+<% } else if (content.view == 'withdraw') { %>
+  <%- include withdraw.ejs %>
+<% } else if (content.view == 'deposit') { %>
+  <%- include deposit.ejs %>
+<% } %> 
+</section>
+

@@ -1,5 +1,9 @@
-<p>
+<% if (content.view == 'login') { %>
+  <%- include login.ejs %>
+<% } else { %>
+	<p>
 Today, people depend on credit that is controlled by others. They depend on a system that is fabricated and manipulated by a few people and in which they are forced to participate. Such a system is naturally unsustainable. We propose an alternative—Credism. Credism is a shift in thinking that empowers people to empower themselves. Credism is the belief in belief. When people have faith in their own capacity to create, and in each other’s capacity to create, this underwrites the exchange between them and activates our capacity to transform our world.
 
 Why participate? Because you believe, like we believe, in a better system. Because you believe that together, we can activate our capacity to live in prosperity.
-</p>
+	</p>
+<% } %>

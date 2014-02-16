@@ -1,5 +1,5 @@
 <nav>
   <a href="/logout">Logout</a>
-  <a href="/transfer">Transfer</a>
-  <a href="/history">History</a>
+  <a <% if (content.base == 'transfer') { %> class="selected"<% } %> href="/transfer">Transfer</a>
+  <a <% if (content.base == 'history') { %> class="selected"<% } %> href="/history">History</a>
 </nav>

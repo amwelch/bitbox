@@ -40,7 +40,7 @@ passport.use(
 	new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
-    callbackURL: 'http://localhost:3000/liftoff/login/facebook',
+    callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
   },
   function(accessToken, refreshToken, profile, done) {
     console.log("---------------------");
@@ -53,8 +53,8 @@ passport.use(
 
 // Redirect the user to Facebook for authentication.  When complete,
 // Facebook will redirect the user back to the application at
-//     /auth/facebook/callback
-app.get('/liftoff/login',
+//     /liftoff/login/facebook/callback
+app.get('/liftoff/login/facebook',
   passport.authenticate('facebook', { 
   	scope: 'email',
   	authType: 'reauthenticate'
@@ -65,7 +65,7 @@ app.get('/liftoff/login',
 // authentication process by attempting to obtain an access token.  If
 // access was granted, the user will be logged in.  Otherwise,
 // authentication has failed.
-app.get('/liftoff/login/facebook', 
+app.get('/liftoff/login/facebook/callback', 
   passport.authenticate('facebook', {
   	successRedirect: '/',
 		failureRedirect: '/' 
@@ -89,6 +89,7 @@ app.get('/history/withdrawals', routes.withdrawals);
 app.get('/history/deposits', routes.deposits);
 app.get('/history', routes.history);
 
+app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 

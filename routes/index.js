@@ -8,7 +8,8 @@ function render(res, content) {
     //  Defaults
     title: 'Credism', 
     content: {
-      page: 'index',
+      base: 'index',
+      view: false,
       alert: false,
       authenticated: false
     }
@@ -39,7 +40,8 @@ function logged_in(req) {
  */
 exports.index = function(req, res){
   render(res, {
-    page: 'index',
+    base: 'index',
+    view: 'index',
     authenticated: logged_in(req)
   });
 };
@@ -47,12 +49,14 @@ exports.index = function(req, res){
 exports.login = function(req, res){
   if (logged_in(req)) {
     render(res, {
-      page: 'index',
+      base: 'index',
+      view: 'index',
       authenticated: true
     });
   } else {
     render(res, {
-      page: 'login'
+      base: 'index',
+      view: 'login'
     });
   }
 };
@@ -61,33 +65,104 @@ exports.login = function(req, res){
  * TRANSFER
  */
 exports.transfer = function(req, res){
-  res.redirect('/');
-};
+  if (logged_in(req)) {
+    render(res, {
+      base: 'transfer',
+      view: 'pay',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
+}
+
 exports.pay = function(req, res){
-  res.redirect('/');
+  if (logged_in(req)) {
+    render(res, {
+      base: 'transfer',
+      view: 'pay',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
 };
 exports.withdraw = function(req, res){
-  res.redirect('/');
+  if (logged_in(req)) {
+    render(res, {
+      base: 'transfer',
+      view: 'withdraw',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
 };
+
 exports.deposit = function(req, res){
-  res.redirect('/');
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'transfer',
+      view: 'deposit',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
 };
 
 /*
  * HISTORY
  */
 exports.history = function(req, res){
-  res.redirect('/');
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'history',
+      view: 'index',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
 };
 
 exports.payments = function(req, res){
-  res.redirect('/');
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'history',
+      view: 'payments',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
 };
 
 exports.withdrawals = function(req, res){
-  res.redirect('/');
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'history',
+      view: 'withdrawals',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
 };
 
 exports.deposits = function(req, res){
-  res.redirect('/');
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'history',
+      view: 'deposits',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
 };
