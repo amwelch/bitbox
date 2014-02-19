@@ -1,7 +1,7 @@
 <nav>
-  <a <% if (content.view == 'pay') { %> class="selected"<% } %> href="/transfer/pay">Pay</a>
-  <a <% if (content.view == 'withdraw') { %> class="selected"<% } %> href="/transfer/withdraw">Withdraw</a>
-  <a <% if (content.view == 'deposit') { %> class="selected"<% } %> href="/transfer/deposit">Deposit</a>
+  <a <% if (content.view == 'pay') { %> class="active"<% } %> href="/transfer/pay">Pay</a>
+  <a <% if (content.view == 'withdraw') { %> class="active"<% } %> href="/transfer/withdraw">Withdraw</a>
+  <a <% if (content.view == 'deposit') { %> class="active"<% } %> href="/transfer/deposit">Deposit</a>
 </nav>
 <section>
 <% if (content.view == 'pay') { %>

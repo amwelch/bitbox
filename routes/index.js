@@ -6,7 +6,7 @@
 function render(res, content) {
   var params = {
     //  Defaults
-    title: 'Credism', 
+    title: 'BitBox', 
     content: {
       base: 'index',
       view: false,

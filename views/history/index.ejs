@@ -1,8 +1,8 @@
 <nav>
-  <a <% if (content.view == 'index') { %> class="selected"<% } %> href="/history">Overview</a>
-  <a <% if (content.view == 'payments') { %> class="selected"<% } %> href="/history/payments">Payments</a>
-  <a <% if (content.view == 'withdrawals') { %> class="selected"<% } %> href="/history/withdrawals">Withdrawals</a>
-  <a <% if (content.view == 'deposits') { %> class="selected"<% } %> href="/history/deposits">Deposits</a>
+  <a <% if (content.view == 'index') { %> class="active"<% } %> href="/history">Overview</a>
+  <a <% if (content.view == 'payments') { %> class="active"<% } %> href="/history/payments">Payments</a>
+  <a <% if (content.view == 'withdrawals') { %> class="active"<% } %> href="/history/withdrawals">Withdrawals</a>
+  <a <% if (content.view == 'deposits') { %> class="active"<% } %> href="/history/deposits">Deposits</a>
 </nav>
 <section>
 <% if (content.view == 'payments') { %>

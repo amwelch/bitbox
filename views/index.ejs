@@ -7,36 +7,72 @@
     <script src="/fb-autocomplete/jquery.js"></script>
     <script src="/fb-autocomplete/facebook-friend-autocomplete.js"></script>
     <link rel="stylesheet" href="/fb-autocomplete/facebook-friend-autocomplete.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap core CSS -->
+    <link href="/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/bootstrap/dashboard.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
   </head>
   <body>
-    <div id="left_panel">
-      <header>
-        <hgroup>
-          <h1><%= title %></h1>
-          <h2>The belief in <%= title %></h2>
-        </hgroup>
-        <section id="navigation_parent">
-        <% if (content.authenticated) { %>
-          <%- include generic/in/header.ejs %>
-        <% } else { %>
-          <%- include generic/out/header.ejs %>
-        <% } %>
-        </section>
-      </header>
-      <footer>
-        <%- include generic/out/footer.ejs %>
-      </footer>
+    <div class="navbar navbar-bitbox navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <img class="cropped" src="/BitBox.png" />
+          <a class="navbar-brand" href="#">BitBox</a>
+        </div> 
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <% if (content.authenticated) { %>
+              <%- include generic/in/header.ejs %>
+            <% } else { %>
+              <%- include generic/out/header.ejs %>
+            <% } %>
+          </ul>
+        </div>
+      </div>
     </div>
-    <div id="right_panel">
-      <main>
-    <% if (content.base == 'transfer') { %>
-      <%- include transfer/index.ejs %>
-    <% } else if (content.base == 'history') { %>
-      <%- include history/index.ejs %>
-    <% } else { %>
+    <div class="container-fluid">
+      <% if (content.base == 'index') { %>
+        <div class="jumbotron">
+          <h1>Send money like never before</h1>
+          <p class="lead">At BitBox, we strive to make Bitcoin a currency for everyone to use.</p>
+          <p><a class="btn btn-lg btn-success" href="/liftoff/login/facebook" role="button">Sign up today</a></p>
+        </div>
+      <% } %>
+      <div class="row">
+        <% if (content.authenticated) { %>
+          <%- include generic/in/nav.ejs %>
+        <% } %>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <% if (content.base == 'transfer') { %>
+          <%- include transfer/index.ejs %>
+        <% } else if (content.base == 'history') { %>
+          <%- include history/index.ejs %>
+        <% } %>
+        </div>
+      </div>
+    </div>
+    <% if (content.base == 'index') { %>
       <%- include liftoff/index.ejs %>
     <% } %>
-      </main>
-    </div>
+    <script src="bootstrap/bootstrap.min.js"></script>
+    <script src="bootstrap/docs.min.js"></script>
   </body>
 </html>

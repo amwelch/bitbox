@@ -28,15 +28,23 @@ app.configure(function() {
 });
 
 passport.serializeUser(function(user, done) {
-	console.log()
-  done(null, user);
+  var projection = {
+    firstName: user.name.givenName,
+    lastName: user.name.familyName,
+    email: user.emails[0].value,
+    id: user.id
+  };
+  console.log(projection);
+  done(null, JSON.stringify(projection));
 });
 
 passport.deserializeUser(function(user, done) {
-  done(null, user);
+  console.log(user);
+  var composition = JSON.parse(user);
+  done(null, composition);
 });
 
-passport.use(
+passport.use( 
 	new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
@@ -57,6 +65,7 @@ passport.use(
 app.get('/liftoff/login/facebook',
   passport.authenticate('facebook', { 
   	scope: 'email',
+    display: 'popup',
   	authType: 'reauthenticate'
   })
 );
