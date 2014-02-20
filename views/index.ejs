@@ -58,9 +58,6 @@
       <% } %>
       <div class="container-fluid">
       <div class="row">
-        <% if (content.authenticated) { %>
-          <%- include generic/in/nav.ejs %>
-        <% } %>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <% if (content.base == 'transfer') { %>
           <%- include transfer/index.ejs %>
@@ -70,32 +67,11 @@
         </div>
       </div>
     </div>
-    <div class="navbar navbar-bitbox navbar-fixed-bottom" role="navigation">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div> 
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <% if (content.authenticated) { %>
-              <%- include generic/in/header.ejs %>
-            <% } else { %>
-              <%- include generic/out/header.ejs %>
-            <% } %>
-          </ul>
-        </div>
-      </div>
-    </div>
     <% if (content.base == 'index') { %>
       <%- include liftoff/index.ejs %>
     <% } %>
-    <script src="bootstrap/bootstrap.min.js"></script>
-    <script src="bootstrap/docs.min.js"></script>
+    <script src="/bootstrap/bootstrap.min.js"></script>
+    <script src="/bootstrap/docs.min.js"></script>
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
   </body>
 </html>

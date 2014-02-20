@@ -1,6 +1,7 @@
 body {
   font-family: Ubuntu, serif !important;
   margin: 0;
+  background-color: #f7f6f2 !important;
 }
 
 .navbar-fixed-top {
@@ -31,8 +32,13 @@ ul.nav.navbar-right li > a:hover, ul.nav.navbar-right li > a:active {
 	background-color: #783919;
 }
 
-ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, l.nav.nav-sidebar li > a:hover {
+ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar li > a:active {
 	color: #783919;
+	border-right: 5px solid wheat;
+}
+
+div.sidebar ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar li > a:active {
+	background-color:#ddd;
 }
 
 a:hover, a:active, li > a:hover, li > a:active {
@@ -68,7 +74,7 @@ h2 {
 .affix .navbar-header div.glow {
 	display: block;
 }
-
+	
 .affix-top .navbar-header div.glow {
 	display: none;
 }
@@ -92,8 +98,9 @@ a {
 	color: #542b14;
 }
 
-.row .nav-sidebar > .active > a {
-	border: 1px solid #f7f6f2;
+.row .nav-sidebar > .active > a, .row .nav-sidebar > .active > a:hover, .row .nav-sidebar > .active > a:active {
+	border: 0px;
+	border-right: 5px solid #683919;
 	color: #683919;
 	background-color: #f7f6f2;
 
@@ -141,4 +148,8 @@ div.jumbotron {
 .row .sidebar {
 	background-color: #f7f6f2;
 	border: 0px;
+}
+
+.row .main {
+	background-color: #f7f6f2;
 }

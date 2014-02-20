@@ -1,9 +1,10 @@
-<nav>
-  <a <% if (content.view == 'pay') { %> class="active"<% } %> href="/transfer/pay">Pay</a>
-  <a <% if (content.view == 'withdraw') { %> class="active"<% } %> href="/transfer/withdraw">Withdraw</a>
-  <a <% if (content.view == 'deposit') { %> class="active"<% } %> href="/transfer/deposit">Deposit</a>
-</nav>
-<section>
+<div class="col-sm-3 col-md-2 sidebar">
+  <ul class="nav nav-sidebar">
+    <li <% if (content.view == "pay") {%>class="active"<% } %>><a href="/transfer/pay">Pay</a></li>
+    <li <% if (content.view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw">Withdraw</a></li>
+    <li <% if (content.view == "deposit") {%>class="active"<% } %>><a href="/transfer/deposit">Deposit</a></li>
+  </ul>
+</div>
 <% if (content.view == 'pay') { %>
   <%- include pay.ejs %>
 <% } else if (content.view == 'withdraw') { %>
@@ -11,5 +12,3 @@
 <% } else if (content.view == 'deposit') { %>
   <%- include deposit.ejs %>
 <% } %> 
-</section>
-
