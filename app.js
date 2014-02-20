@@ -76,7 +76,7 @@ app.get('/liftoff/login/facebook',
 // authentication has failed.
 app.get('/liftoff/login/facebook/callback', 
   passport.authenticate('facebook', {
-  	successRedirect: '/',
+  	successRedirect: '/transfer',
 		failureRedirect: '/' 
 	})
 );
@@ -96,6 +96,8 @@ app.get('/transfer', routes.transfer);
 app.get('/history/payments', routes.payments);
 app.get('/history/withdrawals', routes.withdrawals);
 app.get('/history/deposits', routes.deposits);
+app.get('/history', routes.history);
+
 app.get('/history', routes.history);
 
 app.get('/liftoff/login', routes.login);
