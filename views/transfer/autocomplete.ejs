@@ -10,12 +10,12 @@ var init = function() {
         document.getElementById("fb-user").disabled = "disabled";
         document.getElementById("fb-user").value = friend.name;
         document.getElementById("btc_amount").focus();
-        document.getElementById("fb_user_clear").className = "fb_user_clear";
+        document.getElementById("fb_user_clear").className = "input_option";
         $("#fb_user_clear").click(function() {
           document.getElementById("fb-user").value = "";
           document.getElementById("fb-user").disabled = "";
           document.getElementById("friend_fbid").value = friend.id;
-          document.getElementById("fb_user_clear").className = "fb_user_clear_default";
+          document.getElementById("fb_user_clear").className = "input_option_hide";
         });
       }
   });

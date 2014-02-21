@@ -88,17 +88,16 @@ app.get('/logout', function(req, res) {
 
 //app.get('/in', auth.list);
 
+app.post('/transfer/pay', function(req, res) {
+  console.log(req);
+  res.redirect('/transfer/pay');
+});
+
 app.get('/transfer/pay', routes.pay);
+app.get('/transfer/track', routes.track);
 app.get('/transfer/withdraw', routes.withdraw);
 app.get('/transfer/deposit', routes.deposit);
 app.get('/transfer', routes.transfer);
-
-app.get('/history/payments', routes.payments);
-app.get('/history/withdrawals', routes.withdrawals);
-app.get('/history/deposits', routes.deposits);
-app.get('/history', routes.history);
-
-app.get('/history', routes.history);
 
 app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);

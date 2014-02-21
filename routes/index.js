@@ -115,12 +115,12 @@ exports.deposit = function(req, res){
 /*
  * HISTORY
  */
-exports.history = function(req, res){
+exports.track = function(req, res){
   if (logged_in(req)) {
     render(res, {
 
-      base: 'history',
-      view: 'index',
+      base: 'transfer',
+      view: 'track',
       authenticated: true
     })
   } else {
