@@ -1,3 +1,4 @@
+drop table transactions;
 CREATE TABLE transactions (
     id serial primary key, 
     srcAccount int NOT NULL references users(id), 
@@ -7,6 +8,7 @@ CREATE TABLE transactions (
     memo VARCHAR(100),
     submitted timestamp default current_timestamp
 );
+drop table users;
 CREATE TABLE users (
     id serial primary key, 
     email VARCHAR(100) NOT NULL unique,
@@ -15,13 +17,14 @@ CREATE TABLE users (
     created timestamp default current_timestamp, 
     fbID NUMERIC(20) NOT NULL unique
 );
-
+drop table balances;
 CREATE TABLE balances (
     id int NOT NULL references users(id) primary key,
-    bits bigint NTO NULL default 0
+    bits bigint NOT NULL default 0
 );
 
 
 #Test inserts
 insert into transactions (srcAccount, dstAccount, microBTC) VALUES(0,1, 100);
 insert into users (email, name, fbID) VALUES('test@test.com','hello world', 100);
+insert into balances (id, bits) VALUES(1, 12);
