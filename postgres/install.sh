@@ -2,7 +2,7 @@
 #sudo apt-get -y install postgresql postgresql-contrib
 
 #Switch to postgres user
-su - postgres
+#su - postgres
 #Create database
 #createdb bitbox
 #Create tables
