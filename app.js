@@ -9,6 +9,9 @@ var routes = require('./routes');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
+// Used for transactions
+var pg = require('pg');
+
 var app = express();
 
 app.configure(function() {
