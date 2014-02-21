@@ -1,0 +1,58 @@
+<div id="fb-root"></div>
+<script>
+
+var init = function() {
+  $('#fb-user').facebookAutocomplete({
+      showAvatars: false,
+      onpick: function(friend) { 
+        console.log(friend);
+        document.getElementById("friend_fbid").value = friend.id;
+        document.getElementById("fb-user").disabled = "disabled";
+        document.getElementById("fb-user").value = friend.name;
+        document.getElementById("btc_amount").focus();
+        document.getElementById("fb_user_clear").className = "fb_user_clear";
+        $("#fb_user_clear").click(function() {
+          document.getElementById("fb-user").value = "";
+          document.getElementById("fb-user").disabled = "";
+          document.getElementById("friend_fbid").value = friend.id;
+          document.getElementById("fb_user_clear").className = "fb_user_clear_default";
+        });
+      }
+  });
+};
+window.fbAsyncInit = function() {
+  FB.init({
+    appId: '609051335829720'
+  });
+
+  $('#fb-login').on('click', function() {
+    FB.login();
+  });
+
+  FB.Event.subscribe('auth.authResponseChange', function(response) {
+    if (response.status === 'connected') {
+
+      init();
+
+    } else {
+      window.location.replace("/logout");
+    }
+  });
+};
+
+function createFriendElement(friend) {
+  var $img = $('<img>').attr('src', friend.picture),
+      $name = $('<h3>').text(friend.name),
+      $friend = $('<div>').addClass('friend').append($img, $name);
+  return $friend;
+}
+
+// Load the SDK asynchronously
+(function(d){
+ var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+ if (d.getElementById(id)) {return;}
+ js = d.createElement('script'); js.id = id; js.async = true;
+ js.src = "//connect.facebook.net/en_US/all.js";
+ ref.parentNode.insertBefore(js, ref);
+}(document));
+</script>

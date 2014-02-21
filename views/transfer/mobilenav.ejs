@@ -1,0 +1,5 @@
+  <ul class="nav nav-sidebar mobile">
+    <li <% if (content.view == "pay") {%>class="active"<% } %>><a href="/transfer/pay">Payment</a></li>
+    <li <% if (content.view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw">Withdrawal</a></li>
+    <li <% if (content.view == "deposit") {%>class="active"<% } %>><a href="/transfer/deposit">Deposit</a></li>
+  </ul>

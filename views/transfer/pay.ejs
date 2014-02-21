@@ -1,5 +1,25 @@
   <div id="fb-root"></div>
   <script>
+
+    var init = function() {
+      $('#fb-user').facebookAutocomplete({
+          showAvatars: false,
+          onpick: function(friend) { 
+            console.log(friend);
+            document.getElementById("friend_fbid").value = friend.id;
+            document.getElementById("fb-user").disabled = "disabled";
+            document.getElementById("fb-user").value = friend.name;
+            document.getElementById("btc_amount").focus();
+            document.getElementById("fb_user_clear").className = "fb_user_clear";
+            $("#fb_user_clear").click(function() {
+              document.getElementById("fb-user").value = "";
+              document.getElementById("fb-user").disabled = "";
+              document.getElementById("friend_fbid").value = friend.id;
+              document.getElementById("fb_user_clear").className = "fb_user_clear_default";
+            });
+          }
+      });
+    };
     window.fbAsyncInit = function() {
       FB.init({
         appId: '609051335829720'
@@ -11,18 +31,11 @@
 
       FB.Event.subscribe('auth.authResponseChange', function(response) {
         if (response.status === 'connected') {
-          $('#login').remove();
 
-          // No Avatars
-          $('#fb-input2').facebookAutocomplete({
-              showAvatars: false,
-              onpick: function(friend) { 
-                //createFriendElement(friend).insertBefore($(this)).next().remove();
-              }
-          });
+          init();
 
         } else {
-          $('#demos').remove();
+          window.location.replace("/logout");
         }
       });
     };
@@ -43,13 +56,35 @@
      ref.parentNode.insertBefore(js, ref);
     }(document));
   </script>
-
-  <div id="demos">
-    <div class="demo">
-      <h2>Balance: 2.38483923 BTC</h2>
-      To: 
-      <input type="text" id="fb-input2" style="width: 30%; padding: 10px" placeholder="friend name"/>&nbsp;&nbsp;
-      Amount: <input type="text" style="width: 10%; padding: 10px" placeholder="bitcoins">
-      <button style="background-color: brown; color: white; padding: 10px; border: 2px solid brown;">Submit</button>
-    </div>
+  <div class="dropdown">
+    <button class="btn dropdown-toggle sr-only" type="button" id="dropdownMenu1" data-toggle="dropdown">
+      Dropdown
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+      <li role="presentation" class="divider"></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+    </ul>
   </div>
+  <h1>Payment</h1>
+  <h3>2.38483923 BTC</h3>
+  <form name="pay" method="post" action="/transfer/pay" onkeypress="return event.keyCode != 13;">
+    <div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
+      <label for="fb-user">Who</label><br>
+      <input type="text" id="fb-user" style="width: 20em; padding: 10px" autocomplete="off" placeholder="friend name"/>
+      <span class="fb_user_clear_default" id="fb_user_clear">Clear</span>
+    </div>
+    <div style="inlne-block; float: left; padding-bottom: 10px">
+      <label for="btc_amount">Amount</label><br>
+      <input type="text" id="btc_amount" style="width: 20em; padding: 10px" placeholder="bitcoins">
+    </div>
+    <input type="hidden" name="friend_fbid" id="friend_fbid" value="" />
+    <div style="clear: both; margin: 5px; height: 0px">&nbsp;</div>
+    <p>
+      <input type="submit" class="btn btn-lg btn-success" role="button" name="op" value="Send"></input>
+      <input type="submit" class="btn btn-lg btn-success" role="button" name="op" value="Request"></input>
+    </p>
+  </form>

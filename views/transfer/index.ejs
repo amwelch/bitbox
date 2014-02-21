@@ -1,14 +1,18 @@
 <div class="col-sm-3 col-md-2 sidebar">
   <ul class="nav nav-sidebar">
-    <li <% if (content.view == "pay") {%>class="active"<% } %>><a href="/transfer/pay">Pay</a></li>
-    <li <% if (content.view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw">Withdraw</a></li>
+    <li <% if (content.view == "pay") {%>class="active"<% } %>><a href="/transfer/pay">Payment</a></li>
+    <li <% if (content.view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw">Withdrawal</a></li>
     <li <% if (content.view == "deposit") {%>class="active"<% } %>><a href="/transfer/deposit">Deposit</a></li>
   </ul>
 </div>
 <% if (content.view == 'pay') { %>
+  <%- include autocomplete.ejs %>
+  <%- include mobilenav.ejs %>
   <%- include pay.ejs %>
 <% } else if (content.view == 'withdraw') { %>
+  <%- include mobilenav.ejs %>
   <%- include withdraw.ejs %>
 <% } else if (content.view == 'deposit') { %>
+  <%- include mobilenav.ejs %>
   <%- include deposit.ejs %>
 <% } %> 

@@ -37,8 +37,23 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
 	border-right: 5px solid wheat;
 }
 
-div.sidebar ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar li > a:active {
+body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > a:active {
 	background-color:#ddd;
+}
+
+@media (min-width: 768px) {
+	body div.main ul.nav.nav-sidebar.mobile {
+		display: none;
+	}
+}
+
+div.main ul.nav.nav-sidebar.mobile {
+	display: block;
+}
+
+body div.main ul.nav.nav-sidebar.mobile {
+	margin-left: 0px;
+	margin-right: 0px;
 }
 
 a:hover, a:active, li > a:hover, li > a:active {
@@ -136,13 +151,13 @@ div.jumbotron {
 	text-align: center;
 }
 
-.jumbotron a.btn {
+div p .btn {
 	background-color: #683919;
-	border: 3px solid #683919;
-	color: wheat;
+	border: 3px solid #683919 !important;
+	color: wheat !important;
 }
 
-.jumbotron a.btn:hover {
+body div p .btn:hover {
 	background-color: #783919;
 }
 .row .sidebar {
@@ -152,4 +167,20 @@ div.jumbotron {
 
 .row .main {
 	background-color: #f7f6f2;
+}
+
+div.fbac-suggestion-list {
+	left: inherit !important;
+}
+
+.fb_user_clear_default {
+	display: none;
+}
+
+.fb_user_clear {
+	width: 0px;
+	height: 24px;
+	margin-left: -4em;
+	display: inline-block;
+	cursor: pointer;
 }
