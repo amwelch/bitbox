@@ -3,6 +3,7 @@ CREATE TABLE transactions (
     srcAccount int NOT NULL, dstAccount int NOT NULL, 
     completed boolean DEFAULT false, 
     microBTC int NOT NULL, 
+    memo VARCHAR(100),
     submitted timestamp default current_timestamp
 );
 CREATE TABLE users (
