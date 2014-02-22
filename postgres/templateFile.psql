@@ -6,8 +6,8 @@ drop table users;
 CREATE TABLE users (
     id serial primary key, 
     email VARCHAR(100) NOT NULL unique,
-    fname VARCHAR(100), 
-    lname VARCHAR(100), 
+    firstName VARCHAR(100), 
+    lastName VARCHAR(100), 
     accountState VARCHAR(1) default 'i',
     created timestamp default current_timestamp, 
     fbID NUMERIC(20) NOT NULL unique
@@ -25,6 +25,9 @@ CREATE TABLE balances (
     id int NOT NULL references users(id) primary key,
     bits bigint NOT NULL default 0
 );
+GRANT ALL PRIVILEGES ON users TO alexander;
+GRANT ALL PRIVILEGES ON transactions TO alexander;
+GRANT ALL PRIVILEGES ON balances TO alexander;
 insert into users (email, fname, lname, fbID) VALUES('test@test.com','hello', 'world', 100);
 insert into transactions (srcAccount, dstAccount, bits) VALUES(1,1, 100);
 insert into balances (id, bits) VALUES(1, 12);
