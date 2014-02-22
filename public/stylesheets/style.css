@@ -4,6 +4,9 @@ body {
   background-color: #f7f6f2 !important;
 }
 
+a {
+	outline: 0 !important;
+}
 .navbar-fixed-top {
 	color:wheat;
 }
@@ -72,9 +75,16 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	body div.main ul.nav.nav-sidebar.mobile {
 		display: none;
 	}
+	body .mobile {
+		display: none;
+	}
 }
 
 div.main ul.nav.nav-sidebar.mobile {
+	display: block;
+}
+
+.mobile {
 	display: block;
 }
 
@@ -200,14 +210,22 @@ div.fbac-suggestion-list {
 	left: inherit !important;
 }
 
-.fb_user_clear_default {
+.input_option_hide {
 	display: none;
 }
 
-.fb_user_clear {
+.input_option {
 	width: 0px;
 	height: 24px;
 	margin-left: -4em;
 	display: inline-block;
 	cursor: pointer;
+}
+
+div.switch-toggle label {
+	cursor:pointer !important;
+}
+
+div.main {
+	min-height: 480px;
 }

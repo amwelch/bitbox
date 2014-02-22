@@ -91,11 +91,18 @@ app.get('/logout', function(req, res) {
 
 //app.get('/in', auth.list);
 
+app.post('/transfer/pay', function(req, res) {
+  console.log(req);
+  res.redirect('/transfer/pay');
+});
+
 app.get('/transfer/pay', routes.pay);
+app.get('/transfer/track', routes.track);
 app.get('/transfer/withdraw', routes.withdraw);
 app.get('/transfer/deposit', routes.deposit);
 app.get('/transfer', routes.transfer);
 
+<<<<<<< HEAD
 app.get('/history/payments', routes.payments);
 app.get('/history/withdrawals', routes.withdrawals);
 app.get('/history/deposits', routes.deposits);
@@ -112,6 +119,8 @@ app.post('/accounts/identity', routes.identityUpdate);
 
 
 
+=======
+>>>>>>> b0158497f516984afffca76646080f1c41931eb2
 app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
