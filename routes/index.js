@@ -166,3 +166,70 @@ exports.deposits = function(req, res){
     res.redirect('/liftoff/login');
   }
 };
+
+/* Account */
+exports.userUpdate= function(req, res){
+  if (logged_in(req)) {
+      console.log("Got post");
+
+      console.log(req.body.email);
+      console.log(req.body.fname);
+      console.log(req.body.lname);
+
+      res.redirect('/accounts/user');
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};
+exports.identityUpdate= function(req, res){
+  if (logged_in(req)) {
+      console.log("Got post");
+      res.redirect('/accounts/identity');
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};
+exports.securityUpdate= function(req, res){
+  if (logged_in(req)) {
+      console.log("Got post");
+      res.redirect('/accounts/security');
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};
+exports.user= function(req, res){
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'accounts',
+      view: 'user',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};
+exports.identity= function(req, res){
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'accounts',
+      view: 'identity',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};
+exports.security= function(req, res){
+  if (logged_in(req)) {
+    render(res, {
+
+      base: 'accounts',
+      view: 'security',
+      authenticated: true
+    })
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};

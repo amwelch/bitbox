@@ -103,6 +103,15 @@ app.get('/history', routes.history);
 
 app.get('/history', routes.history);
 
+app.get('/accounts/user', routes.user);
+app.get('/accounts/security', routes.security);
+app.get('/accounts/identity', routes.identity);
+app.post('/accounts/user', routes.userUpdate);
+app.post('/accounts/security', routes.securityUpdate);
+app.post('/accounts/identity', routes.identityUpdate);
+
+
+
 app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);

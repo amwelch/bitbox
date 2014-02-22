@@ -7,6 +7,33 @@ body {
 .navbar-fixed-top {
 	color:wheat;
 }
+div.form-submit {
+    text-align:center;
+}
+button.user-btn {
+    margin-right: 15px;
+    margin-left: 15px;
+    width: 10%;
+    color:wheat;
+	background-color: #683919;
+	border: 3px solid #683919 !important;
+}
+button.user-btn:hover {
+	background-color: #783919;
+}
+
+div.container-user {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+input.user-form {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
 
 div.navbar-fixed-top {
 	color:wheat;
