@@ -37,7 +37,8 @@ passport.serializeUser(function(user, done) {
     email: user.emails[0].value,
     id: user.id
   };
-  console.log(projection);
+  console.log("User logged in submitting query");
+
   done(null, JSON.stringify(projection));
 });
 

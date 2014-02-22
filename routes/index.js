@@ -35,6 +35,20 @@ function logged_in(req) {
   return rValue;
 }
 
+var rollback = function(client, done) {
+  client.query('ROLLBACK', function(err) {
+  	console.log("Rolling back!!");
+  	console.log(err);
+    //if there was a problem rolling back the query
+    //something is seriously messed up.  Return the error
+    //to the done function to close & remove this client from
+    //the pool.  If you leave a client in the pool with an unaborted
+    //transaction __very bad things__ will happen.
+    return done(err);
+  });
+};
+
+
 /*
  * HOMEPAGE
  */
@@ -168,14 +182,70 @@ exports.deposits = function(req, res){
 };
 
 /* Account */
+exports.user_update_db= function(fields){
+  /*TODO: Keep around connection so we don't re-auth every time*/
+  var pg = require('pg');
+  var first = true;
+  var fbID = fields["id"];
+  delete fields["id"];
+
+  console.log(fields);
+
+  var updateStr = "";
+  for(var f in fields){
+    if (fields[f] == undefined){
+        console.log(f);
+        console.log(fields[f]);
+        continue;
+    }
+    if (!first){
+      updateStr += ",";
+    }
+    else{
+      first = false;
+    }
+    updateStr += " "+f+"="+"'"+fields[f]+"'";
+  }
+  var query = "UPDATE users SET " + updateStr + " WHERE fbID="+fbID+";";
+  console.log(query);
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  pg.connect(dbUrl, function(err, client, done) {
+    if(err)
+        throw err;
+    client.query('BEGIN', function(err) {
+        if(err)
+            return rollback(client, done);
+      process.nextTick(function() {
+        client.query(query, [], function(err) {
+          if(err) {
+          	console.error(err);
+          	return rollback(client, done);
+          }	        
+          client.query('COMMIT', done);	          
+        });
+      });
+    });
+  });
+
+}
 exports.userUpdate= function(req, res){
   if (logged_in(req)) {
       console.log("Got post");
 
-      console.log(req.body.email);
-      console.log(req.body.fname);
-      console.log(req.body.lname);
+      var email = req.body.email;
+      var fname = req.body.fname;
+      var lname = req.body.lname;
+      
+      var fbID = req.user.id;
 
+      console.log(fbID);
+      fields = {};
+      fields.email = email;
+      fields.firstName = fname;
+      fields.lastName = lname;
+      fields.id = fbID;
+      exports.user_update_db(fields);
+      //TODO Copying from Luis's example will break this out into more general/efficent layer later
       res.redirect('/accounts/user');
   } else {
     res.redirect('/liftoff/login');

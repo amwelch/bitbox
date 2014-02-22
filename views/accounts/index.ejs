@@ -1,3 +1,6 @@
+<div class="container-fluid">
+<div class="row">
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 <div class="col-sm-3 col-md-2 sidebar">
   <ul class="nav nav-sidebar">
   	<li <% if (content.view == "user") {%>class="active"<% } %>><a href="/accounts/user">General Information</a></li>
@@ -10,8 +13,8 @@
     <form class="form-signin" role="form" action="#" method="post">
         <h2>User Configuration</h2>
         <input type="email" name="email" class="user-form form-control" placeholder="Email Address" required autofocus>
-        <input type="text"  name="fname" class="user-form form-control" placeholder="First Name">
-        <input type="text"  name="lname" class="user-form form-control" placeholder="Last Name">
+        <input type="text"  name="firstName" class="user-form form-control" placeholder="First Name">
+        <input type="text"  name="lastName" class="user-form form-control" placeholder="Last Name">
         <div class="form-submit">
           <button class="user-btn btn btn-lg" type="submit"> Save</button>
           <button class="user-btn btn btn-lg" type="submit"> Reset</button>
@@ -22,3 +25,6 @@
 <% } else if (content.view == 'identity') { %>
   <h2> Identity Verification Coming Soon! </h2>
 <% } %> 
+</div>
+</div>
+</div>
