@@ -12,7 +12,8 @@ drop table users;
 CREATE TABLE users (
     id serial primary key, 
     email VARCHAR(100) NOT NULL unique,
-    name VARCHAR(100), 
+    fname VARCHAR(100), 
+    lname VARCHAR(100), 
     accountState VARCHAR(1) NOT NULL default 'i',
     created timestamp default current_timestamp, 
     fbID NUMERIC(20) NOT NULL unique
