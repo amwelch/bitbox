@@ -28,6 +28,8 @@ CREATE TABLE balances (
 GRANT ALL PRIVILEGES ON users TO alexander;
 GRANT ALL PRIVILEGES ON transactions TO alexander;
 GRANT ALL PRIVILEGES ON balances TO alexander;
-insert into users (email, fname, lname, fbID) VALUES('test@test.com','hello', 'world', 100);
+GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
+GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
+insert into users (email, firstName, lastName, fbID) VALUES('test@test.com','hello', 'world', 100);
 insert into transactions (srcAccount, dstAccount, bits) VALUES(1,1, 100);
 insert into balances (id, bits) VALUES(1, 12);

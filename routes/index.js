@@ -182,31 +182,44 @@ exports.deposits = function(req, res){
 };
 
 /* Account */
-exports.user_update_db= function(fields){
+exports.create_user= function(fields){
+    exports.user_update_db(fields, true);
+}
+
+exports.user_update_db= function(fields, new_account){
   /*TODO: Keep around connection so we don't re-auth every time*/
   var pg = require('pg');
   var first = true;
   var fbID = fields["id"];
-  delete fields["id"];
 
   console.log(fields);
 
   var updateStr = "";
+  var keyStr = "fbID";
+  var valueStr = fbID;
   for(var f in fields){
-    if (fields[f] == undefined){
-        console.log(f);
-        console.log(fields[f]);
+    if (fields[f] == undefined || f =="id"){
         continue;
     }
+    valueStr += ",";
+    keyStr += ",";
     if (!first){
       updateStr += ",";
     }
     else{
       first = false;
     }
+    keyStr += f;
+    valueStr += "'" + fields[f] + "'";
     updateStr += " "+f+"="+"'"+fields[f]+"'";
   }
-  var query = "UPDATE users SET " + updateStr + " WHERE fbID="+fbID+";";
+  var query = "";
+  if (new_account){
+      query = "INSERT into users ("+keyStr+") VALUES("+valueStr+");";
+  }
+  else{
+      query = "UPDATE users SET " + updateStr + " WHERE fbID="+fbID+";";
+  }
   console.log(query);
   var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
   pg.connect(dbUrl, function(err, client, done) {
@@ -231,6 +244,8 @@ exports.user_update_db= function(fields){
 exports.userUpdate= function(req, res){
   if (logged_in(req)) {
       console.log("Got post");
+      console.log(req.user);
+      console.log(req.body);
 
       var email = req.body.email;
       var fname = req.body.fname;
@@ -245,7 +260,6 @@ exports.userUpdate= function(req, res){
       fields.lastName = lname;
       fields.id = fbID;
       exports.user_update_db(fields);
-      //TODO Copying from Luis's example will break this out into more general/efficent layer later
       res.redirect('/accounts/user');
   } else {
     res.redirect('/liftoff/login');

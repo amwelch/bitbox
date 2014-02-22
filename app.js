@@ -38,7 +38,10 @@ passport.serializeUser(function(user, done) {
     id: user.id
   };
   console.log("User logged in submitting query");
-
+  /*TODO: For now just create on every login since it will just fail silently
+     later check if already exists or insert/update macro or something
+  */
+  routes.create_user(projection);
   done(null, JSON.stringify(projection));
 });
 
