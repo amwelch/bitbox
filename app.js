@@ -102,14 +102,6 @@ app.get('/transfer/withdraw', routes.withdraw);
 app.get('/transfer/deposit', routes.deposit);
 app.get('/transfer', routes.transfer);
 
-<<<<<<< HEAD
-app.get('/history/payments', routes.payments);
-app.get('/history/withdrawals', routes.withdrawals);
-app.get('/history/deposits', routes.deposits);
-app.get('/history', routes.history);
-
-app.get('/history', routes.history);
-
 app.get('/accounts/user', routes.user);
 app.get('/accounts/security', routes.security);
 app.get('/accounts/identity', routes.identity);
@@ -117,10 +109,6 @@ app.post('/accounts/user', routes.userUpdate);
 app.post('/accounts/security', routes.securityUpdate);
 app.post('/accounts/identity', routes.identityUpdate);
 
-
-
-=======
->>>>>>> b0158497f516984afffca76646080f1c41931eb2
 app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
