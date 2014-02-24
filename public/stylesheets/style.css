@@ -183,10 +183,6 @@ div.fbac-suggestion-list {
 	left: inherit !important;
 }
 
-.input_option_hide {
-	display: none;
-}
-
 .input_option {
 	width: 0px;
 	height: 24px;
@@ -201,4 +197,9 @@ div.switch-toggle label {
 
 div.main {
 	min-height: 480px;
+}
+
+div.fbac-suggestion-list {
+	padding: 0px;
+	background-color: transparent;
 }

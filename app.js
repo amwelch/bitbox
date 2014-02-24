@@ -31,9 +31,11 @@ app.configure(function() {
 });
 
 passport.serializeUser(function(user, done) {
+  console.log(user.name);
   var projection = {
     firstName: user.name.givenName,
     lastName: user.name.familyName,
+    fullName: user.name.givenName + " " + user.name.familyName,
     email: user.emails[0].value,
     id: user.id
   };
