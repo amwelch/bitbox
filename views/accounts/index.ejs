@@ -3,12 +3,12 @@
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 <div class="col-sm-3 col-md-2 sidebar">
   <ul class="nav nav-sidebar">
-  	<li <% if (content.view == "user") {%>class="active"<% } %>><a href="/accounts/user">General Information</a></li>
-    <li <% if (content.view == "identity") {%>class="active"<% } %>><a href="/accounts/identity">Verify Identity</a></li>
-    <li <% if (content.view == "security") {%>class="active"<% } %>><a href="/accounts/security">Security</a></li>
+  	<li <% if (view == "user") {%>class="active"<% } %>><a href="/accounts/user">General Information</a></li>
+    <li <% if (view == "identity") {%>class="active"<% } %>><a href="/accounts/identity">Verify Identity</a></li>
+    <li <% if (view == "security") {%>class="active"<% } %>><a href="/accounts/security">Security</a></li>
   </ul>
 </div>
-<% if (content.view == 'user') { %>
+<% if (view == 'user') { %>
   <div class="container-user container">
     <form class="form-signin" role="form" action="#" method="post">
         <h2>User Configuration</h2>
@@ -20,9 +20,9 @@
           <button class="user-btn btn btn-lg" type="submit"> Reset</button>
         </div>
   </div>
-<% } else if (content.view == 'security') { %>
+<% } else if (view == 'security') { %>
   <h2> Security Coming Soon! </h2>
-<% } else if (content.view == 'identity') { %>
+<% } else if (view == 'identity') { %>
   <h2> Identity Verification Coming Soon! </h2>
 <% } %> 
 </div>

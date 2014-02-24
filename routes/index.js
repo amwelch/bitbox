@@ -248,6 +248,7 @@ exports.user= function(req, res){
 
       base: 'accounts',
       view: 'user',
+      title: 'My Account',
       authenticated: true
     })
   } else {
@@ -260,6 +261,7 @@ exports.identity= function(req, res){
 
       base: 'accounts',
       view: 'identity',
+      title: 'Identity',
       authenticated: true
     })
   } else {
@@ -272,6 +274,7 @@ exports.security= function(req, res){
 
       base: 'accounts',
       view: 'security',
+      title: 'Security',
       authenticated: true
     })
   } else {
