@@ -1,4 +1,17 @@
+CREATE USER alexander WITH PASSWORD 'testing123';
+GRANT ALL PRIVILEGES ON DATABASE bitbox TO alexander;
+drop table balances;
 drop table transactions;
+drop table users;
+CREATE TABLE users (
+    id serial primary key, 
+    email VARCHAR(100) NOT NULL unique,
+    firstName VARCHAR(100), 
+    lastName VARCHAR(100), 
+    accountState VARCHAR(1) default 'i',
+    created timestamp default current_timestamp, 
+    fbID NUMERIC(20) NOT NULL unique
+);
 CREATE TABLE transactions (
     id serial primary key, 
     srcAccount int NOT NULL references users(id), 
@@ -8,23 +21,15 @@ CREATE TABLE transactions (
     memo VARCHAR(100),
     submitted timestamp default current_timestamp
 );
-drop table users;
-CREATE TABLE users (
-    id serial primary key, 
-    email VARCHAR(100) NOT NULL unique,
-    name VARCHAR(100), 
-    accountState VARCHAR(1) NOT NULL default 'i',
-    created timestamp default current_timestamp, 
-    fbID NUMERIC(20) NOT NULL unique
-);
-drop table balances;
 CREATE TABLE balances (
     id int NOT NULL references users(id) primary key,
     bits bigint NOT NULL default 0
 );
-
-
-#Test inserts
-insert into transactions (srcAccount, dstAccount, microBTC) VALUES(0,1, 100);
-insert into users (email, name, fbID) VALUES('test@test.com','hello world', 100);
+GRANT ALL PRIVILEGES ON users TO alexander;
+GRANT ALL PRIVILEGES ON transactions TO alexander;
+GRANT ALL PRIVILEGES ON balances TO alexander;
+GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
+GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
+insert into users (email, firstName, lastName, fbID) VALUES('test@test.com','hello', 'world', 100);
+insert into transactions (srcAccount, dstAccount, bits) VALUES(1,1, 100);
 insert into balances (id, bits) VALUES(1, 12);

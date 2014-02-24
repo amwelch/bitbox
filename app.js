@@ -39,7 +39,11 @@ passport.serializeUser(function(user, done) {
     email: user.emails[0].value,
     id: user.id
   };
-  console.log(projection);
+  console.log("User logged in submitting query");
+  /*TODO: For now just create on every login since it will just fail silently
+     later check if already exists or insert/update macro or something
+  */
+  routes.create_user(projection);
   done(null, JSON.stringify(projection));
 });
 
@@ -103,6 +107,13 @@ app.get('/transfer/track', routes.track);
 app.get('/transfer/withdraw', routes.withdraw);
 app.get('/transfer/deposit', routes.deposit);
 app.get('/transfer', routes.transfer);
+
+app.get('/accounts/user', routes.user);
+app.get('/accounts/security', routes.security);
+app.get('/accounts/identity', routes.identity);
+app.post('/accounts/user', routes.userUpdate);
+app.post('/accounts/security', routes.securityUpdate);
+app.post('/accounts/identity', routes.identityUpdate);
 
 app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);

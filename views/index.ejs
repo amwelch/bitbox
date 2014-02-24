@@ -53,15 +53,17 @@
     </div>
     <% if (base == 'index') { %>
       <div class="jumbotron">
-        <h1>Bitcoin's gone social</h1>
+        <h1>Bitcoin. Gone social.</h1>
         <p class="lead">Welcome to BitBox, a revolutionary peer-to-peer payment platform.</p>
         <p><a class="btn btn-lg btn-success" href="/liftoff/login/facebook" role="button">Sign up today</a></p>
       </div>
     <% } %>
+
     <% if (base == 'transfer') { %>
-        <%- include transfer/index.ejs %>
-    <% } %>
-    <% if (base == 'index') { %>
+      <%- include transfer/index.ejs %>
+    <% } else if (base == 'accounts') { %>
+      <%- include accounts/index.ejs %>
+    <% } else if (base == 'index') { %>
       <%- include liftoff/index.ejs %>
     <% } %>
     <script src="/bootstrap/bootstrap.min.js"></script>
