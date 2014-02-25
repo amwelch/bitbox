@@ -186,6 +186,33 @@ exports.create_user= function(fields){
     exports.user_update_db(fields, true);
 }
 
+/*Get user by email*/
+exports.get_user = function(email, passport_info, cb){
+  var pg = require('pg');
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  var queryStr = "SELECT id FROM users where email='"+email+"';"
+  console.log("HERE!!!");
+  pg.connect(dbUrl, function(err, client, done) {
+      console.log("GOT CONNECTION!");
+      client.query(queryStr, function(err, result){
+          console.log("WOOT GOT QUERY");
+          if (err){
+            console.log("ERROR:", err);
+          }
+          else if (result.rows.length != 1){
+            console.log("ERROR: bad length "+ result.rows.length);
+            data = undefined;
+          }
+          else{
+            console.log("WOO RETURNING");
+            data = result.rows[0];
+          }
+          cb(data, passport_info);
+      });
+  });
+
+}
+
 exports.user_update_db= function(fields, new_account){
   /*TODO: Keep around connection so we don't re-auth every time*/
   var pg = require('pg');
@@ -240,26 +267,33 @@ exports.user_update_db= function(fields, new_account){
     });
   });
 
+
 }
+/*Merge two associative arrays in case of a dupe d1 key will win*/
+exports.mergeDict= function(d1, d2){
+    for (k in d2){
+        if(d1[k] == undefined)
+            d1[k] = d2[k]
+    }
+    return d1;
+}
+
 exports.userUpdate= function(req, res){
   if (logged_in(req)) {
       console.log("Got post");
       console.log(req.user);
       console.log(req.body);
 
-      var email = req.body.email;
-      var fname = req.body.fname;
-      var lname = req.body.lname;
-      
-      var fbID = req.user.id;
-
-      console.log(fbID);
-      fields = {};
-      fields.email = email;
-      fields.firstName = fname;
-      fields.lastName = lname;
-      fields.id = fbID;
+      fields = exports.mergeDict(req.body, req.user);
+      console.log(fields);
       exports.user_update_db(fields);
+
+      /*Update the user information in passport*/
+      for (k in fields){
+          req.session[k] = fields[k];
+      }
+      req.session.save();
+
       res.redirect('/accounts/user');
   } else {
     res.redirect('/liftoff/login');
@@ -281,12 +315,22 @@ exports.securityUpdate= function(req, res){
     res.redirect('/liftoff/login');
   }
 };
+exports.userInfo = function(req, res){
+  if (logged_in(req)) {
+      res.json(req.user);
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};
 exports.user= function(req, res){
   if (logged_in(req)) {
     render(res, {
 
+      /*TODO for now fetch data for user from db here but in the future we want to fetch this on login and pass it around*/
+
       base: 'accounts',
       view: 'user',
+      user: res.user,
       authenticated: true
     })
   } else {

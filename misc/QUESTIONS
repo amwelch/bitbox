@@ -1,1 +1,2 @@
 whats the right way to generalize database initialization, variables, and such?
+NEED TO VALIDATE Account update information, i.e. what fields are they allowed to update (not email obviously)

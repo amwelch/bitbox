@@ -37,11 +37,15 @@ passport.serializeUser(function(user, done) {
     email: user.emails[0].value,
     id: user.id
   };
-  console.log("User logged in submitting query");
-  /*TODO: For now just create on every login since it will just fail silently
-     later check if already exists or insert/update macro or something
-  */
-  routes.create_user(projection);
+  /*Function to add the user if they don't already exist otherwise update in passport*/
+  var cb = function(data, passport_data){
+    if ( !data)
+        routes.create_user(passport_data);
+    /*TODO: update passport session data*/
+    console.log("updating passport...");
+  };
+  var user_dict = routes.get_user(projection.email, projection, cb);
+
   done(null, JSON.stringify(projection));
 });
 
@@ -112,6 +116,8 @@ app.get('/accounts/identity', routes.identity);
 app.post('/accounts/user', routes.userUpdate);
 app.post('/accounts/security', routes.securityUpdate);
 app.post('/accounts/identity', routes.identityUpdate);
+
+app.get('/api/userInfo', routes.userInfo);
 
 app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
