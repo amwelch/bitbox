@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
+    <title>BitBox - <%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel='stylesheet' href='/stylesheets/toggle-switch.css' />
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
@@ -27,6 +27,7 @@
     <![endif]-->
   </head>
   <body>
+    <div id="fb-root"></div>  
     <div data-spy="affix" data-offset-top="50" class="navbar navbar-bitbox navbar-fixed-top" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -42,7 +43,7 @@
         </div> 
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <% if (content.authenticated) { %>
+            <% if (authenticated) { %>
               <%- include generic/in/header.ejs %>
             <% } else { %>
               <%- include generic/out/header.ejs %>
@@ -51,21 +52,17 @@
         </div>
       </div>
     </div>
-    <% if (content.base == 'index') { %>
+    <% if (base == 'index') { %>
       <div class="jumbotron">
-        <h1>Bitcoin's gone social</h1>
+        <h1>Bitcoin. Gone social.</h1>
         <p class="lead">Welcome to BitBox, a revolutionary peer-to-peer payment platform.</p>
         <p><a class="btn btn-lg btn-success" href="/liftoff/login/facebook" role="button">Sign up today</a></p>
       </div>
-    <% } %>
-    <% if (content.base == 'transfer') { %>
-        <%- include transfer/index.ejs %>
-    <% } %>
-    <% if (content.base == 'accounts') { %>
-        <%- include accounts/index.ejs %>
-    <% } %>
-    <% if (content.base == 'index') { %>
       <%- include liftoff/index.ejs %>
+    <% } else if (base == 'transfer') { %>
+      <%- include transfer/index.ejs %>
+    <% } else if (base == 'accounts') { %>
+      <%- include accounts/index.ejs %>
     <% } %>
     <script src="/bootstrap/bootstrap.min.js"></script>
     <script src="/bootstrap/docs.min.js"></script>

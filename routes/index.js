@@ -4,22 +4,13 @@
  */
 
 function render(res, content) {
-  var params = {
-    //  Defaults
-    title: 'BitBox', 
-    content: {
-      base: 'index',
-      view: false,
-      alert: false,
-      authenticated: false
-    }
-  };
+  var params = {};
 
   for (var key in content) {
     // important check that this is objects own property 
     // not from prototype prop inherited
     if(content.hasOwnProperty(key)) {
-      params.content[key] = content[key];
+      params[key] = content[key];
     }
   }
 
@@ -56,7 +47,8 @@ exports.index = function(req, res){
   render(res, {
     base: 'index',
     view: 'index',
-    authenticated: logged_in(req)
+    authenticated: logged_in(req),
+    title: 'Social Bitcoin'
   });
 };
 
@@ -65,12 +57,15 @@ exports.login = function(req, res){
     render(res, {
       base: 'index',
       view: 'index',
-      authenticated: true
+      authenticated: true,
+      title: 'Social Bitcoin'
     });
   } else {
     render(res, {
       base: 'index',
-      view: 'login'
+      view: 'login',
+      authenticated: false,
+      title: 'Login'
     });
   }
 };
@@ -83,7 +78,8 @@ exports.transfer = function(req, res){
     render(res, {
       base: 'transfer',
       view: 'pay',
-      authenticated: true
+      authenticated: true,
+      title: 'Pay'
     })
   } else {
     res.redirect('/liftoff/login');
@@ -95,7 +91,8 @@ exports.pay = function(req, res){
     render(res, {
       base: 'transfer',
       view: 'pay',
-      authenticated: true
+      authenticated: true,
+      title: 'Pay'
     })
   } else {
     res.redirect('/liftoff/login');
@@ -106,7 +103,8 @@ exports.withdraw = function(req, res){
     render(res, {
       base: 'transfer',
       view: 'withdraw',
-      authenticated: true
+      authenticated: true,
+      title: 'Pay'
     })
   } else {
     res.redirect('/liftoff/login');
@@ -119,7 +117,8 @@ exports.deposit = function(req, res){
 
       base: 'transfer',
       view: 'deposit',
-      authenticated: true
+      authenticated: true,
+      title: 'Deposit'
     })
   } else {
     res.redirect('/liftoff/login');
@@ -135,46 +134,8 @@ exports.track = function(req, res){
 
       base: 'transfer',
       view: 'track',
-      authenticated: true
-    })
-  } else {
-    res.redirect('/liftoff/login');
-  }
-};
-
-exports.payments = function(req, res){
-  if (logged_in(req)) {
-    render(res, {
-
-      base: 'history',
-      view: 'payments',
-      authenticated: true
-    })
-  } else {
-    res.redirect('/liftoff/login');
-  }
-};
-
-exports.withdrawals = function(req, res){
-  if (logged_in(req)) {
-    render(res, {
-
-      base: 'history',
-      view: 'withdrawals',
-      authenticated: true
-    })
-  } else {
-    res.redirect('/liftoff/login');
-  }
-};
-
-exports.deposits = function(req, res){
-  if (logged_in(req)) {
-    render(res, {
-
-      base: 'history',
-      view: 'deposits',
-      authenticated: true
+      authenticated: true,
+      title: 'Track'
     })
   } else {
     res.redirect('/liftoff/login');
@@ -330,7 +291,7 @@ exports.user= function(req, res){
 
       base: 'accounts',
       view: 'user',
-      user: res.user,
+      title: 'My Account',
       authenticated: true
     })
   } else {
@@ -343,6 +304,7 @@ exports.identity= function(req, res){
 
       base: 'accounts',
       view: 'identity',
+      title: 'Identity',
       authenticated: true
     })
   } else {
@@ -355,6 +317,7 @@ exports.security= function(req, res){
 
       base: 'accounts',
       view: 'security',
+      title: 'Security',
       authenticated: true
     })
   } else {

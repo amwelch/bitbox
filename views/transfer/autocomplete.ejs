@@ -1,21 +1,28 @@
-<div id="fb-root"></div>
 <script>
 
 var init = function() {
   $('#fb-user').facebookAutocomplete({
-      showAvatars: false,
+      showAvatars: true,
       onpick: function(friend) { 
         console.log(friend);
         document.getElementById("friend_fbid").value = friend.id;
         document.getElementById("fb-user").disabled = "disabled";
         document.getElementById("fb-user").value = friend.name;
         document.getElementById("btc_amount").focus();
-        document.getElementById("fb_user_clear").className = "input_option";
+        document.getElementById("fb_user_clear").innerHTML = "Clear";
+        FB.ui({
+          method: 'send',
+          display: 'popup',
+          to: friend.id,
+          link: 'http://credism-dev.elasticbeanstalk.com',
+        });
+
         $("#fb_user_clear").click(function() {
           document.getElementById("fb-user").value = "";
           document.getElementById("fb-user").disabled = "";
           document.getElementById("friend_fbid").value = friend.id;
-          document.getElementById("fb_user_clear").className = "input_option_hide";
+          document.getElementById("fb_user_clear").innerHTML = "&nbsp;";
+          window.location.reload();
         });
       }
   });
@@ -40,12 +47,6 @@ window.fbAsyncInit = function() {
   });
 };
 
-function createFriendElement(friend) {
-  var $img = $('<img>').attr('src', friend.picture),
-      $name = $('<h3>').text(friend.name),
-      $friend = $('<div>').addClass('friend').append($img, $name);
-  return $friend;
-}
 
 // Load the SDK asynchronously
 (function(d){
