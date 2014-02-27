@@ -9,6 +9,10 @@ var routes = require('./routes');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
+//Redis for session management
+RedisStore = require("connect-redis")(express);
+redis = require("redis").createClient();
+
 // Used for transactions
 var pg = require('pg');
 
@@ -24,7 +28,10 @@ app.configure(function() {
   app.use(express.static('public'));
   app.use(express.cookieParser());
   app.use(express.bodyParser());
-  app.use(express.session({ secret: 'CHANGE ME nonce9001' }));
+  app.use(express.session({ 
+      secret: 'lsfkahfasho124h18087fahg0db0123g12r',
+      store: new RedisStore({client:redis})
+  }));
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
@@ -32,23 +39,40 @@ app.configure(function() {
 
 passport.serializeUser(function(user, done) {
   console.log(user.name);
-  var projection = {
-    firstName: user.name.givenName,
-    lastName: user.name.familyName,
-    fullName: user.name.givenName + " " + user.name.familyName,
-    email: user.emails[0].value,
-    id: user.id
-  };
+  var projection = {};
+  if ("update" in user){
+      delete user["update"];
+      projection = user;
+      done(null, JSON.stringify(projection));
+      return;
+  }
+  else{
+        projection = {
+        firstname: user.name.givenName,
+        lastname: user.name.familyName,
+        email: user.emails[0].value,
+        fbid: user.id
+      };
+  }
   /*Function to add the user if they don't already exist otherwise update in passport*/
-  var cb = function(data, passport_data){
+  var cb = function(data, passport_data, done){
     if ( !data)
+    {
         routes.create_user(passport_data);
+        data = passport_data;
+    }
     /*TODO: update passport session data*/
     console.log("updating passport...");
+    console.log(data);
+    console.log("passport_data");
+    console.log(passport_data);
+    console.log("calling done");
+    console.log(done);
+    done(null, JSON.stringify(data));
   };
-  var user_dict = routes.get_user(projection.email, projection, cb);
-
-  done(null, JSON.stringify(projection));
+  routes.get_user(projection.email, projection, cb, done);
+  //Return default data the callback will read from db and populate session with actual data
+  //done(null, JSON.stringify(projection));
 });
 
 passport.deserializeUser(function(user, done) {

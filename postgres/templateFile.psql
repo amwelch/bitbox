@@ -6,11 +6,12 @@ drop table users;
 CREATE TABLE users (
     id serial primary key, 
     email VARCHAR(100) NOT NULL unique,
-    firstName VARCHAR(100), 
-    lastName VARCHAR(100), 
+    firstname VARCHAR(100), 
+    lastname VARCHAR(100), 
+    fullname VARCHAR(200),
     accountState VARCHAR(1) default 'i',
     created timestamp default current_timestamp, 
-    fbID NUMERIC(20) NOT NULL unique
+    fbid NUMERIC(20) NOT NULL unique
 );
 CREATE TABLE transactions (
     id serial primary key, 
@@ -30,6 +31,6 @@ GRANT ALL PRIVILEGES ON transactions TO alexander;
 GRANT ALL PRIVILEGES ON balances TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
-insert into users (email, firstName, lastName, fbID) VALUES('test@test.com','hello', 'world', 100);
+insert into users (email, firstname, lastname, fbid) VALUES('test@test.com','hello', 'world', 100);
 insert into transactions (srcAccount, dstAccount, bits) VALUES(1,1, 100);
 insert into balances (id, bits) VALUES(1, 12);

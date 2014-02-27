@@ -148,15 +148,12 @@ exports.create_user= function(fields){
 }
 
 /*Get user by email*/
-exports.get_user = function(email, passport_info, cb){
+exports.get_user = function(email, passport_info, cb, done){
   var pg = require('pg');
   var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
-  var queryStr = "SELECT id FROM users where email='"+email+"';"
-  console.log("HERE!!!");
-  pg.connect(dbUrl, function(err, client, done) {
-      console.log("GOT CONNECTION!");
+  var queryStr = "SELECT * FROM users where email='"+email+"';"
+  pg.connect(dbUrl, function(err, client, pg_done) {
       client.query(queryStr, function(err, result){
-          console.log("WOOT GOT QUERY");
           if (err){
             console.log("ERROR:", err);
           }
@@ -165,11 +162,12 @@ exports.get_user = function(email, passport_info, cb){
             data = undefined;
           }
           else{
-            console.log("WOO RETURNING");
             data = result.rows[0];
           }
-          cb(data, passport_info);
+          cb(data, passport_info, done);
+          client.end();
       });
+      //Close the connection
   });
 
 }
@@ -178,15 +176,15 @@ exports.user_update_db= function(fields, new_account){
   /*TODO: Keep around connection so we don't re-auth every time*/
   var pg = require('pg');
   var first = true;
-  var fbID = fields["id"];
+  var fbID = fields["fbid"];
 
   console.log(fields);
 
   var updateStr = "";
-  var keyStr = "fbID";
+  var keyStr = "fbid";
   var valueStr = fbID;
   for(var f in fields){
-    if (fields[f] == undefined || f =="id"){
+    if (fields[f] == undefined || f =="fbid" || fields[f] == "id"){
         continue;
     }
     valueStr += ",";
@@ -206,13 +204,13 @@ exports.user_update_db= function(fields, new_account){
       query = "INSERT into users ("+keyStr+") VALUES("+valueStr+");";
   }
   else{
-      query = "UPDATE users SET " + updateStr + " WHERE fbID="+fbID+";";
+      query = "UPDATE users SET " + updateStr + " WHERE fbid="+fbID+";";
   }
   console.log(query);
   var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
   pg.connect(dbUrl, function(err, client, done) {
     if(err)
-        throw err;
+        consle.log(err);
     client.query('BEGIN', function(err) {
         if(err)
             return rollback(client, done);
@@ -241,20 +239,27 @@ exports.mergeDict= function(d1, d2){
 
 exports.userUpdate= function(req, res){
   if (logged_in(req)) {
-      console.log("Got post");
-      console.log(req.user);
-      console.log(req.body);
 
       fields = exports.mergeDict(req.body, req.user);
       console.log(fields);
       exports.user_update_db(fields);
 
+      console.log("Old user: ", req.user);
+      var user = req.user;
       /*Update the user information in passport*/
       for (k in fields){
-          req.session[k] = fields[k];
+          user[k] = fields[k];
       }
-      req.session.save();
-
+      user["update"] = true;
+      console.log("New user", req.user);
+      req.logIn(user, function(err){
+          if(err){
+              console.log("ERROR: ", err);
+          }
+          else{
+              console.log("Worked!!!");
+          }
+      });
       res.redirect('/accounts/user');
   } else {
     res.redirect('/liftoff/login');
@@ -262,7 +267,6 @@ exports.userUpdate= function(req, res){
 };
 exports.identityUpdate= function(req, res){
   if (logged_in(req)) {
-      console.log("Got post");
       res.redirect('/accounts/identity');
   } else {
     res.redirect('/liftoff/login');
@@ -270,7 +274,6 @@ exports.identityUpdate= function(req, res){
 };
 exports.securityUpdate= function(req, res){
   if (logged_in(req)) {
-      console.log("Got post");
       res.redirect('/accounts/security');
   } else {
     res.redirect('/liftoff/login');

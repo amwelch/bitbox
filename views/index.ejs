@@ -67,5 +67,31 @@
     <script src="/bootstrap/bootstrap.min.js"></script>
     <script src="/bootstrap/docs.min.js"></script>
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
+    <script>
+      $(document).ready(function(){
+          console.log("Running req");
+          $.ajax({
+              url: '/api/userInfo',
+              complete: function(info){
+                  if (info.status != 200){
+                     //Do nothing
+                  }
+                  else{
+                      console.log("request fine");
+                      info = info.responseJSON;
+                      var name = undefined;
+                      if (info.firstname)
+                          name = info.firstname;
+                      else if (info.lastname)
+                          name = info.lastname;
+
+                      if (name != undefined){
+                          $("#accounts_link").text(name);
+                      }
+                  }
+              }
+          });
+      });
+    </script>
   </body>
 </html>
