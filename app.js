@@ -2,6 +2,8 @@
 /**
  * Module dependencies.
  */
+var ip = '172.31.9.227';
+var eip = '54.200.103.29';
 
 var express = require('express');
 var routes = require('./routes');
@@ -83,9 +85,12 @@ passport.deserializeUser(function(user, done) {
 
 passport.use( 
 	new FacebookStrategy({
-    clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
-    clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
-    callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
+    //clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
+    //clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
+    //callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
+    clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
+    clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
+    callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
   },
   function(accessToken, refreshToken, profile, done) {
     console.log("---------------------");
@@ -149,7 +154,11 @@ app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
-var port = process.env.PORT || 3000
-app.listen(port, function() {
-  console.log('Listening on ' + port)
+//var port = process.env.PORT || 3000
+//app.listen(port, function() {
+//  console.log('Listening on ' + port)
+//})
+var port = process.env.PORT || 443
+app.listen(port, ip, function() {
+  console.log('Listening on ' + port);
 })
