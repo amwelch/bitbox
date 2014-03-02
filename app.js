@@ -1,9 +1,15 @@
+/*Temporary ips*/
+var ip = '172.31.9.227';
+var eip = '54.200.103.29';
 
+var args = process.argv.slice(2);
+var debug = false;
+if (args.indexOf('dev') != -1){
+    debug = true;
+}
 /**
  * Module dependencies.
  */
-var ip = '172.31.9.227';
-var eip = '54.200.103.29';
 
 var express = require('express');
 var routes = require('./routes');
@@ -11,13 +17,14 @@ var routes = require('./routes');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
-//Redis for session management
-RedisStore = require("connect-redis")(express);
-redis = require("redis").createClient();
+/* Redis only on production */
+if (!debug){
+    RedisStore = require("connect-redis")(express);
+    redis = require("redis").createClient();
+}
 
 // Used for transactions
 var pg = require('pg');
-
 var app = express();
 
 app.configure(function() {
@@ -30,10 +37,17 @@ app.configure(function() {
   app.use(express.static('public'));
   app.use(express.cookieParser());
   app.use(express.bodyParser());
-  app.use(express.session({ 
+  if (!debug){
+    app.use(express.session({ 
       secret: 'lsfkahfasho124h18087fahg0db0123g12r',
       store: new RedisStore({client:redis})
-  }));
+    }));
+  }
+  else{
+    app.use(express.session({ 
+      secret: 'lsfkahfasho124h18087fahg0db0123g12r'
+    }));
+  }
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
@@ -83,6 +97,20 @@ passport.deserializeUser(function(user, done) {
   done(null, composition);
 });
 
+if (debug){
+  var strat = {
+    clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
+    clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
+    callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
+  };
+}
+else{
+  var start = {
+    clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
+    clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
+    callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
+  };
+}
 passport.use( 
 	new FacebookStrategy({
     //clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
@@ -134,7 +162,6 @@ app.post('/transfer/pay', function(req, res) {
   console.log(req);
   res.redirect('/transfer/pay');
 });
-
 app.get('/transfer/pay', routes.pay);
 app.get('/transfer/track', routes.track);
 app.get('/transfer/withdraw', routes.withdraw);
@@ -154,11 +181,15 @@ app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
-//var port = process.env.PORT || 3000
-//app.listen(port, function() {
-//  console.log('Listening on ' + port)
-//})
-var port = process.env.PORT || 443
-app.listen(port, ip, function() {
-  console.log('Listening on ' + port);
-})
+if (debug){
+  var port = process.env.PORT || 3000;
+  app.listen(port, function() {
+    console.log('Listening on ' + port)
+  });
+}
+else{
+  var port = process.env.PORT || 443;
+  app.listen(port, ip, function() {
+    console.log('Listening on ' + port);
+  });
+}
