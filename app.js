@@ -1,4 +1,14 @@
 
+/* Command line arguments */
+
+var args = process.argv.slice(2);
+
+var debug = false;
+
+if (args.indexOf('dev') != -1){
+    debug = true;
+}
+
 /**
  * Module dependencies.
  */
@@ -9,13 +19,13 @@ var routes = require('./routes');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
-//Redis for session management
-RedisStore = require("connect-redis")(express);
-redis = require("redis").createClient();
-
+/* Redis only on production */
+if (!debug){
+    RedisStore = require("connect-redis")(express);
+    redis = require("redis").createClient();
+}
 // Used for transactions
 var pg = require('pg');
-
 var app = express();
 
 app.configure(function() {
@@ -28,10 +38,17 @@ app.configure(function() {
   app.use(express.static('public'));
   app.use(express.cookieParser());
   app.use(express.bodyParser());
-  app.use(express.session({ 
+  if (!debug){
+    app.use(express.session({ 
       secret: 'lsfkahfasho124h18087fahg0db0123g12r',
       store: new RedisStore({client:redis})
-  }));
+    }));
+  }
+  else{
+    app.use(express.session({ 
+      secret: 'lsfkahfasho124h18087fahg0db0123g12r'
+    }));
+  }
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
@@ -81,12 +98,15 @@ passport.deserializeUser(function(user, done) {
   done(null, composition);
 });
 
-passport.use( 
-	new FacebookStrategy({
+
+var strat = {
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
     callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
-  },
+};
+passport.use( 
+	new FacebookStrategy(strat
+  ,
   function(accessToken, refreshToken, profile, done) {
     console.log("---------------------");
     console.log("FBID: " + profile.id);
