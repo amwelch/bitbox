@@ -4,6 +4,14 @@ body {
   background-color: #f7f6f2 !important;
 }
 
+a.paginate_button {
+	padding-right: 5px;
+}
+
+a.paginate_active {
+    padding-right: 5px;
+}
+
 a {
 	outline: 0 !important;
 }
