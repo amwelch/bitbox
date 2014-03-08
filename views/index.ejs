@@ -5,9 +5,9 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel='stylesheet' href='/stylesheets/toggle-switch.css' />
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
+    <!--<script src="/jq/jquery-2.1.0.min.js"></script>-->
     <script src="/fb-autocomplete/jquery.js"></script>
     <script src="/fb-autocomplete/facebook-friend-autocomplete.js"></script>
-    <script src="/jq/jquery-2.1.0.min.js"></script>
     <link rel="stylesheet" href="/fb-autocomplete/facebook-friend-autocomplete.css">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -67,5 +67,31 @@
     <script src="/bootstrap/bootstrap.min.js"></script>
     <script src="/bootstrap/docs.min.js"></script>
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
+    <script>
+      $(document).ready(function(){
+          console.log("Running req");
+          $.ajax({
+              url: '/api/userInfo',
+              complete: function(info){
+                  if (info.status != 200){
+                     //Do nothing
+                  }
+                  else{
+                      console.log("request fine");
+                      info = info.responseJSON;
+                      var name = undefined;
+                      if (info.firstname)
+                          name = info.firstname;
+                      else if (info.lastname)
+                          name = info.lastname;
+
+                      if (name != undefined){
+                          $("#accounts_link").text(name);
+                      }
+                  }
+              }
+          });
+      });
+    </script>
   </body>
 </html>

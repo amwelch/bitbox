@@ -1,4 +1,12 @@
+/*Temporary ips*/
+var ip = '172.31.9.227';
+var eip = '54.200.103.29';
 
+var args = process.argv.slice(2);
+var debug = false;
+if (args.indexOf('dev') != -1){
+    debug = true;
+}
 /**
  * Module dependencies.
  */
@@ -9,9 +17,13 @@ var routes = require('./routes');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
+/* Redis only on production */
+if (!debug){
+    RedisStore = require("connect-redis")(express);
+    redis = require("redis").createClient();
+}
 // Used for transactions
 var pg = require('pg');
-
 var app = express();
 
 app.configure(function() {
@@ -24,7 +36,17 @@ app.configure(function() {
   app.use(express.static('public'));
   app.use(express.cookieParser());
   app.use(express.bodyParser());
-  app.use(express.session({ secret: 'CHANGE ME nonce9001' }));
+  if (!debug){
+    app.use(express.session({ 
+      secret: 'lsfkahfasho124h18087fahg0db0123g12r',
+      store: new RedisStore({client:redis})
+    }));
+  }
+  else{
+    app.use(express.session({ 
+      secret: 'lsfkahfasho124h18087fahg0db0123g12r'
+    }));
+  }
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
@@ -32,23 +54,40 @@ app.configure(function() {
 
 passport.serializeUser(function(user, done) {
   console.log(user.name);
-  var projection = {
-    firstName: user.name.givenName,
-    lastName: user.name.familyName,
-    fullName: user.name.givenName + " " + user.name.familyName,
-    email: user.emails[0].value,
-    id: user.id
-  };
+  var projection = {};
+  if ("update" in user){
+      delete user["update"];
+      projection = user;
+      done(null, JSON.stringify(projection));
+      return;
+  }
+  else{
+        projection = {
+        firstname: user.name.givenName,
+        lastname: user.name.familyName,
+        email: user.emails[0].value,
+        fbid: user.id
+      };
+  }
   /*Function to add the user if they don't already exist otherwise update in passport*/
-  var cb = function(data, passport_data){
+  var cb = function(data, passport_data, done){
     if ( !data)
+    {
         routes.create_user(passport_data);
+        data = passport_data;
+    }
     /*TODO: update passport session data*/
     console.log("updating passport...");
+    console.log(data);
+    console.log("passport_data");
+    console.log(passport_data);
+    console.log("calling done");
+    console.log(done);
+    done(null, JSON.stringify(data));
   };
-  var user_dict = routes.get_user(projection.email, projection, cb);
-
-  done(null, JSON.stringify(projection));
+  routes.get_user(projection.email, projection, cb, done);
+  //Return default data the callback will read from db and populate session with actual data
+  //done(null, JSON.stringify(projection));
 });
 
 passport.deserializeUser(function(user, done) {
@@ -57,12 +96,41 @@ passport.deserializeUser(function(user, done) {
   done(null, composition);
 });
 
-passport.use( 
-	new FacebookStrategy({
+// <<<<<<< HEAD
+
+var strat = {
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
     callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
-  },
+};
+passport.use( 
+	new FacebookStrategy(strat
+  ,
+// =======
+// if (debug){
+//   var strat = {
+//     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
+//     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
+//     callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
+//   };
+// }
+// else{
+//   var start = {
+//     clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
+//     clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
+//     callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
+//   };
+// }
+// passport.use( 
+// 	new FacebookStrategy({
+//     //clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
+//     //clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
+//     //callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
+//     clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
+//     clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
+//     callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
+//   },
+// >>>>>>> c58d7da36d08adfc52e67d61b86989d99e842deb
   function(accessToken, refreshToken, profile, done) {
     console.log("---------------------");
     console.log("FBID: " + profile.id);
@@ -88,9 +156,9 @@ app.get('/liftoff/login/facebook',
 // access was granted, the user will be logged in.  Otherwise,
 // authentication has failed.
 app.get('/liftoff/login/facebook/callback', 
-  passport.authenticate('facebook', {
-  	successRedirect: '/transfer',
-		failureRedirect: '/' 
+  passport.authenticate('facebook', { 
+     successRedirect: '/transfer',
+		 failureRedirect: '/' 
 	})
 );
 
@@ -105,7 +173,6 @@ app.post('/transfer/pay', function(req, res) {
   console.log(req);
   res.redirect('/transfer/pay');
 });
-
 app.get('/transfer/pay', routes.pay);
 app.get('/transfer/track', routes.track);
 app.get('/transfer/withdraw', routes.withdraw);
@@ -125,7 +192,15 @@ app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
-var port = process.env.PORT || 3000
-app.listen(port, function() {
-  console.log('Listening on ' + port)
-})
+if (debug){
+  var port = process.env.PORT || 3000;
+  app.listen(port, function() {
+    console.log('Listening on ' + port)
+  });
+}
+else{
+  var port = process.env.PORT || 443;
+  app.listen(port, ip, function() {
+    console.log('Listening on ' + port);
+  });
+}
