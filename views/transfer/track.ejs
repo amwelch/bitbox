@@ -1,23 +1,36 @@
   <h1><%= header %></h1>  
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th><%= col1 %></th>
-          <th><%= col2 %></th>
-          <th><%= col3 %></th>
-          <th><%= col4 %></th>
-          <th><%= col5 %></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(var i=0; i < transactions.length; i++) { %>
-            <tr>
-              <% for(var j=0; j < transactions[i].length; j++) { %>
-                <td> <%= transactions[i][j] %> </td>
-              <% } %>
-            </tr>
-        <% } %>        
-      </tbody>
-    </table>
-  </div>
+   <span class="glyphicon glyphicon-ok"></span>
+  <% if (ok) { %>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th><%= col1 %></th>
+            <th><%= col2 %></th>
+            <th><%= col3 %></th>
+            <th><%= col4 %></th>
+            <th><%= col5 %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0; i < transactions.length; i++) { %>
+              <tr>
+                <td> <%= transactions[i].submitted %> </td>
+                <td>  </td>
+                <td> <%= transactions[i].src %> </td>
+                <td> 
+                <% if (transactions[i].completed) { %>
+                  Approved
+                <% } else { %>
+                  Pending
+                <% } %>                 
+                </td>
+                <td> BTC <%= transactions[i].bits %> </td>
+              </tr>
+          <% } %>        
+        </tbody>
+      </table>
+    </div>  
+  <% } else { %>
+    <div class="alert alert-danger"><strong>We are sorry!</strong>  your request couldn't be completed please try later</div>
+  <% } %> 

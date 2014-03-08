@@ -128,99 +128,64 @@ exports.deposit = function(req, res){
 /*
  * HISTORY
  */
-function db_query(query_str) {
+function get_transactions(res, id) {
+
+  var tx_query = "SELECT t.submitted, u1.firstname as src, u2.firstname as dst, " +
+                        "t.completed, t.bits, t.srcaccount, t.dstaccount " +
+                 "FROM (SELECT submitted, srcaccount, dstaccount, completed, bits " +
+                       "FROM transactions " +
+                       "WHERE srcaccount="+id+" OR dstaccount="+id+") as t " +
+                 "INNER JOIN users u1 on t.srcaccount = u1.id " +
+                 "INNER JOIN users u2 on t.dstaccount = u2.id " +
+                 "ORDER BY t.submitted DESC;" 
+
   var pg = require('pg');
   var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
-  var query_result;
   pg.connect(dbUrl, function(err, client, done) {
-    console.log("Connected to DB sending query");
-    query_result = client.query(query);    
+    client.query(tx_query, function(err, result){
+        console.log("got query");
+        if (err){
+          console.log("ERROR:", err);          
+          render(res, {
+            base: 'transfer',
+            view: 'track',
+            header: 'Transaction Overview',
+            ok: false,
+            authenticated: true,
+            title: 'Track',
+          });
+        }
+        else {
+          console.log("got transactions query result");          
+
+          render(res, {
+            base: 'transfer',
+            view: 'track',
+            header: 'Transaction Overview',
+            ok: true,
+            authenticated: true,
+            title: 'Track',        
+            col1: 'Date',
+            col2: 'Type',
+            col3: 'With',
+            col4: 'Status',
+            col5: 'Gross',
+            transactions: result.rows,
+          });          
+        }
+    })
     done();
-  }
-  console.log(query_result);
-}
-
-function db_transaction(query, work_result) {
-  var pg = require('pg');
-  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
-  var r_result;
-  pg.connect(dbUrl, function(err, client, done) {
-      console.log("GOT CONNECTION!");
-      var id;
-      client.query(query, function(err, result){
-          console.log("WOOT GOT QUERY");
-          if (err){
-            console.log("ERROR:", err);
-          }
-          else if (result.rows.length != 1){
-            console.log("ERROR: bad length "+ result.rows.length);
-            data = undefined;
-          }
-          else{
-            console.log("WOO RETURNING");
-            work_result(result);
-          }          
-      });
-  });  
-}
-
-function get_transactions() {
+  });
   
-}
-
-function get_id(result) {
-  // var id = 
-}
-
-function transactions_data(fbID){
-  console.log("getting transactions...");
-
-  // TODO: we shouldn't need to get the id from the db. 
-  var queryId =  "SELECT id FROM users WHERE fbid="+fbID+";"
-  var id = db_query(queryId);
-  console.log(id);
-  if(!id) {
-    console.log("DB error couldn't get user id");
-    return;
-  }
-  var queryStrT= "SELECT t.submitted, u1.firstname as src, u2.firstname as dst," +
-                        "t.completed, t.bits, t.srcaccount, t.dstaccount" +
-                 "FROM (SELECT submitted, srcaccount, dstaccount, completed, bits" +
-                       "FROM transactions" +
-                       "WHERE srcaccount="+id+" OR dstaccount="+id+") as t" +
-                 "INNER JOIN users u1 on t.srcaccount = u1.id" +
-                 "INNER JOIN users u2 on t.dstaccount = u2.id;"
-  var transactions = db_query(queryStrT);
-  console.log(transactions);
 }
 
 exports.track = function(req, res){
   if (logged_in(req)) {
     console.log("----------->Starting transaction retrieval");
-    
-    var user_transactions = [
-        ['col1','col2','col3','col4','col5'], 
-        ['col1','col2','col3','col4','col5']
-      ]
-
     var fields = exports.mergeDict(req.body, req.user);    
+    var id = fields["id"];
+    get_transactions(res, id);  
 
-    console.log(fields["id"]);
-    transactions_data(fields["id"]);
-
-    render(res, {
-      base: 'transfer',
-      view: 'track',
-      header: 'Transaction Overview',
-      col1: 'Date',
-      col2: 'Type',
-      col3: 'With',
-      col4: 'Status',
-      col5: 'Gross',
-      transactions: user_transactions,
-      authenticated: true,
-      title: 'Track',
-    })
   } else {
     res.redirect('/liftoff/login');
   }
