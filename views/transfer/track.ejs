@@ -1,6 +1,5 @@
-  <h1><%= header %></h1>  
-   <span class="glyphicon glyphicon-ok"></span>
-  <% if (ok) { %>
+  <h1><%= header %></h1>     
+  <% if (ok != 'error') { %>
     <div class="table-responsive">
       <table class="table table-striped">
         <thead>
@@ -13,19 +12,19 @@
           </tr>
         </thead>
         <tbody>
-          <% for(var i=0; i < transactions.length; i++) { %>
+          <% for(var i=0; i < data.length; i++) { %>
               <tr>
-                <td> <%= transactions[i].submitted %> </td>
+                <td> <%= data[i].submitted %> </td>
                 <td>  </td>
-                <td> <%= transactions[i].src %> </td>
+                <td> <%= data[i].src %> </td>
                 <td> 
-                <% if (transactions[i].completed) { %>
+                <% if (data[i].completed) { %>
                   Approved
                 <% } else { %>
                   Pending
                 <% } %>                 
                 </td>
-                <td> BTC <%= transactions[i].bits %> </td>
+                <td> BTC <%= data[i].bits %> </td>
               </tr>
           <% } %>        
         </tbody>

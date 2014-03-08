@@ -39,6 +39,34 @@ var rollback = function(client, done) {
   });
 };
 
+function db_query(res, query, render_content) {
+  var pg = require('pg');
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  pg.connect(dbUrl, function(err, client, done) {
+    client.query(query, function(err, result){
+        console.log("got query");
+        if (err){
+          // If there is an error the user is prompted with a
+          // screen that gives some info. 
+          console.log("ERROR:", err);          
+          render_content.ok = 'error';
+          render(res, render_content);          
+        }
+        else if (result.rows.length < 1) {
+          console.log("ERROR: bad length "+ result.rows.length);
+          render_content.ok = 'no_results';
+          render(res, render_content);
+        }
+        else {
+          console.log("got query result");          
+          render_content.ok = 'ok';
+          render_content.data = result.rows
+          render(res, render_content);
+        }
+    })
+    done();
+  });  
+}
 
 /*
  * HOMEPAGE
@@ -70,34 +98,57 @@ exports.login = function(req, res){
   }
 };
 
+function transaction(usr_id, tx_data) {
+  
+}
+
 /*
  * TRANSFER
  */
-exports.transfer = function(req, res){
+exports.process_transaction = function(req, res) {
   if (logged_in(req)) {
-    render(res, {
-      base: 'transfer',
-      view: 'pay',
-      authenticated: true,
-      title: 'Pay'
-    })
-  } else {
+    //TODO: do we need more security checks here
+    // to make sure this is a legit post request?
+    console.log("------------->>>> POST Transfer");
+    console.log(req.body.tx);
+    var tx_data = req.body.tx;
+
+    var fields = exports.mergeDict(req.body, req.user);    
+    var usr_id = fields["id"];
+
+    transaction(usr_id, tx_data);
+
+    res.redirect('/transfer/pay');
+  }
+  else {
     res.redirect('/liftoff/login');
   }
 }
 
 exports.pay = function(req, res){
-  if (logged_in(req)) {
-    render(res, {
+  if (logged_in(req)) {      
+    console.log("------------->>>> GET Transfer");
+
+    var fields = exports.mergeDict(req.body, req.user);    
+    var id = fields["id"];
+
+    var query = "SELECT bits FROM balances WHERE id="+id+";";
+
+    var render_content = {
       base: 'transfer',
       view: 'pay',
       authenticated: true,
-      title: 'Pay'
-    })
+      title: 'Pay',
+      header: 'Payment'      
+    }    
+
+    db_query(res, query, render_content);
+
   } else {
     res.redirect('/liftoff/login');
   }
 };
+
 exports.withdraw = function(req, res){
   if (logged_in(req)) {
     render(res, {
@@ -128,9 +179,14 @@ exports.deposit = function(req, res){
 /*
  * HISTORY
  */
-function get_transactions(res, id) {
+exports.track = function(req, res){
+  if (logged_in(req)) {
+    console.log("------------->>>> GET History");
 
-  var tx_query = "SELECT t.submitted, u1.firstname as src, u2.firstname as dst, " +
+    var fields = exports.mergeDict(req.body, req.user);    
+    var id = fields["id"];
+
+    var query = "SELECT t.submitted, u1.firstname as src, u2.firstname as dst, " +
                         "t.completed, t.bits, t.srcaccount, t.dstaccount " +
                  "FROM (SELECT submitted, srcaccount, dstaccount, completed, bits " +
                        "FROM transactions " +
@@ -138,58 +194,30 @@ function get_transactions(res, id) {
                  "INNER JOIN users u1 on t.srcaccount = u1.id " +
                  "INNER JOIN users u2 on t.dstaccount = u2.id " +
                  "ORDER BY t.submitted DESC;" 
+    
+    render_content = {
+      base: 'transfer',
+      view: 'track',
+      header: 'Transaction Overview',      
+      authenticated: true,
+      title: 'Track',        
+      col1: 'Date',
+      col2: 'Type',
+      col3: 'With',
+      col4: 'Status',
+      col5: 'Gross'      
+    };
 
-  var pg = require('pg');
-  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
-  pg.connect(dbUrl, function(err, client, done) {
-    client.query(tx_query, function(err, result){
-        console.log("got query");
-        if (err){
-          console.log("ERROR:", err);          
-          render(res, {
-            base: 'transfer',
-            view: 'track',
-            header: 'Transaction Overview',
-            ok: false,
-            authenticated: true,
-            title: 'Track',
-          });
-        }
-        else {
-          console.log("got transactions query result");          
-
-          render(res, {
-            base: 'transfer',
-            view: 'track',
-            header: 'Transaction Overview',
-            ok: true,
-            authenticated: true,
-            title: 'Track',        
-            col1: 'Date',
-            col2: 'Type',
-            col3: 'With',
-            col4: 'Status',
-            col5: 'Gross',
-            transactions: result.rows,
-          });          
-        }
-    })
-    done();
-  });
-  
-}
-
-exports.track = function(req, res){
-  if (logged_in(req)) {
-    console.log("----------->Starting transaction retrieval");
-    var fields = exports.mergeDict(req.body, req.user);    
-    var id = fields["id"];
-    get_transactions(res, id);  
+    db_query(res, query, render_content) 
 
   } else {
     res.redirect('/liftoff/login');
   }
 };
+
+/*
+ * ///HISTORY
+ */
 
 /* Account */
 exports.create_user= function(fields){
@@ -251,7 +279,9 @@ exports.user_update_db= function(fields, new_account){
   }
   var query = "";
   if (new_account){
+    //TODO: need to update an empty balance entry into the balance account as well
       query = "INSERT into users ("+keyStr+") VALUES("+valueStr+");";
+
   }
   else{
       query = "UPDATE users SET " + updateStr + " WHERE fbid="+fbID+";";
