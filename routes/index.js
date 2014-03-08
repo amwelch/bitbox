@@ -125,17 +125,90 @@ exports.deposit = function(req, res){
   }
 };
 
+
+function db_query(query, work_result) {
+  var pg = require('pg');
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  var r_result;
+  pg.connect(dbUrl, function(err, client, done) {
+      console.log("GOT CONNECTION!");
+      var id;
+      client.query(query, function(err, result){
+          console.log("WOOT GOT QUERY");
+          if (err){
+            console.log("ERROR:", err);
+          }
+          else if (result.rows.length != 1){
+            console.log("ERROR: bad length "+ result.rows.length);
+            data = undefined;
+          }
+          else{
+            console.log("WOO RETURNING");
+            work_result(result);
+          }          
+      });
+  });  
+}
+
 /*
  * HISTORY
  */
+function get_transactions() {
+  
+}
+
+function get_id(result) {
+  var id = 
+}
+
+function transactions_data(fbID){
+  console.log("getting transactions...");
+
+  // TODO: we shouldn't need to get the id from the db. 
+  var queryId =  "SELECT id FROM users WHERE fbid="+fbID+";"
+  var id = db_query(queryId, get_transactions);
+  console.log(id);
+  if(!id) {
+    console.log("DB error couldn't get user id");
+    return;
+  }
+  var queryStrT= "SELECT t.submitted, u1.firstname as src, u2.firstname as dst," +
+                        "t.completed, t.bits, t.srcaccount, t.dstaccount" +
+                 "FROM (SELECT submitted, srcaccount, dstaccount, completed, bits" +
+                       "FROM transactions" +
+                       "WHERE srcaccount="+id+" OR dstaccount="+id+") as t" +
+                 "INNER JOIN users u1 on t.srcaccount = u1.id" +
+                 "INNER JOIN users u2 on t.dstaccount = u2.id;"
+  var transactions = db_query(queryStrT);
+  console.log(transactions);
+}
+
 exports.track = function(req, res){
   if (logged_in(req)) {
-    render(res, {
+    console.log("----------->Starting transaction retrieval");
+    
+    var user_transactions = [
+        ['col1','col2','col3','col4','col5'], 
+        ['col1','col2','col3','col4','col5']
+      ]
 
+    var fields = exports.mergeDict(req.body, req.user);    
+
+    console.log(fields["id"]);
+    transactions_data(fields["id"]);
+
+    render(res, {
       base: 'transfer',
       view: 'track',
+      header: 'Transaction Overview',
+      col1: 'Date',
+      col2: 'Type',
+      col3: 'With',
+      col4: 'Status',
+      col5: 'Gross',
+      transactions: user_transactions,
       authenticated: true,
-      title: 'Track'
+      title: 'Track',
     })
   } else {
     res.redirect('/liftoff/login');
@@ -186,7 +259,7 @@ exports.user_update_db= function(fields, new_account){
   var keyStr = "fbID";
   var valueStr = fbID;
   for(var f in fields){
-    if (fields[f] == undefined || f =="id"){
+    if (fields[f] == undefined || f =="id" || f =="fullName"){
         continue;
     }
     valueStr += ",";
