@@ -3,13 +3,19 @@ GRANT ALL PRIVILEGES ON DATABASE bitbox TO alexander;
 drop table balances;
 drop table transactions;
 drop table users;
+drop type tx_status;
+drop type tx_type;
+drop type a_state;
+CREATE TYPE tx_status AS ENUM ('Declined', 'Pending', 'Approved');
+CREATE TYPE tx_type AS ENUM ('Pay', 'Charge');
+CREATE TYPE a_state AS ENUM ('Active','Inactive');
 CREATE TABLE users (
     id serial primary key, 
     email VARCHAR(100) NOT NULL unique,
     firstname VARCHAR(100), 
     lastname VARCHAR(100), 
     fullname VARCHAR(200),
-    accountState VARCHAR(1) default 'i',
+    accountState a_state default 'Active',
     created timestamp default current_timestamp, 
     fbid NUMERIC(20) NOT NULL unique
 );
@@ -17,7 +23,8 @@ CREATE TABLE transactions (
     id serial primary key, 
     srcAccount int NOT NULL references users(id), 
     dstAccount int NOT NULL references users(id), 
-    completed boolean DEFAULT false, 
+    status tx_status DEFAULT 'Declined',
+    type tx_type DEFAULT 'Charge', 
     bits bigint NOT NULL, 
     memo VARCHAR(100),
     submitted timestamp default current_timestamp
@@ -32,5 +39,5 @@ GRANT ALL PRIVILEGES ON balances TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
 insert into users (email, firstname, lastname, fbid) VALUES('test@test.com','hello', 'world', 100);
-insert into transactions (srcAccount, dstAccount, bits) VALUES(1,1, 100);
+insert into transactions (srcAccount, dstAccount, bits, type) VALUES(1,1, 100,'Pay');
 insert into balances (id, bits) VALUES(1, 12);

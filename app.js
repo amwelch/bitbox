@@ -85,6 +85,8 @@ passport.serializeUser(function(user, done) {
     console.log(done);
     done(null, JSON.stringify(data));
   };
+
+  // TODO: race condition?
   routes.get_user(projection.email, projection, cb, done);
   //Return default data the callback will read from db and populate session with actual data
   //done(null, JSON.stringify(projection));
@@ -96,42 +98,24 @@ passport.deserializeUser(function(user, done) {
   done(null, composition);
 });
 
-<<<<<<< HEAD
-
-var strat = {
-    clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
-    clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
-    callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
-};
-passport.use( 
-	new FacebookStrategy(strat
-  ,
-=======
+var strat;
 if (debug){
-  var strat = {
+  strat = {
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
     callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
   };
 }
 else{
-  var start = {
+  start = {
     clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
     clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
     callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
   };
 }
+
 passport.use( 
-	new FacebookStrategy({
-    //clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
-    //clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
-    //callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
-    clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
-    clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
-    callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
-  },
->>>>>>> c58d7da36d08adfc52e67d61b86989d99e842deb
-  function(accessToken, refreshToken, profile, done) {
+  new FacebookStrategy(strat, function(accessToken, refreshToken, profile, done) {
     console.log("---------------------");
     console.log("FBID: " + profile.id);
     console.log("EMAIL: " + profile.emails[0].value);
@@ -156,9 +140,9 @@ app.get('/liftoff/login/facebook',
 // access was granted, the user will be logged in.  Otherwise,
 // authentication has failed.
 app.get('/liftoff/login/facebook/callback', 
-  passport.authenticate('facebook', {
-  	successRedirect: '/transfer',
-		failureRedirect: '/' 
+  passport.authenticate('facebook', { 
+     successRedirect: '/transfer',
+		 failureRedirect: '/' 
 	})
 );
 
@@ -169,15 +153,13 @@ app.get('/logout', function(req, res) {
 
 //app.get('/in', auth.list);
 
-app.post('/transfer/pay', function(req, res) {
-  console.log(req);
-  res.redirect('/transfer/pay');
-});
+app.post('/transfer/pay', routes.process_transaction);
+
 app.get('/transfer/pay', routes.pay);
 app.get('/transfer/track', routes.track);
 app.get('/transfer/withdraw', routes.withdraw);
 app.get('/transfer/deposit', routes.deposit);
-app.get('/transfer', routes.transfer);
+app.get('/transfer', routes.pay);
 
 app.get('/accounts/user', routes.user);
 app.get('/accounts/security', routes.security);

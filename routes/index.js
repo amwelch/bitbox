@@ -26,7 +26,8 @@ function logged_in(req) {
   return rValue;
 }
 
-var rollback = function(client, done) {
+var rollback = function(client, done, err_in) {
+  console.error(err_in);
   client.query('ROLLBACK', function(err) {
   	console.log("Rolling back!!");
   	console.log(err);
@@ -39,6 +40,34 @@ var rollback = function(client, done) {
   });
 };
 
+function db_query(res, query, render_content) {
+  var pg = require('pg');
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  pg.connect(dbUrl, function(err, client, done) {
+    client.query(query, function(err, result){
+        console.log("got query");
+        if (err){
+          // If there is an error the user is prompted with a
+          // screen that gives some info. 
+          console.log("ERROR:", err);          
+          render_content.ok = 'error';
+          render(res, render_content);          
+        }
+        else if (result.rows.length < 1) {
+          console.log("ERROR: bad length "+ result.rows.length);
+          render_content.ok = 'no_results';
+          render(res, render_content);
+        }
+        else {
+          console.log("got query result");          
+          render_content.ok = 'ok';
+          render_content.data = result.rows
+          render(res, render_content);
+        }
+    })
+    done();
+  });  
+}
 
 /*
  * HOMEPAGE
@@ -70,34 +99,205 @@ exports.login = function(req, res){
   }
 };
 
+function transaction(usr_id, tx_data) {
+  // This query is to check if the dst exists or not in our DB
+  var dst_query = {text:"SELECT id, accountstate FROM users WHERE fbid=$1", values:[tx_data.fbid]};  
+  var partial_usr_query = {text:"INSERT INTO users(fbid, email, accountstate) "+
+                                "VALUES($1,$2,'Inactive')", values:[tx_data.fbid,tx_data.fbid]};  
+  var balance_query = {text:"SELECT bits FROM balances WHERE id=$1", values:[usr_id]};
+
+  var tx_query = "INSERT INTO transactions "+
+                 "(srcaccount, dstaccount, status, type, bits, memo) "+
+                 "VALUES($1,$2,$3,$4,$5,$6)";
+
+
+  var pg = require('pg');
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  pg.connect(dbUrl, function(err, client, done) {
+    // Check if the user we are trying to pay/charge
+    // exists or not.
+    client.query(dst_query, function(err, result){
+      if (err){
+        // There is an error with the query 
+        console.log("ERROR:", err);                              
+      } // ERROR      
+      else if (result.rows.length < 1) {
+        // The dst user doesn't exist
+        console.log("User doesn't exist"); 
+
+        // Strat transaction
+        client.query('BEGIN', function(err) {
+          if(err) return rollback(client, done); 
+          process.nextTick(function() {     
+
+            // Create partial user in the db
+            client.query(partial_usr_query, function(err) {
+              if(err) return rollback(client, done, err);
+
+              // Get new user id
+              client.query(dst_query, function(err, result) {              
+                if (err) return rollback(client, done, err);
+                var dst_id = result.rows[0].id;
+
+                // TODO: Insert new balance row for this dst_usr?
+
+                // Insert pending transaction                
+                client.query(tx_query, [usr_id, dst_id, 'Pending', tx_data.op, tx_data.bits, tx_data.memo],
+                  function(err) {
+                  if(err) return rollback(client, done, err);
+                  client.query('COMMIT', done);
+                });               
+              });
+            });
+          });      
+        });
+      } // if (result.rows.length < 1)
+      else {        
+        // The dst user exists, proceed with transaction
+        console.log("Dst User exists proceed with transaction");
+        var dst_id = result.rows[0].id;
+        var dst_state = result.rows[0].accountstate;
+
+        // Are we paying or charging
+        if(tx_data.op == 'Pay') {
+          // Check if the user can pay
+          // TODO: should we just cache the balance?
+          client.query(balance_query, function(err, result){
+            if (err) console.log("ERROR:", err);
+            var balance = result.rows[0].bits;
+
+            // Check if user has enough money
+            if(balance >= tx_data.bits) {
+              // Is the dst active?
+              if(dst_state == 'Active') {
+                // Strat transaction
+                client.query('BEGIN', function(err) {
+                  if(err) return rollback(client, done); 
+                  process.nextTick(function() {                                                                 
+                    client.query(tx_query, [usr_id, dst_id, 'Approved', tx_data.op, tx_data.bits, tx_data.memo],
+                      function(err) {
+                      if(err) return rollback(client, done, err);
+
+                      var balance_query = 'UPDATE balances SET bits = bits + $1 WHERE id = $2';
+                      var neg_bits = tx_data.bits * -1;
+                      client.query(balance_query, [neg_bits, usr_id], function(err) {
+                        if(err) return rollback(client, done, err);
+                        
+                        client.query(balance_query, [tx_data.bits, dst_id], function(err) {
+                          if(err) return rollback(client, done, err);
+                          client.query('COMMIT', done);
+                        });
+                      });
+                    });
+                  });
+                });
+              } // if(dst_state == 'Active')
+              else {
+                // If the user is not active add a pending transaction
+                // Strat transaction
+                client.query('BEGIN', function(err) {
+                  if(err) return rollback(client, done); 
+                  process.nextTick(function() {
+                    // Insert pending transaction                                                                     
+                    client.query(tx_query, [usr_id, dst_id, 'Pending', tx_data.op, tx_data.bits, tx_data.memo],
+                      function(err) {
+                      if(err) return rollback(client, done, err);
+                      client.query('COMMIT', done);
+                    });               
+                  });
+                });                
+              } // else
+            } // if(balance >= tx_data.bits) 
+            else {
+              // The user doesn't have enough money to pay!
+              // TODO: should we even allow the user to submit 
+              // a transaction if he doesn't have enough money,
+              // maybe pop an alert to the user? 
+
+              // Strat transaction
+              client.query('BEGIN', function(err) {
+                if(err) return rollback(client, done); 
+                process.nextTick(function() {
+                  // Insert pending transaction                                                                     
+                  client.query(tx_query, [usr_id, dst_id, 'Declined', tx_data.op, tx_data.bits, tx_data.memo],
+                    function(err) {
+                    if(err) return rollback(client, done, err);
+                    client.query('COMMIT', done);
+                  });               
+                });
+              });
+            } // else
+          });
+        } // if(tx_data.op == 'Pay')
+        else {
+          // TODO: notify dst_user that there is a charge request
+          // For now just add a pending transaction
+          
+          // Strat transaction
+          client.query('BEGIN', function(err) {
+            if(err) return rollback(client, done); 
+            process.nextTick(function() {
+              // Insert pending transaction                                                                     
+              client.query(tx_query, [usr_id, dst_id, 'Pending', tx_data.op, tx_data.bits, tx_data.memo],
+                function(err) {
+                if(err) return rollback(client, done, err);
+                client.query('COMMIT', done);
+              });               
+            });
+          });
+        } // else
+      } // else
+    });    
+  });
+}
+
 /*
  * TRANSFER
  */
-exports.transfer = function(req, res){
+exports.process_transaction = function(req, res) {
   if (logged_in(req)) {
-    render(res, {
-      base: 'transfer',
-      view: 'pay',
-      authenticated: true,
-      title: 'Pay'
-    })
-  } else {
+    //TODO: do we need more security checks here
+    // to make sure this is a legit post request?
+    console.log("------------->>>> POST Transfer");    
+
+    var fields = exports.mergeDict(req.body, req.user);    
+    var usr_id = fields["id"];
+
+    transaction(usr_id, req.body.tx);
+
+    res.redirect('/transfer/pay');
+  }
+  else {
     res.redirect('/liftoff/login');
   }
 }
 
 exports.pay = function(req, res){
-  if (logged_in(req)) {
-    render(res, {
+  if (logged_in(req)) {      
+    console.log("------------->>>> GET Transfer");
+
+    var fields = exports.mergeDict(req.body, req.user);    
+    var id = fields["id"];
+
+    // TODO: do we want to fetch the balance from the db every time?
+    // Possible race condition when transaction is being executed. 
+    var query = {text:"SELECT bits FROM balances WHERE id=$1", values:[id]};
+
+    var render_content = {
       base: 'transfer',
       view: 'pay',
       authenticated: true,
-      title: 'Pay'
-    })
+      title: 'Pay',
+      header: 'Payment'      
+    }    
+
+    db_query(res, query, render_content);
+
   } else {
     res.redirect('/liftoff/login');
   }
 };
+
 exports.withdraw = function(req, res){
   if (logged_in(req)) {
     render(res, {
@@ -130,17 +330,45 @@ exports.deposit = function(req, res){
  */
 exports.track = function(req, res){
   if (logged_in(req)) {
-    render(res, {
+    console.log("------------->>>> GET History");
 
+    var fields = exports.mergeDict(req.body, req.user);    
+    var id = fields["id"];
+
+    // TODO: this could have a sql
+    var query = "SELECT t.submitted, u1.firstname as src, u2.firstname as dst, " +
+                        "t.status, t.type, t.bits, t.srcaccount, t.dstaccount " +
+                 "FROM (SELECT submitted, srcaccount, dstaccount, status, type, bits " +
+                       "FROM transactions " +
+                       "WHERE srcaccount="+id+" OR dstaccount="+id+") as t " +
+                 "INNER JOIN users u1 on t.srcaccount = u1.id " +
+                 "INNER JOIN users u2 on t.dstaccount = u2.id " +
+                 "ORDER BY t.submitted DESC;" 
+    
+    render_content = {
       base: 'transfer',
       view: 'track',
+      header: 'Transaction Overview',      
       authenticated: true,
-      title: 'Track'
-    })
+      title: 'Track',        
+      from: 'From',
+      type: 'Type',
+      to: 'To',
+      status: 'Status',
+      gross: 'Gross',
+      date: 'Date'
+    };
+
+    db_query(res, query, render_content) 
+
   } else {
     res.redirect('/liftoff/login');
   }
 };
+
+/*
+ * ///HISTORY
+ */
 
 /* Account */
 exports.create_user= function(fields){
@@ -151,6 +379,7 @@ exports.create_user= function(fields){
 exports.get_user = function(email, passport_info, cb, done){
   var pg = require('pg');
   var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  // TODO: possible sql injection!
   var queryStr = "SELECT * FROM users where email='"+email+"';"
   pg.connect(dbUrl, function(err, client, pg_done) {
       client.query(queryStr, function(err, result){
@@ -201,6 +430,7 @@ exports.user_update_db= function(fields, new_account){
   }
   var query = "";
   if (new_account){
+    //TODO: This could have a sql injection!
       query = "INSERT into users ("+keyStr+") VALUES("+valueStr+");";
   }
   else{
@@ -219,8 +449,23 @@ exports.user_update_db= function(fields, new_account){
           if(err) {
           	console.error(err);
           	return rollback(client, done);
-          }	        
-          client.query('COMMIT', done);	          
+          }
+
+          client.query('COMMIT', done);
+
+          // // Get user id and add a row to balance as well          
+          // var id_query = {text:"SELECT id FROM users WHERE email=$1", values:[fields.email]};  
+          // client.query(id_query, function(err, result) {              
+          //   if (err) return rollback(client, done, err);
+          //   var id = result.rows[0].id;
+          //   var b_query = {text:"INSERT INTO balances(id, bits) values($1,0)", values:[id]};  
+            
+          //   // Insert balance row
+          //   client.query(b_query, function(err) {
+          //     if (err) return rollback(client, done, err);
+          //     client.query('COMMIT', done);	          
+          //   });
+          // });
         });
       });
     });
