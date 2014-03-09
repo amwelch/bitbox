@@ -16,7 +16,13 @@
           <% for(var i=0; i < data.length; i++) { %>
               <tr>
                 <td> <%= data[i].src %> </td>
-                <td> <%= data[i].type %> </td>
+                <td> 
+                  <% if(data[i].type == 'Pay') { %> 
+                  Paid
+                  <% } else { %>
+                  Charged
+                  <% } %>
+                </td>
                 <td> <%= data[i].dst %> </td>
                 <td> <%= data[i].status %> </td>                
                 <td> BTC <%= data[i].bits %> </td>

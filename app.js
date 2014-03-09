@@ -85,6 +85,8 @@ passport.serializeUser(function(user, done) {
     console.log(done);
     done(null, JSON.stringify(data));
   };
+
+  // TODO: race condition?
   routes.get_user(projection.email, projection, cb, done);
   //Return default data the callback will read from db and populate session with actual data
   //done(null, JSON.stringify(projection));
