@@ -99,7 +99,30 @@ exports.login = function(req, res){
 };
 
 function transaction(usr_id, tx_data) {
-  
+  // This query is to check if the dst exists or not in our DB
+  var dst_query = {text:"SELECT id FROM users WHERE fbid=$1", values:[tx_data.fbid]};  
+
+  var pg = require('pg');
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  pg.connect(dbUrl, function(err, client, done) {
+    // Check if the user we are trying to pay/charge
+    // exists or not.
+    client.query(dst_query, function(err, result){
+      if (err){
+        // There is an error with the query 
+        console.log("ERROR:", err);                              
+      }
+      else if (result.rows.length < 1) {
+        // The dst user doesn't exist
+        console.log("User doesn't exist");        
+      }
+      else {
+        // The dst user exists, proceed with transaction
+        console.log("Dst User exists proceed with transaction");                  
+      }
+    });
+    done();
+  });
 }
 
 /*
@@ -109,14 +132,12 @@ exports.process_transaction = function(req, res) {
   if (logged_in(req)) {
     //TODO: do we need more security checks here
     // to make sure this is a legit post request?
-    console.log("------------->>>> POST Transfer");
-    console.log(req.body.tx);
-    var tx_data = req.body.tx;
+    console.log("------------->>>> POST Transfer");    
 
     var fields = exports.mergeDict(req.body, req.user);    
     var usr_id = fields["id"];
 
-    transaction(usr_id, tx_data);
+    transaction(usr_id, req.body.tx);
 
     res.redirect('/transfer/pay');
   }
@@ -187,8 +208,8 @@ exports.track = function(req, res){
     var id = fields["id"];
 
     var query = "SELECT t.submitted, u1.firstname as src, u2.firstname as dst, " +
-                        "t.completed, t.bits, t.srcaccount, t.dstaccount " +
-                 "FROM (SELECT submitted, srcaccount, dstaccount, completed, bits " +
+                        "t.status, t.type, t.bits, t.srcaccount, t.dstaccount " +
+                 "FROM (SELECT submitted, srcaccount, dstaccount, status, type, bits " +
                        "FROM transactions " +
                        "WHERE srcaccount="+id+" OR dstaccount="+id+") as t " +
                  "INNER JOIN users u1 on t.srcaccount = u1.id " +
@@ -201,11 +222,12 @@ exports.track = function(req, res){
       header: 'Transaction Overview',      
       authenticated: true,
       title: 'Track',        
-      col1: 'Date',
-      col2: 'Type',
-      col3: 'With',
-      col4: 'Status',
-      col5: 'Gross'      
+      from: 'From',
+      type: 'Type',
+      to: 'To',
+      status: 'Status',
+      gross: 'Gross',
+      date: 'Date'
     };
 
     db_query(res, query, render_content) 
@@ -261,8 +283,7 @@ exports.user_update_db= function(fields, new_account){
   var keyStr = "fbid";
   var valueStr = fbID;
   for(var f in fields){
-    if (fields[f] == undefined || f =="id" || f =="fullName"){
-    // if (fields[f] == undefined || f =="fbid" || fields[f] == "id"){
+    if (fields[f] == undefined || f =="fbid" || fields[f] == "id"){
         continue;
     }
     valueStr += ",";

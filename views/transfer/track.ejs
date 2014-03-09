@@ -4,27 +4,23 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th><%= col1 %></th>
-            <th><%= col2 %></th>
-            <th><%= col3 %></th>
-            <th><%= col4 %></th>
-            <th><%= col5 %></th>
+            <th><%= from %></th>
+            <th><%= type %></th>
+            <th><%= to %></th>
+            <th><%= status %></th>
+            <th><%= gross %></th>
+            <th><%= date %></th>
           </tr>
         </thead>
         <tbody>
           <% for(var i=0; i < data.length; i++) { %>
               <tr>
-                <td> <%= data[i].submitted %> </td>
-                <td>  </td>
                 <td> <%= data[i].src %> </td>
-                <td> 
-                <% if (data[i].completed) { %>
-                  Approved
-                <% } else { %>
-                  Pending
-                <% } %>                 
-                </td>
+                <td> <%= data[i].type %> </td>
+                <td> <%= data[i].dst %> </td>
+                <td> <%= data[i].status %> </td>                
                 <td> BTC <%= data[i].bits %> </td>
+                <td> <%= data[i].submitted %> </td>
               </tr>
           <% } %>        
         </tbody>
