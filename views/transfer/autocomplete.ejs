@@ -8,6 +8,7 @@ var init = function() {
         document.getElementById("friend_fbid").value = friend.id;
         document.getElementById("fb-user").disabled = "disabled";
         document.getElementById("fb-user").value = friend.name;
+        document.getElementById("fb_name").value = friend.name;
         document.getElementById("btc_amount").focus();
         document.getElementById("fb_user_clear").innerHTML = "Clear";
         FB.ui({
@@ -19,6 +20,7 @@ var init = function() {
 
         $("#fb_user_clear").click(function() {
           document.getElementById("fb-user").value = "";
+          document.getElementById("fb_name").value = "";
           document.getElementById("fb-user").disabled = "";
           document.getElementById("friend_fbid").value = friend.id;
           document.getElementById("fb_user_clear").innerHTML = "&nbsp;";
