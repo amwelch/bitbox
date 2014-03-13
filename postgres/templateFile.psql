@@ -1,35 +1,105 @@
+DROP TRIGGER update_user_balances
+DROP FUNCTION update_balances();
+DROP TABLE transactions;
+DROP TABLE users;
+DROP TYPE TXN_STATUS;
+DROP TYPE TXN_TYPE;
+DROP TYPE ACCOUNT_STATE;
+REVOKE ALL PRIVILEGES ON DATABASE bitbox FROM alexander;
+DROP USER alexander;
+
 CREATE USER alexander WITH PASSWORD 'testing123';
 GRANT ALL PRIVILEGES ON DATABASE bitbox TO alexander;
-drop table balances;
-drop table transactions;
-drop table users;
+
+CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete');
+CREATE TYPE TXN_TYPE AS ENUM ('Payment', 'Deposit', 'Withdrawal');
+CREATE TYPE ACCOUNT_STATE AS ENUM ('External','Admin', 'Active', 'Disabled', 'Inactive');
+
 CREATE TABLE users (
-    id serial primary key, 
-    email VARCHAR(100) NOT NULL unique,
-    firstName VARCHAR(100), 
-    lastName VARCHAR(100), 
-    accountState VARCHAR(1) default 'i',
-    created timestamp default current_timestamp, 
-    fbID NUMERIC(20) NOT NULL unique
+    id SERIAL PRIMARY KEY, 
+    email VARCHAR(100) UNIQUE DEFAULT NULL,
+    firstname VARCHAR(100) DEFAULT NULL, 
+    lastname VARCHAR(100) DEFAULT NULL, 
+    nickname VARCHAR(200) DEFAULT NULL,
+    status ACCOUNT_STATE NOT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    facebook_id NUMERIC(20) UNIQUE DEFAULT NULL,
+    balance BIGINT NOT NULL DEFAULT 0 CONSTRAINT non_negative_balance CHECK (balance >= 0)
 );
+
 CREATE TABLE transactions (
-    id serial primary key, 
-    srcAccount int NOT NULL references users(id), 
-    dstAccount int NOT NULL references users(id), 
-    completed boolean DEFAULT false, 
-    bits bigint NOT NULL, 
+    id SERIAL PRIMARY KEY, 
+    source INT NOT NULL REFERENCES users(id), 
+    destination INT NOT NULL REFERENCES users(id), 
+    status TXN_STATUS NOT NULL DEFAULT 'Pending',
+    type TXN_TYPE NOT NULL, 
+    amount BIGINT NOT NULL CONSTRAINT positive_amount CHECK (amount > 0), 
     memo VARCHAR(100),
-    submitted timestamp default current_timestamp
+    submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE balances (
-    id int NOT NULL references users(id) primary key,
-    bits bigint NOT NULL default 0
-);
+
 GRANT ALL PRIVILEGES ON users TO alexander;
 GRANT ALL PRIVILEGES ON transactions TO alexander;
-GRANT ALL PRIVILEGES ON balances TO alexander;
+
 GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
-insert into users (email, firstName, lastName, fbID) VALUES('test@test.com','hello', 'world', 100);
-insert into transactions (srcAccount, dstAccount, bits) VALUES(1,1, 100);
-insert into balances (id, bits) VALUES(1, 12);
+
+INSERT INTO users (nickname, status, facebook_id) VALUES ('Bitcoin Network', 'External', -1);
+
+CREATE OR REPLACE FUNCTION activate_user() RETURNS TRIGGER AS $_$
+BEGIN
+    IF (OLD.status = 'Pending' AND (NEW.status = 'Admin' OR NEW.status = 'Active')) THEN
+        UPDATE transactions SET status = 'Complete' WHERE type = 'Payment' AND transactions.destination = NEW.id;
+    END IF;
+END $_$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION update_balances() RETURNS TRIGGER AS $_$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        RAISE EXCEPTION 'Deleting a transaction is prohibited';
+    END IF;
+
+    IF (NEW.type = 'Payment') THEN
+        IF (TG_OP = 'INSERT') THEN
+            IF (NEW.status = 'Pending') THEN
+                UPDATE users SET balance = (balance - OLD.amount) WHERE (users.id = OLD.source); 
+            ELSEIF (NEW.status = 'Complete') THEN
+                UPDATE users SET balance = (balance - OLD.amount) WHERE (users.id = OLD.source AND users.status != 'External');
+                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+            END IF;
+        ELSEIF (TG_OP = 'UPDATE') THEN
+            IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
+                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+            ELSEIF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
+                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.source AND users.status != 'External');
+            END IF;
+        END IF;
+    ELSEIF (NEW.type = 'Deposit') THEN
+        IF (TG_OP = 'INSERT') THEN
+            IF (NEW.status = 'Complete') THEN
+                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+            END IF;
+        ELSEIF (TG_OP = 'UPDATE') THEN
+            IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
+                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+            END IF;
+        END IF;
+    ELSEIF (NEW.type = 'Withdrawal') THEN
+        IF (TG_OP = 'INSERT') THEN
+            IF (NEW.status = 'Pending') THEN
+                UPDATE users SET balance = (balance - OLD.amount) WHERE (users.id = OLD.source); 
+            END IF;
+        ELSEIF (TG_OP = 'UPDATE') THEN
+            IF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
+                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.source);
+            END IF;
+        END IF;
+    END IF;
+    RETURN NEW;
+END $_$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER update_user_balances
+BEFORE INSERT OR UPDATE OR DELETE
+ON transactions
+FOR EACH ROW
+EXECUTE PROCEDURE update_balances();

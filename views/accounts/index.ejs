@@ -4,7 +4,7 @@
 <div class="col-sm-3 col-md-2 sidebar">
   <ul class="nav nav-sidebar">
   	<li <% if (view == "user") {%>class="active"<% } %>><a href="/accounts/user">General Information</a></li>
-    <li <% if (view == "identity") {%>class="active"<% } %>><a href="/accounts/identity">Verify Identity</a></li>
+    <li <% if (view == "identity") {%>class="active"<% } %>><a href="/accounts/identity">Identity</a></li>
     <li <% if (view == "security") {%>class="active"<% } %>><a href="/accounts/security">Security</a></li>
   </ul>
 </div>
@@ -41,9 +41,9 @@
     });
   </script>
 <% } else if (view == 'security') { %>
-  <h2> Security Coming Soon! </h2>
+  <h2>Two-Factor Authentication Coming Soon! </h2>
 <% } else if (view == 'identity') { %>
-  <h2> Identity Verification Coming Soon! </h2>
+  <h2>Identity Verification Coming Soon! </h2>
 <% } %> 
 </div>
 </div>

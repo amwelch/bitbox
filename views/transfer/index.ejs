@@ -1,28 +1,26 @@
 <div class="container-fluid">
-<div class="row">
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-<div class="col-sm-3 col-md-2 sidebar">
-  <ul class="nav nav-sidebar">
-    <li <% if (view == "pay") {%>class="active"<% } %>><a href="/transfer/pay">Pay</a></li>
-    <li <% if (view == "track") {%>class="active"<% } %>><a href="/transfer/track">Track</a></li>
-    <li <% if (view == "deposit") {%>class="active"<% } %>><a href="/transfer/deposit">Deposit</a></li>
-    <li <% if (view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw">Withdraw</a></li>
-  </ul>
-</div>
-<% if (view == 'pay') { %>
-  <%- include autocomplete.ejs %>
-  <%- include mobilenav.ejs %>
-  <%- include pay.ejs %>
-<% } else if (view == 'track') { %>
-  <%- include mobilenav.ejs %>
-  <%- include track.ejs %>
-<% } else if (view == 'withdraw') { %>
-  <%- include mobilenav.ejs %>
-  <%- include withdraw.ejs %>
-<% } else if (view == 'deposit') { %>
-  <%- include mobilenav.ejs %>
-  <%- include deposit.ejs %>
-<% } %> 
-</div>
-</div>
+  <div class="row">
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+          <li <% if (view == "pay") {%>class="active"<% } %>><a href="/transfer/pay">Pay</a></li>
+          <li <% if (view == "track") {%>class="active"<% } %>><a href="/transfer/track">Track</a></li>
+          <li <% if (view == "deposit") {%>class="active"<% } %>><a href="/transfer/deposit">Deposit</a></li>
+          <li <% if (view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw">Withdraw</a></li>
+        </ul>
+      </div>
+    <%- include balance.ejs %>
+    <%- include mobilenav.ejs %>
+    <% if (view == 'pay') { %>
+      <%- include pay.ejs %>
+      <%- include autocomplete.ejs %>
+    <% } else if (view == 'track') { %>
+      <%- include track.ejs %>
+    <% } else if (view == 'withdraw') { %>
+      <%- include withdraw.ejs %>
+    <% } else if (view == 'deposit') { %>
+      <%- include deposit.ejs %>
+    <% } %> 
+    </div>
+  </div>
 </div>
