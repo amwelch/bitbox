@@ -1,0 +1,11 @@
+
+homepage once logged in
+valid vs invalid account (redirection)
+80 -> 443 with ssl
+txn demo (autocomplete, etc)
+Transaction acceptance?
+Limits tab
+BitBox logo
+Footer
+Balance location?
+

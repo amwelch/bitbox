@@ -12,29 +12,39 @@
   <div class="container-user container">
     <form class="form-signin" role="form" action="#" method="post">
         <h2>User Configuration</h2>
-        <input id="inputFName" type="text"  name="firstName" class="user-form form-control" placeholder="First Name">
-        <input id="inputLName" type="text"  name="lastName" class="user-form form-control" placeholder="Last Name">
+        <input id="inputFName" type="text"  name="firstname" class="user-form form-control" placeholder="First Name">
+        <input id="inputLName" type="text"  name="lastname" class="user-form form-control" placeholder="Last Name">
         <div class="form-submit">
           <button class="user-btn btn btn-lg" type="submit"> Save</button>
-          <button class="user-btn btn btn-lg" type="submit"> Reset</button>
+          <button id="reset-button" class="user-btn btn btn-lg" type="submit"> Reset</button>
         </div>
   </div>
   <script>
     //Global data
-    var tile = {}
     $(document).ready(function(){
+        console.log("Running req");
+        $("#reset-button").click(function(e){
+            e.preventDefault();
+            if (window.user != undefined){
+               $('#inputFName').val(window.user['firstname']);
+               $('#inputLName').val(window.user['lastname']);
+            }
+            $("#reset-button").blur();
+        });
         $.ajax({
             url: '/api/userInfo',
             complete: function(info){
                 if (info.status != 200){
+                    console.log("Got non-200 ", info.status);
                    //Do nothing
                 }
                 else{
                     info = info.responseJSON;
-                    tile.user = info;
-                    console.log(info);
-                    $('#inputFName').val(info['firstName']);
-                    $('#inputLName').val(info['lastName']);
+                    console.log("here");
+                    window.user = info;
+                    console.log("there");
+                    $('#inputFName').val(info['firstname']);
+                    $('#inputLName').val(info['lastname']);
                 }
             }
         });
