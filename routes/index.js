@@ -73,12 +73,18 @@ function db_query(res, query, render_content) {
  * HOMEPAGE
  */
 exports.index = function(req, res){
-  render(res, {
-    base: 'index',
-    view: 'index',
-    authenticated: logged_in(req),
-    title: 'Social Bitcoin'
-  });
+  //TODO: Whats the default page for logged in?
+  if (logged_in(req)) {
+    res.redirect('/transfer/pay');
+  }
+  else{
+    render(res, {
+      base: 'index',
+      view: 'index',
+      authenticated: logged_in(req),
+      title: 'Social Bitcoin'
+    });
+  }
 };
 
 exports.login = function(req, res){
@@ -563,6 +569,8 @@ exports.betaEmail = function(req, res){
   /*Where do you want default ui directory to be? Stick it in home for now*/
   var UNAME = "";
   var PW = "";
+  console.log("Made it here");
+  console.log(req.body.email);
   require('child_process').exec('python ~/credism/misc/sendMail.py -f '+UNAME+' -t '+req.body.email+' -p '+PW, function(err, stdout, stderr){
     console.log('stdout: ' + stdout);
     console.log('stderr: ' + stderr);
