@@ -12,15 +12,18 @@
   </div>
 </div>
 <script>
-  var data = {email:$('#beta-email').val()};
-  console.log(data);
-  $.ajax({
-      url: '/beta',
-      type: 'POST',
-      data: data,
-      dataType: 'json',
-      success: function(response) {
-      }
+  $('#beta-submit').on('click', function(e){
+    e.preventDefault();
+    var data = {email:$('#beta-email').val()};
+    console.log(data);
+    $.ajax({
+        url: '/beta',
+        type: 'POST',
+        data: data,
+        dataType: 'json',
+        success: function(response) {
+        }
+    });
+    $('#beta-confirm').show();
   });
-  $('beta-confirm').show();
 </script>
