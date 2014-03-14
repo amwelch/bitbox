@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="jumbotron">
+    <h1>Closed Beta</h1>
+    <p>Sorry, bitbox is currently in closed beta. Enter your email below to subscribe to updates.</p>
+    <p>
+      <row>
+        <input id="beta-email" type="text">
+        <a id = "beta-submit" class="btn btn-lg btn-success" role="button">Subscribe</a>
+      </row>
+    </p>
+    <p id="beta-confirm" style="display:none;">Thanks for subscribing! You should recieve an email in the next hour confirming your subscription. You can also subscribe manually by contacting us at info (at) bitbox.mx </p>
+  </div>
+</div>
+<script>
+  var data = {email:$('#beta-email').val()};
+  console.log(data);
+  $.ajax({
+      url: '/beta',
+      type: 'POST',
+      data: data,
+      dataType: 'json',
+      success: function(response) {
+      }
+  });
+  $('beta-confirm').show();
+</script>
