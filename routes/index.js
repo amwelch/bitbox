@@ -592,8 +592,8 @@ exports.security= function(req, res){
     render(res, {
 
       base: 'accounts',
-      view: 'security',
-      title: 'Security',
+      view: '2FA',
+      title: '2FA',
       authenticated: true
     })
   } else {

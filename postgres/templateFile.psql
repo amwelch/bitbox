@@ -14,7 +14,7 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL unique,
     firstname VARCHAR(100), 
     lastname VARCHAR(100), 
-    fullname VARCHAR(200),
+    displayname VARCHAR(200),
     accountState a_state default 'Active',
     created timestamp default current_timestamp, 
     fbid NUMERIC(20) NOT NULL unique
