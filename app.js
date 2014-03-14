@@ -3,9 +3,9 @@ var ip = '172.31.9.227';
 var eip = '54.200.103.29';
 
 var args = process.argv.slice(2);
-var debug = false;
+var dev = false;
 if (args.indexOf('dev') != -1){
-    debug = true;
+    dev = true;
 }
 /**
  * Module dependencies.
@@ -18,13 +18,24 @@ var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
 /* Redis only on production */
-if (!debug){
+if (!dev){
     RedisStore = require("connect-redis")(express);
     redis = require("redis").createClient();
 }
 // Used for transactions
 var pg = require('pg');
 var app = express();
+var https = require('https');
+var fs = require('fs');
+
+
+//If not dev redirect to https for all requests
+function requireHTTPS(req, res, next) {
+    if (!req.secure){
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+}
 
 app.configure(function() {
 	app.use(express.favicon());
@@ -36,7 +47,7 @@ app.configure(function() {
   app.use(express.static('public'));
   app.use(express.cookieParser());
   app.use(express.bodyParser());
-  if (!debug){
+  if (!dev){
     app.use(express.session({ 
       secret: 'lsfkahfasho124h18087fahg0db0123g12r',
       store: new RedisStore({client:redis})
@@ -99,7 +110,7 @@ passport.deserializeUser(function(user, done) {
 });
 
 var strat;
-if (debug){
+if (dev){
   strat = {
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
@@ -168,21 +179,29 @@ app.post('/accounts/user', routes.userUpdate);
 app.post('/accounts/security', routes.securityUpdate);
 app.post('/accounts/identity', routes.identityUpdate);
 
+app.get('/beta', routes.betaSignUp);
+
 app.get('/api/userInfo', routes.userInfo);
+
 
 app.get('/liftoff/login', routes.login);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
-if (debug){
+if (dev){
   var port = process.env.PORT || 3000;
   app.listen(port, function() {
     console.log('Listening on ' + port)
   });
 }
 else{
+  app.use(requireHTTPS);
+  var options = {
+      key: fs.readFileSync(''),
+      cert: fs.readFileSync(''),
+  }
   var port = process.env.PORT || 443;
-  app.listen(port, ip, function() {
+  https.createServer(options, app).listen(port, ip, function() {
     console.log('Listening on ' + port);
   });
 }

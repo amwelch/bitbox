@@ -559,6 +559,15 @@ exports.identity= function(req, res){
     res.redirect('/liftoff/login');
   }
 };
+exports.betaSignUp = function(req, res){
+  render(res, {
+
+    base: 'beta',
+    view: 'signup',
+    title: 'Sorry!',
+    authenticated: false
+  })
+};
 exports.security= function(req, res){
   if (logged_in(req)) {
     render(res, {
