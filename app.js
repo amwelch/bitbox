@@ -180,6 +180,7 @@ app.post('/accounts/security', routes.securityUpdate);
 app.post('/accounts/identity', routes.identityUpdate);
 
 app.get('/beta', routes.betaSignUp);
+app.post('/beta', routes.betaEmail);
 
 app.get('/api/userInfo', routes.userInfo);
 

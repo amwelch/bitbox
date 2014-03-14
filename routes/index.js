@@ -559,9 +559,20 @@ exports.identity= function(req, res){
     res.redirect('/liftoff/login');
   }
 };
+exports.betaEmail = function(req, res){
+  /*Where do you want default ui directory to be? Stick it in home for now*/
+  var UNAME = "";
+  var PW = "";
+  require('child_process').exec('python ~/credism/misc/sendMail.py -f '+UNAME+' -t '+req.body.email+' -p '+PW, function(err, stdout, stderr){
+    console.log('stdout: ' + stdout);
+    console.log('stderr: ' + stderr);
+    if (err != null){
+      console.log('exec err: ' + err);
+    }
+  });
+};
 exports.betaSignUp = function(req, res){
   render(res, {
-
     base: 'beta',
     view: 'signup',
     title: 'Sorry!',
