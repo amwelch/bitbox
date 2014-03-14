@@ -456,29 +456,39 @@ exports.user_update_db= function(fields, new_account){
           	console.error(err);
           	return rollback(client, done);
           }
-
           client.query('COMMIT', done);
-
-          // // Get user id and add a row to balance as well          
-          // var id_query = {text:"SELECT id FROM users WHERE email=$1", values:[fields.email]};  
-          // client.query(id_query, function(err, result) {              
-          //   if (err) return rollback(client, done, err);
-          //   var id = result.rows[0].id;
-          //   var b_query = {text:"INSERT INTO balances(id, bits) values($1,0)", values:[id]};  
-            
-          //   // Insert balance row
-          //   client.query(b_query, function(err) {
-          //     if (err) return rollback(client, done, err);
-          //     client.query('COMMIT', done);	          
-          //   });
-          // });
+          set_0_balance(fields['email']);
         });
       });
     });
   });
-
-
 }
+
+var set_0_balance = function(email){
+  // Get user id and add a row to balance as well          
+  var id_query = {text:"SELECT id FROM users WHERE email=$1", values:[email]};  
+  var pg = require('pg');
+  var dbUrl = "pg://alexander:testing123@localhost:5432/bitbox"
+  pg.connect(dbUrl, function(err, client, done) {
+    client.query('BEGIN', function(err) {
+      console.log('balance begin');
+      client.query(id_query, function(err, result) {
+        if (err) return rollback(client, done, err);
+        console.log(result.rows);
+        var id = result.rows[0].id;
+        var b_query = {text:"INSERT INTO balances(id, bits) values($1,0)", values:[id]};  
+      
+        // Insert balance row
+        client.query(b_query, function(err) {
+          if (err) return rollback(client, done, err);
+          console.log("updated balance");
+          client.query('COMMIT', done);	          
+        });
+      });
+    });
+  });
+}
+
 /*Merge two associative arrays in case of a dupe d1 key will win*/
 exports.mergeDict= function(d1, d2){
     for (k in d2){
