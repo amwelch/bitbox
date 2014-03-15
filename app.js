@@ -154,15 +154,12 @@ app.post('/accounts/user', postLater);
 app.get('/accounts/security', routes.security);
 app.post('/accounts/security', postLater);
 
-<<<<<<< HEAD
 app.get('/beta', routes.betaSignUp);
 app.post('/beta', routes.betaEmail);
 
 app.get('/api/userInfo', routes.userInfo);
-=======
 app.get('/accounts/identity', routes.identity);
 app.post('/accounts/identity', postLater);
->>>>>>> reorg
 
 
 app.get('/liftoff/login', routes.login);
