@@ -321,7 +321,7 @@ exports.lobby = function(req, res) {
   render(res, {
     base: 'index',
     view: 'lobby',
-    authenticated: true,
+    authenticated: false,
     title: 'Lobby'
   });
 }

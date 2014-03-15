@@ -103,7 +103,11 @@ passport.use(
       if (err) {
         console.log(err);
       } else {
-        done(null, result);
+        if (result.status == 'Active') {
+          done(null, null);
+        } else {
+          done(null, result);
+        }
       }
     });
   })
@@ -127,8 +131,8 @@ app.get('/liftoff/login/facebook',
 //  Loopback from FB login. Attempts to get Access Token.
 app.get('/liftoff/login/facebook/callback', 
   passport.authenticate('facebook', {
-    successRedirect: '/lobby',
-    failureRedirect: '/' 
+    successRedirect: '/',
+    failureRedirect: '/lobby' 
   })
 );
 
