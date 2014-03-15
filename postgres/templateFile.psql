@@ -46,24 +46,15 @@ GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
 
 INSERT INTO users (nickname, status, facebook_id) VALUES ('Bitcoin Network', 'External', -1);
 
-CREATE OR REPLACE FUNCTION activate_user_transactions() RETURNS TRIGGER AS $_$
+CREATE OR REPLACE FUNCTION activate_user_transactions() RETURNS TRIGGER AS $wrapper$
 BEGIN
     IF (OLD.status = 'Pending' AND (NEW.status = 'Admin' OR NEW.status = 'Active')) THEN
         UPDATE transactions SET status = 'Complete' WHERE type = 'Payment' AND transactions.destination = NEW.id;
     END IF;
     RETURN NEW;
-END $_$ LANGUAGE 'plpgsql';
+END $wrapper$ LANGUAGE 'plpgsql';
 
-
-CREATE OR REPLACE FUNCTION yolo() RETURNS TRIGGER AS $_$
-BEGIN
-    RETURN NEW;
-END $_$ LANGUAGE 'plpgsql';
-
-RETURN NEW;
-END $_$ LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION update_balances() RETURNS TRIGGER AS $_$
+CREATE OR REPLACE FUNCTION update_balances() RETURNS TRIGGER AS $wrapper$
 BEGIN
     IF (TG_OP = 'DELETE') THEN
         RAISE EXCEPTION 'Deleting a transaction is prohibited';
@@ -106,7 +97,7 @@ BEGIN
         END IF;
     END IF;
     RETURN NEW;
-END $_$ LANGUAGE 'plpgsql';
+END $wrapper$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER update_user_balances
 BEFORE INSERT OR UPDATE OR DELETE
