@@ -1,0 +1,49 @@
+<script>
+lastId = 'fb-user';
+var init = function() {
+  document.getElementById('wrapapa').innerHTML = '<input type="text" id="'+lastId+'" style="width: 20em; padding: 10px" autocomplete="off" placeholder="friend name"/>';
+  $('#'+lastId).facebookAutocomplete({
+      showAvatars: true,
+      onpick: function(friend) { 
+        console.log(friend);
+        document.getElementById(lastId).value = friend.name;
+
+
+        FB.ui({
+          method: 'send',
+          display: 'popup',
+          to: friend.id,
+          link: 'http://www.inbitbox.com/',
+        });
+        document.getElementById(lastId).id = lastId + 'i';
+        lastId = lastId + 'i';  
+        init();
+      }
+  });
+};
+window.fbAsyncInit = function() {
+  FB.init({
+    appId: '711524742231536'
+  });
+
+  FB.Event.subscribe('auth.authResponseChange', function(response) {
+    if (response.status === 'connected') {
+
+      init();
+
+    } else {
+      window.location.replace("/logout");
+    }
+  });
+};
+
+
+// Load the SDK asynchronously
+(function(d){
+ var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+ if (d.getElementById(id)) {return;}
+ js = d.createElement('script'); js.id = id; js.async = true;
+ js.src = "//connect.facebook.net/en_US/all.js";
+ ref.parentNode.insertBefore(js, ref);
+}(document));
+</script>
