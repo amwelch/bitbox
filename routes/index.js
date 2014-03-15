@@ -315,3 +315,16 @@ exports.security= function(req, res){
     res.redirect('/liftoff/login');
   }
 };
+
+exports.lobby = function(req, res) {
+  if (req.user) {
+        render(res, {
+          base: 'index',
+          view: 'lobby',
+          authenticated: true,
+          title: 'Lobby'
+        });
+  } else {
+    res.redirect('/liftoff/login');
+  }
+}

@@ -127,7 +127,7 @@ app.get('/liftoff/login/facebook',
 //  Loopback from FB login. Attempts to get Access Token.
 app.get('/liftoff/login/facebook/callback', 
   passport.authenticate('facebook', {
-    successRedirect: '/transfer',
+    successRedirect: '/lobby',
     failureRedirect: '/' 
   })
 );
@@ -162,7 +162,8 @@ app.get('/accounts/identity', routes.identity);
 app.post('/accounts/identity', postLater);
 
 
-app.get('/liftoff/login', routes.login);
+app.get('/lobby', routes.lobby);
+app.get('/liftoff/login', routes.index);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
