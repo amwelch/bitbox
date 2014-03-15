@@ -318,14 +318,10 @@ exports.security= function(req, res){
 };
 
 exports.lobby = function(req, res) {
-  if (req.user) {
-        render(res, {
-          base: 'index',
-          view: 'lobby',
-          authenticated: true,
-          title: 'Lobby'
-        });
-  } else {
-    res.redirect('/liftoff/login');
-  }
+  render(res, {
+    base: 'index',
+    view: 'lobby',
+    authenticated: true,
+    title: 'Lobby'
+  });
 }
