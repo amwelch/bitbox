@@ -98,7 +98,6 @@ exports.transfer = function(req, res) {
 }
 
 exports.viewPay = function(req, res) {  
-  console.log(req);
   if (loggedIn(req)) {
     api.getUserByUserId(userId(req), function(err, user) {
       if (err) {

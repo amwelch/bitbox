@@ -63,36 +63,36 @@ BEGIN
     IF (NEW.type = 'Payment') THEN
         IF (TG_OP = 'INSERT') THEN
             IF (NEW.status = 'Pending') THEN
-                UPDATE users SET balance = (balance - OLD.amount) WHERE (users.id = OLD.source); 
+                UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
             ELSEIF (NEW.status = 'Complete') THEN
-                UPDATE users SET balance = (balance - OLD.amount) WHERE (users.id = OLD.source AND users.status != 'External');
-                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+                UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source AND users.status != 'External');
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
-                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             ELSEIF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
-                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.source AND users.status != 'External');
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source AND users.status != 'External');
             END IF;
         END IF;
     ELSEIF (NEW.type = 'Deposit') THEN
         IF (TG_OP = 'INSERT') THEN
             IF (NEW.status = 'Complete') THEN
-                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
-                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.destination);
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
         END IF;
     ELSEIF (NEW.type = 'Withdrawal') THEN
         IF (TG_OP = 'INSERT') THEN
             IF (NEW.status = 'Pending') THEN
-                UPDATE users SET balance = (balance - OLD.amount) WHERE (users.id = OLD.source); 
+                UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
             END IF;
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
-                UPDATE users SET balance = (balance + OLD.amount) WHERE (users.id = OLD.source);
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source);
             END IF;
         END IF;
     END IF;
