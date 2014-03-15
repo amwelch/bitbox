@@ -238,3 +238,9 @@ div.fbac-suggestion-list {
 	padding: 0px;
 	background-color: transparent;
 }
+
+#wrapapa {
+	margin-left: auto;
+	margin-right: auto;
+	width: 20em;
+}
