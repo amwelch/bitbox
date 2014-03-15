@@ -32,10 +32,6 @@ window.fbAsyncInit = function() {
     appId: '609051335829720'
   });
 
-  $('#fb-login').on('click', function() {
-    FB.login();
-  });
-
   FB.Event.subscribe('auth.authResponseChange', function(response) {
     if (response.status === 'connected') {
 
