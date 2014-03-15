@@ -3,9 +3,9 @@ var api = require('./api');
 var ec = require('./error-codes');
 exports.api = api;
 
-/*
- * HELPER FUNCTIONS
- */
+
+//HELPER FUNCTIONS
+
 
 function render(res, content) {
   var params = {};
@@ -38,9 +38,9 @@ function facebookId(req) {
   return req.user.facebook_id;
 }
 
-/*
- * HOMEPAGE
- */
+
+//HOMEPAGE
+
 exports.index = function(req, res){
   //TODO: Whats the default page for logged in?
   if (logged_in(req)) {
@@ -54,6 +54,7 @@ exports.index = function(req, res){
       title: 'Social Bitcoin'
     });
   }
+};
 exports.index = function(req, res) {
   render(res, {
     base: 'index',
@@ -62,7 +63,6 @@ exports.index = function(req, res) {
     title: 'Social Bitcoin'
   });
 };
-
 exports.login = function(req, res) {
   if (loggedIn(req)) {
     render(res, {
@@ -86,9 +86,9 @@ exports.logout = function(req, res) {
   res.redirect('/');
 };
 
-/*
- * TRANSFER
- */
+//TRANSFER
+
+
 exports.transfer = function(req, res) {
   if (loggedIn(req)) {
     res.redirect('/transfer/pay');
@@ -256,7 +256,7 @@ exports.user = function(req, res){
   if (loggedIn(req)) {
     render(res, {
 
-      /*TODO for now fetch data for user from db here but in the future we want to fetch this on login and pass it around*/
+      //TODO for now fetch data for user from db here but in the future we want to fetch this on login and pass it around
 
       base: 'accounts',
       view: 'user',
@@ -282,7 +282,6 @@ exports.identity= function(req, res){
   }
 };
 exports.betaEmail = function(req, res){
-  /*Where do you want default ui directory to be? Stick it in home for now*/
   var UNAME = "";
   var PW = "";
   console.log("Made it here");
@@ -301,7 +300,7 @@ exports.betaSignUp = function(req, res){
     view: 'signup',
     title: 'Sorry!',
     authenticated: false
-  })
+  });
 };
 exports.security= function(req, res){
   if (loggedIn(req)) {
