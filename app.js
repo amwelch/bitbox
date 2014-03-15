@@ -44,9 +44,9 @@ var ec = require('./routes/error-codes');
 //  ------- Server Configuration -------
 var app = express();  
 app.configure(function() {
-	app.use(express.favicon());
-	app.set('views', __dirname + '/views');
-	app.set('view engine', 'ejs');
+  app.use(express.favicon());
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'ejs');
   app.use(express.static('public'));
   app.use(express.cookieParser());
   //app.use(express.bodyParser()); // Replaced by following 2 lines:
@@ -82,12 +82,20 @@ passport.deserializeUser(function(serialized_user, done) {
 var strat;
 if (dev){
   strat = {
-passport.use( 
-  new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
     callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
-  },
+  };
+}
+else{
+  strat = {
+    clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
+    clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
+    callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
+  };
+}
+passport.use( 
+  new FacebookStrategy(strat,
   function(accessToken, refreshToken, profile, done) {
     //  First try finding a user
     console.log(profile);
