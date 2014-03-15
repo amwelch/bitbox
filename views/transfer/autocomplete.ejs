@@ -10,12 +10,12 @@ var init = function() {
         document.getElementById("fb-user").value = friend.name;
         document.getElementById("btc_amount").focus();
         document.getElementById("fb_user_clear").innerHTML = "Clear";
-        FB.ui({
+        /*FB.ui({
           method: 'send',
           display: 'popup',
           to: friend.id,
           link: 'http://credism-dev.elasticbeanstalk.com',
-        });
+        });*/
 
         $("#fb_user_clear").click(function() {
           document.getElementById("fb-user").value = "";
