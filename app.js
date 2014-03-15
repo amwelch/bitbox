@@ -1,11 +1,41 @@
-//  ------- Module Dependencies -------
-//  Server
+/*Temporary ips*/
+var ip = '172.31.9.227';
+var eip = '54.200.103.29';
+
+var args = process.argv.slice(2);
+var dev = false;
+if (args.indexOf('dev') != -1){
+    dev = true;
+}
+/**
+ * Module dependencies.
+ */
+
 var express = require('express');
 
 //  Authentication
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
+/* Redis only on production */
+if (!dev){
+    RedisStore = require("connect-redis")(express);
+    redis = require("redis").createClient();
+}
+// Used for transactions
+var pg = require('pg');
+var app = express();
+var https = require('https');
+var fs = require('fs');
+
+
+//If not dev redirect to https for all requests
+function requireHTTPS(req, res, next) {
+    if (!req.secure){
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+}
 //  Rendering
 var routes = require('./routes');
 
@@ -22,9 +52,18 @@ app.configure(function() {
   //app.use(express.bodyParser()); // Replaced by following 2 lines:
   app.use(express.json());       // to support JSON-encoded bodies
   app.use(express.urlencoded()); // to support URL-encoded bodies
-  app.use(express.session({ secret: 'CHANGE ME nonce9001' }));
   app.use(passport.initialize());
-  app.use(passport.session());
+  if (!dev){
+    app.use(express.session({ 
+      secret: 'lsfkahfasho124h18087fahg0db0123g12r',
+      store: new RedisStore({client:redis})
+    }));
+  }
+  else{
+    app.use(express.session({ 
+      secret: 'lsfkahfasho124h18087fahg0db0123g12r'
+    }));
+  }
   app.use(app.router);
 });
 
@@ -40,6 +79,9 @@ passport.deserializeUser(function(serialized_user, done) {
   done(null, JSON.parse(serialized_user));
 });
 
+var strat;
+if (dev){
+  strat = {
 passport.use( 
   new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
@@ -104,16 +146,36 @@ app.post('/accounts/user', postLater);
 app.get('/accounts/security', routes.security);
 app.post('/accounts/security', postLater);
 
+<<<<<<< HEAD
+app.get('/beta', routes.betaSignUp);
+app.post('/beta', routes.betaEmail);
+
+app.get('/api/userInfo', routes.userInfo);
+=======
 app.get('/accounts/identity', routes.identity);
 app.post('/accounts/identity', postLater);
+>>>>>>> reorg
+
 
 app.get('/lobby', routes.lobby);
 app.get('/liftoff/login', routes.index);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
-//  ------- Launch application -------
-var port = process.env.PORT || 3000
-app.listen(port, function() {
-  console.log('Listening on ' + port)
-})
+if (dev){
+  var port = process.env.PORT || 3000;
+  app.listen(port, function() {
+    console.log('Listening on ' + port)
+  });
+}
+else{
+  app.use(requireHTTPS);
+  var options = {
+      key: fs.readFileSync(''),
+      cert: fs.readFileSync(''),
+  }
+  var port = process.env.PORT || 443;
+  https.createServer(options, app).listen(port, ip, function() {
+    console.log('Listening on ' + port);
+  });
+}

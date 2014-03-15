@@ -4,30 +4,32 @@
 <div class="col-sm-3 col-md-2 sidebar">
   <ul class="nav nav-sidebar">
   	<li <% if (view == "user") {%>class="active"<% } %>><a href="/accounts/user">General Information</a></li>
-    <li <% if (view == "identity") {%>class="active"<% } %>><a href="/accounts/identity">Identity</a></li>
-    <li <% if (view == "security") {%>class="active"<% } %>><a href="/accounts/security">Security</a></li>
+    <li <% if (view == "identity") {%>class="active"<% } %>><a href="/accounts/identity">Verify Identity</a></li>
+    <li <% if (view == "2FA") {%>class="active"<% } %>><a href="/accounts/security">2FA</a></li>
   </ul>
 </div>
 <% if (view == 'user') { %>
   <div class="container-user container">
     <form class="form-signin" role="form" action="#" method="post">
         <h2>User Configuration</h2>
-        <input id="inputFName" type="text"  name="firstname" class="user-form form-control" placeholder="First Name">
-        <input id="inputLName" type="text"  name="lastname" class="user-form form-control" placeholder="Last Name">
+        <input id="inputDisplayName" type="text"  name="displayname" class="user-form form-control" placeholder="Display Name">
         <div class="form-submit">
-          <button class="user-btn btn btn-lg" type="submit"> Save</button>
+          <button id="save-button" class="user-btn btn btn-lg" type="submit"> Save</button>
           <button id="reset-button" class="user-btn btn btn-lg" type="submit"> Reset</button>
         </div>
+    </form>
   </div>
   <script>
     //Global data
     $(document).ready(function(){
         console.log("Running req");
+        $('#save-button').on('click', function(){
+            alert('Changes Saved!');
+        });
         $("#reset-button").click(function(e){
             e.preventDefault();
             if (window.user != undefined){
-               $('#inputFName').val(window.user['firstname']);
-               $('#inputLName').val(window.user['lastname']);
+               $('#displayname').val(window.user['displayname']);
             }
             $("#reset-button").blur();
         });
@@ -40,16 +42,15 @@
                 }
                 else{
                     info = info.responseJSON;
-                    console.log("here");
                     window.user = info;
-                    console.log("there");
-                    $('#inputFName').val(info['firstname']);
-                    $('#inputLName').val(info['lastname']);
+                    $('#displayname').val(info['displayname']);
                 }
             }
         });
     });
   </script>
+<% } else if (view == '2FA') { %>
+  <h2> Two Factor Authentication Coming Soon! </h2>
 <% } else if (view == 'security') { %>
   <h2>Two-Factor Authentication Coming Soon! </h2>
 <% } else if (view == 'identity') { %>
