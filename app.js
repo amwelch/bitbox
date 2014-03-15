@@ -52,7 +52,6 @@ app.configure(function() {
   //app.use(express.bodyParser()); // Replaced by following 2 lines:
   app.use(express.json());       // to support JSON-encoded bodies
   app.use(express.urlencoded()); // to support URL-encoded bodies
-  app.use(passport.initialize());
   if (!dev){
     app.use(express.session({ 
       secret: 'lsfkahfasho124h18087fahg0db0123g12r',
@@ -64,6 +63,8 @@ app.configure(function() {
       secret: 'lsfkahfasho124h18087fahg0db0123g12r'
     }));
   }
+  app.use(passport.initialize());
+  app.use(passport.session());
   app.use(app.router);
 });
 
@@ -98,7 +99,6 @@ passport.use(
   new FacebookStrategy(strat,
   function(accessToken, refreshToken, profile, done) {
     //  First try finding a user
-    console.log(profile);
     routes.api.getOrCreateUserByFB(profile, function(err, result) {
       if (err) {
         console.log(err);
