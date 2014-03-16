@@ -5,8 +5,7 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel='stylesheet' href='/stylesheets/toggle-switch.css' />
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
-    <!--<script src="/jq/jquery-2.1.0.min.js"></script>-->
-    <script src="/fb-autocomplete/jquery.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="/fb-autocomplete/facebook-friend-autocomplete.js"></script>
     <link rel="stylesheet" href="/fb-autocomplete/facebook-friend-autocomplete.css">
     <meta charset="utf-8">
@@ -53,45 +52,38 @@
       </div>
     </div>
     <% if (base == 'index') { %>
-      <div class="jumbotron">
-        <h1>Bitcoin. Gone social.</h1>
-        <p class="lead">Welcome to BitBox, a revolutionary peer-to-peer payment platform.</p>
-        <p><a class="btn btn-lg btn-success" href="/liftoff/login/facebook" role="button">Sign up today</a></p>
-      </div>
+      <% if (view == 'index') { %>
+        <div class="jumbotron">
+          <h1>Bitcoin. Gone social.</h1>
+          <p class="lead">Welcome to BitBox, a revolutionary peer-to-peer payment platform.</p>
+          <p><a class="btn btn-lg btn-success" href="/liftoff/login/facebook" role="button">Request Early Access</a></p>
+        </div>
+      <% } else if (view == 'lobby') { %>
+        <div class="jumbotron">
+          <h1>We'll be in touch.</h1>
+          <p class="lead">Thank you for your interest in BitBox.</p>
+          <div>
+            <label for="fb-user">Got Friends?</label><br>
+            <div id="wrapapa">
+              <input type="text" id="fb-user" style="width: 20em; padding: 10px" autocomplete="off" placeholder="friend name"/>
+            </div>
+          </div>
+          <input type="hidden" name="facebook_id" id="friend_fbid" value="" />
+          <div style="clear: both;">
+          </div>
+          <%- include lobby/autocomplete.ejs %>
+        </div>
+      <% } %>
       <%- include liftoff/index.ejs %>
     <% } else if (base == 'transfer') { %>
       <%- include transfer/index.ejs %>
+    <% } else if (base == 'beta') { %>
+      <%- include beta/signUp.ejs %>
     <% } else if (base == 'accounts') { %>
       <%- include accounts/index.ejs %>
     <% } %>
     <script src="/bootstrap/bootstrap.min.js"></script>
     <script src="/bootstrap/docs.min.js"></script>
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
-    <script>
-      $(document).ready(function(){
-          console.log("Running req");
-          $.ajax({
-              url: '/api/userInfo',
-              complete: function(info){
-                  if (info.status != 200){
-                     //Do nothing
-                  }
-                  else{
-                      console.log("request fine");
-                      info = info.responseJSON;
-                      var name = undefined;
-                      if (info.firstname)
-                          name = info.firstname;
-                      else if (info.lastname)
-                          name = info.lastname;
-
-                      if (name != undefined){
-                          $("#accounts_link").text(name);
-                      }
-                  }
-              }
-          });
-      });
-    </script>
   </body>
 </html>

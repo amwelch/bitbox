@@ -11,12 +11,12 @@ var init = function() {
         document.getElementById("fb_name").value = friend.name;
         document.getElementById("btc_amount").focus();
         document.getElementById("fb_user_clear").innerHTML = "Clear";
-        FB.ui({
+        /*FB.ui({
           method: 'send',
           display: 'popup',
           to: friend.id,
           link: 'http://credism-dev.elasticbeanstalk.com',
-        });
+        });*/
 
         $("#fb_user_clear").click(function() {
           document.getElementById("fb-user").value = "";
@@ -32,10 +32,6 @@ var init = function() {
 window.fbAsyncInit = function() {
   FB.init({
     appId: '609051335829720'
-  });
-
-  $('#fb-login').on('click', function() {
-    FB.login();
   });
 
   FB.Event.subscribe('auth.authResponseChange', function(response) {
