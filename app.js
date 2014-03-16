@@ -180,8 +180,8 @@ if (dev){
 else{
   app.use(requireHTTPS);
   var options = {
-      key: fs.readFileSync(''),
-      cert: fs.readFileSync(''),
+      key: fs.readFileSync('/keykepper.pem'),
+      cert: fs.readFileSync('/bbcsr.pem'),
   }
   var port = process.env.PORT || 443;
   https.createServer(options, app).listen(port, ip, function() {
