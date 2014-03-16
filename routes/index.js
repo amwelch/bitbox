@@ -43,7 +43,7 @@ function facebookId(req) {
 
 exports.index = function(req, res){
   //TODO: Whats the default page for logged in?
-  if (logged_in(req)) {
+  if (loggedIn(req)) {
     res.redirect('/transfer/pay');
   }
   else{
