@@ -104,7 +104,18 @@ exports.viewPay = function(req, res) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
+        var success;
+        if (req.query.success == "true"){
+            success= "true";
+        }
+        else if (req.query.success == "false"){
+            success = "false";
+        }
+        else {
+            success = "null";
+        }
         render(res, {
+          success: success,
           base: 'transfer',
           view: 'pay',
           authenticated: true,
