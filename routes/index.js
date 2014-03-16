@@ -43,25 +43,17 @@ function facebookId(req) {
 
 exports.index = function(req, res){
   //TODO: Whats the default page for logged in?
-  if (logged_in(req)) {
+  if (loggedIn(req)) {
     res.redirect('/transfer/pay');
   }
   else{
     render(res, {
       base: 'index',
       view: 'index',
-      authenticated: logged_in(req),
+      authenticated: false,
       title: 'Social Bitcoin'
     });
   }
-};
-exports.index = function(req, res) {
-  render(res, {
-    base: 'index',
-    view: 'index',
-    authenticated: loggedIn(req),
-    title: 'Social Bitcoin'
-  });
 };
 exports.login = function(req, res) {
   if (loggedIn(req)) {
