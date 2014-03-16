@@ -49,8 +49,8 @@ INSERT INTO users (nickname, status, facebook_id) VALUES ('Bitcoin Network', 'Ex
 
 CREATE OR REPLACE FUNCTION complete_deposits() RETURNS TRIGGER AS $wrapper$
 BEGIN
-    IF (OLD.status = 'Pending') THEN
-        UPDATE transactions SET status = 'Complete' WHERE type = 'Deposit' AND transactions.destination = NEW.id;
+    IF (NEW.status = 'Pending') THEN
+        UPDATE transactions SET status = 'Complete' WHERE type = 'Deposit';
     END IF;
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
