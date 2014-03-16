@@ -50,18 +50,10 @@ exports.index = function(req, res){
     render(res, {
       base: 'index',
       view: 'index',
-      authenticated: logged_in(req),
+      authenticated: false,
       title: 'Social Bitcoin'
     });
   }
-};
-exports.index = function(req, res) {
-  render(res, {
-    base: 'index',
-    view: 'index',
-    authenticated: loggedIn(req),
-    title: 'Social Bitcoin'
-  });
 };
 exports.login = function(req, res) {
   if (loggedIn(req)) {
