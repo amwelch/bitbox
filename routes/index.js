@@ -202,8 +202,10 @@ exports.controlPay = function(req, res) {
       memo: req.body.memo
     };
 
-    api.pay(form, function(code, result) {
-      if (code != ec.SUCCESS) {
+    api.pay(form, function(error, result) {
+      console.log(code);
+      console.log(result);
+      if (error != null) {
         res.redirect('/transfer/pay?success=false');
       } else {
         res.redirect('/transfer/pay?success=true');
