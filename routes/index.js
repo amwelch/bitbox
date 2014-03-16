@@ -203,8 +203,6 @@ exports.controlPay = function(req, res) {
     };
 
     api.pay(form, function(error, result) {
-      console.log(code);
-      console.log(result);
       if (error != null) {
         res.redirect('/transfer/pay?success=false');
       } else {
