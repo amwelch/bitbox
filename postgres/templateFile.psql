@@ -35,7 +35,8 @@ CREATE TABLE transactions (
     type TXN_TYPE NOT NULL, 
     amount BIGINT NOT NULL CONSTRAINT positive_amount CHECK (amount > 0), 
     memo VARCHAR(100),
-    submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    uuid VARCHAR(32) UNIQUE DEFAULT NULL
 );
 
 GRANT ALL PRIVILEGES ON users TO alexander;
@@ -46,10 +47,10 @@ GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
 
 INSERT INTO users (nickname, status, facebook_id) VALUES ('Bitcoin Network', 'External', -1);
 
-CREATE OR REPLACE FUNCTION activate_user_transactions() RETURNS TRIGGER AS $wrapper$
+CREATE OR REPLACE FUNCTION complete_deposits() RETURNS TRIGGER AS $wrapper$
 BEGIN
-    IF (OLD.status = 'Pending' AND (NEW.status = 'Admin' OR NEW.status = 'Active')) THEN
-        UPDATE transactions SET status = 'Complete' WHERE type = 'Payment' AND transactions.destination = NEW.id;
+    IF (OLD.status = 'Pending') THEN
+        UPDATE transactions SET status = 'Complete' WHERE type = 'Deposit' AND transactions.destination = NEW.id;
     END IF;
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
@@ -104,3 +105,9 @@ BEFORE INSERT OR UPDATE OR DELETE
 ON transactions
 FOR EACH ROW
 EXECUTE PROCEDURE update_balances();
+
+CREATE TRIGGER autocomplete_deposits
+BEFORE INSERT OR UPDATE OR DELETE
+ON transactions
+FOR EACH ROW
+EXECUTE PROCEDURE complete_deposits();

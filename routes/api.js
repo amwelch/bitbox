@@ -281,7 +281,11 @@ exports.withdraw = pool.pooled(function(client, form, callback) {
   form.type = "Withdrawal";
   form.destination_fbid = 1;
   _transfer(client, form, function(err, result) {
-    callback(err, result);
+    if (err) {
+      callback(ec.QUERY_ERR, null);
+    } else {
+      callback(null, result);
+    }
   });
 });
 
@@ -290,6 +294,50 @@ exports.deposit = pool.pooled(function(client, form, callback) {
   form.source_id = 1;
   form.memo = "Address: 31uEbMgunupShBVTewXjtqbBv5MndwfXhb";
   _transfer(client, form, function(err, result) {
-    callback(err, result);
+    if (err) {
+      callback(ec.QUERY_ERR, null);
+    } else {
+      callback(null, result);
+    }
   });
 });
+
+exports.track = pool.pooled(function(client, id, callback) {
+  id = parseInt(id);
+  client.query("SELECT transactions.*, source.nickname AS source_name, destination.nickname AS destination_name "+
+    "FROM transactions "+
+    "LEFT OUTER JOIN users source ON transactions.source=source.id "+
+    "LEFT OUTER JOIN users destination ON transactions.destination=destination.id "+
+    "WHERE source=$1 OR destination=$1 "+
+    "ORDER BY transactions.submitted DESC", [id], function(err, result) {
+    if (err) {
+      console.log(err);
+      callback(ec.QUERY_ERR, null);
+    } else { 
+      var rValue = [];
+      var history = result.rows;
+      for (var i = 0; i < history.length; ++i) {
+        if (history[i].source == id) {
+          rValue.push({
+            date: history[i].submitted,
+            action: history[i].type,
+            whom: history[i].destination_name ? history[i].destination_name : "FB friend",
+            status: history[i].status,
+            amount: history[i].amount,
+            memo: history[i].memo
+          });
+        } else if (history[i].destination == id) {
+          rValue.push({
+            date: history[i].submitted,
+            action: history[i].type,
+            whom: history[i].source_name ? history[i].source_name : "FB friend",
+            status: history[i].status,
+            amount: history[i].amount,
+            memo: history[i].memo
+          });
+        }
+      }
+      callback(null, rValue);
+    }
+  });
+})

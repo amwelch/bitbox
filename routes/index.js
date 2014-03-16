@@ -125,12 +125,20 @@ exports.viewTrack = function(req, res) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
-        render(res, {
-          base: 'transfer',
-          view: 'track',
-          authenticated: true,
-          title: 'Track',
-          balance: user.balance
+        api.track(user.id, function(err, history) {
+          if (err) {
+            console.log("Unable to get user");
+            res.redirect("/");
+          } else {
+            render(res, {
+              base: 'transfer',
+              view: 'track',
+              authenticated: true,
+              title: 'Track',
+              balance: user.balance,
+              history: history
+            });
+          }
         });
       }
     });
