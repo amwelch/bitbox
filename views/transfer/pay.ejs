@@ -1,31 +1,35 @@
-<form name="pay" method="post" action="/transfer/pay" onkeypress="return event.keyCode != 13;">
-  <br>
-  <div class="switch-toggle switch-candy" style="max-width: 20em;">
-    <input id="op_ask" name="op" type="radio" checked>
-    <label for="op_ask" onclick="">Ask</label>
-    <input id="op_send" name="op" type="radio">
-    <label for="op_send" onclick="">Send</label>
-    <a></a>
-  </div>
-  <br>
-  <div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
-    <label for="fb-user">Who</label><br>
-    <input type="text" id="fb-user" style="width: 20em; padding: 10px" autocomplete="off" placeholder="friend name"/>
-    <span class="input_option" id="fb_user_clear">&nbsp;</span>
-  </div>
-  <div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
-    <label for="btc_amount">Amount</label><br>
-    <input type="text" id="btc_amount" name="amount" style="width: 20em; padding: 10px" placeholder="bitcoins">
-    <span class="input_option" id="yolo">Bits</span>
-  </div>
-  <div style="inlne-block; float: left; padding-bottom: 10px;">
-    <label for="memo">Memo</label><br>
-    <input type="text" id="memo" style="width: 20em; padding: 10px" placeholder="memo">
-  </div>
-  <input type="hidden" name="facebook_id" id="friend_fbid" value="" />
-  <input type="hidden" name="facebook_name" id="friend_fbname" value="test" />
-  <div style="clear: both; margin: 0px height: 0px">&nbsp;</div>
-  <p>
-    <input type="submit" class="btn btn-lg btn-success" role="button" name="submit" value="Submit"></input>
-  </p>
-</form>
+<% if (ok == 'ok') { %>
+  <form name="pay" method="post" action="/transfer/pay" onkeypress="return event.keyCode != 13;">
+    <br>
+    <div class="switch-toggle switch-candy" style="max-width: 20em;">
+      <input id="op_ask" name="op" type="radio" checked>
+      <label for="op_ask" onclick="">Ask</label>
+      <input id="op_send" name="op" type="radio">
+      <label for="op_send" onclick="">Send</label>
+      <a></a>
+    </div>
+    <br>
+    <div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
+      <label for="fb-user">Who</label><br>
+      <input type="text" id="fb-user" style="width: 20em; padding: 10px" autocomplete="off" placeholder="friend name"/>
+      <span class="input_option" id="fb_user_clear">&nbsp;</span>
+    </div>
+    <div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
+      <label for="btc_amount">Amount</label><br>
+      <input type="text" id="btc_amount" name="amount" style="width: 20em; padding: 10px" placeholder="bitcoins">
+      <span class="input_option" id="yolo">Bits</span>
+    </div>
+    <div style="inlne-block; float: left; padding-bottom: 10px;">
+      <label for="memo">Memo</label><br>
+      <input type="text" id="memo" style="width: 20em; padding: 10px" placeholder="memo">
+    </div>
+    <input type="hidden" name="facebook_id" id="friend_fbid" value="" />
+    <input type="hidden" name="facebook_name" id="friend_fbname" value="test" />
+    <div style="clear: both; margin: 0px height: 0px">&nbsp;</div>
+    <p>
+      <input type="submit" class="btn btn-lg btn-success" role="button" name="submit" value="Submit"></input>
+    </p>
+  </form>
+<% } else { %>  
+  <div class="alert alert-danger"><strong>We are sorry!</strong>  your request couldn't be completed please try again later</div>
+<% } %>  
