@@ -1,4 +1,4 @@
-<% if (success != 'false') { %>
+<% if (success == 'null') { %>
   <form name="pay" method="post" action="/transfer/pay" onkeypress="return event.keyCode != 13;">
     <br>
     <div class="switch-toggle switch-candy" style="max-width: 20em;">
@@ -30,6 +30,8 @@
       <input type="submit" class="btn btn-lg btn-success" role="button" name="submit" value="Submit"></input>
     </p>
   </form>
-<% } else { %>  
+<% } else if(success == "false"){ %>  
   <div class="alert alert-danger"><strong>We are sorry!</strong>  your request couldn't be completed please try again later</div>
+<% } else if(success == "true"){ %>  
+  <div class="alert alert-sucess"><strong>Success!</strong>  Your request completed!</div>
 <% } %>  
