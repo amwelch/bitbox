@@ -93,8 +93,8 @@ _rollback = function(client, error_code, callback) {
   });
 };
 
-_createUserByFBId = function(client, facebook_id, callback) {
-  client.query("INSERT INTO users (facebook_id, status) VALUES ($1, 'Inactive')", [facebook_id], function(err, result) {
+_createUserByFBId = function(client, facebook_id, nickname, callback) {
+  client.query("INSERT INTO users (facebook_id, status, nickname) VALUES ($1, 'Inactive', $2)", [facebook_id, nickname], function(err, result) {
     if (err) {
       console.log(err);
       callback(ec.QUERY_ERR, null);
@@ -199,10 +199,10 @@ exports.getOrCreateUserByFB = pool.pooled(_getOrCreateUserByFB = function(client
   });
 });
 
-exports.getOrCreateUserByFBId = pool.pooled(_getOrCreateUserByFBId = function(client, facebook_id, callback) {
+exports.getOrCreateUserByFBId = pool.pooled(_getOrCreateUserByFBId = function(client, facebook_id, nickname, callback) {
   _getUserByFBId(client, facebook_id, function(err, result) {
     if (err) {
-      _createUserByFBId(client, facebook_id, function(err, result) {
+      _createUserByFBId(client, facebook_id, nickname, function(err, result) {
         if (err) {
 
           //  Unable to create FB identity
@@ -239,7 +239,7 @@ _transfer = function(client, form, callback) {
         } else {
           console.log(source);
           //  GET DEST ACCT
-          _getOrCreateUserByFBId(client, form.destination_fbid, function(err, destination) {
+          _getOrCreateUserByFBId(client, form.destination_fbid, form.nickname, function(err, destination) {
             if (err) {
               _rollback(client, err, callback);
             } else {

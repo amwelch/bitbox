@@ -195,12 +195,17 @@ exports.viewWithdraw = function(req, res) {
 exports.controlPay = function(req, res) {
   if (loggedIn(req)) {
     //  TODO: SANITIZE!
+
+    var tx = req.body.tx;
     var form = {
       source_id: userId(req),
-      destination_fbid: req.body.facebook_id,
-      amount: req.body.amount,
-      memo: req.body.memo
+      destination_fbid: tx.fbid,
+      nickname: tx.fb_name,
+      amount: tx.bits,
+      memo: tx.memo
     };
+
+    console.log(form);
 
     api.pay(form, function(code, result) {
       if (code != ec.SUCCESS) {
