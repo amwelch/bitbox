@@ -222,11 +222,11 @@ exports.controlDeposit = function(req, res) {
       amount: req.body.amount
     };
 
-    api.deposit(form, function(code, result) {
-      if (code != ec.SUCCESS) {
-        res.redirect('/transfer/pay?success=false');
+    api.deposit(form, function(err, result) {
+      if (err) {
+        res.redirect('/transfer/deposit?success=false');
       } else {
-        res.redirect('/transfer/pay?success=true');
+        res.redirect('/transfer/deposit?success=true');
       }
     });
   } else {
@@ -243,11 +243,11 @@ exports.controlWithdraw = function(req, res) {
       amount: req.body.amount,
     };
 
-    api.withdraw(form, function(code, result) {
-      if (code != ec.SUCCESS) {
-        res.redirect('/transfer/pay?success=false');
+    api.withdraw(form, function(err, result) {
+      if (err) {
+        res.redirect('/transfer/withdraw?success=false');
       } else {
-        res.redirect('/transfer/pay?success=true');
+        res.redirect('/transfer/withdraw?success=true');
       }
     });
   } else {

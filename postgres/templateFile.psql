@@ -1,4 +1,5 @@
-DROP TRIGGER update_user_balances
+DROP TRIGGER update_user_balances ON transactions;
+DROP TRIGGER autocomplete_deposits ON transactions;
 DROP FUNCTION update_balances();
 DROP TABLE transactions;
 DROP TABLE users;
@@ -49,8 +50,8 @@ INSERT INTO users (nickname, status, facebook_id) VALUES ('Bitcoin Network', 'Ex
 
 CREATE OR REPLACE FUNCTION complete_deposits() RETURNS TRIGGER AS $wrapper$
 BEGIN
-    IF (NEW.status = 'Pending') THEN
-        UPDATE transactions SET status = 'Complete' WHERE type = 'Deposit';
+    IF (NEW.type = 'Deposit') THEN
+        NEW.status = 'Complete';
     END IF;
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
@@ -107,7 +108,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE update_balances();
 
 CREATE TRIGGER autocomplete_deposits
-BEFORE INSERT OR UPDATE OR DELETE
+BEFORE INSERT
 ON transactions
 FOR EACH ROW
 EXECUTE PROCEDURE complete_deposits();
