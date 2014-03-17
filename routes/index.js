@@ -43,25 +43,17 @@ function facebookId(req) {
 
 exports.index = function(req, res){
   //TODO: Whats the default page for logged in?
-  if (logged_in(req)) {
+  if (loggedIn(req)) {
     res.redirect('/transfer/pay');
   }
   else{
     render(res, {
       base: 'index',
       view: 'index',
-      authenticated: logged_in(req),
+      authenticated: false,
       title: 'Social Bitcoin'
     });
   }
-};
-exports.index = function(req, res) {
-  render(res, {
-    base: 'index',
-    view: 'index',
-    authenticated: loggedIn(req),
-    title: 'Social Bitcoin'
-  });
 };
 exports.login = function(req, res) {
   if (loggedIn(req)) {
@@ -136,12 +128,20 @@ exports.viewTrack = function(req, res) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
-        render(res, {
-          base: 'transfer',
-          view: 'track',
-          authenticated: true,
-          title: 'Track',
-          balance: user.balance
+        api.track(user.id, function(err, history) {
+          if (err) {
+            console.log("Unable to get user");
+            res.redirect("/");
+          } else {
+            render(res, {
+              base: 'transfer',
+              view: 'track',
+              authenticated: true,
+              title: 'Track',
+              balance: user.balance,
+              history: history
+            });
+          }
         });
       }
     });
@@ -205,10 +205,8 @@ exports.controlPay = function(req, res) {
       memo: tx.memo
     };
 
-    console.log(form);
-
-    api.pay(form, function(code, result) {
-      if (code != ec.SUCCESS) {
+    api.pay(form, function(error, result) {
+      if (error != null) {
         res.redirect('/transfer/pay?success=false');
       } else {
         res.redirect('/transfer/pay?success=true');
