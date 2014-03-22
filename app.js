@@ -164,6 +164,8 @@ app.post('/transfer/track', postLater);
 app.post('/transfer/deposit', routes.controlDeposit);
 app.post('/transfer/withdraw', routes.controlWithdraw);
 
+app.get('/transfer/blockchain', routes.blockChainIn);
+
 app.get('/transfer', routes.transfer);
 
 app.get('/accounts/user', routes.user);
@@ -184,6 +186,7 @@ app.get('/lobby', routes.lobby);
 app.get('/liftoff/login', routes.index);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
+
 
 if (dev){
   var port = process.env.PORT || 3000;

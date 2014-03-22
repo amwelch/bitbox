@@ -256,6 +256,12 @@ exports.controlPay = function(req, res) {
   }
 };
 
+exports.blockChainIn = function(req, res) {
+   params = req.query;
+   console.log("Params");
+   console.log(params);
+}
+
 exports.controlDeposit = function(req, res) {
   if (loggedIn(req)) {
     api.transfer({
