@@ -98,15 +98,29 @@ else{
 passport.use( 
   new FacebookStrategy(strat,
   function(accessToken, refreshToken, profile, done) {
-    //  First try finding a user
-    routes.api.getOrCreateUserByFB(profile, function(err, result) {
+    var data = {
+      email: profile.emails[0].value,
+      firstname: profile.name.givenName,
+      lastname: profile.name.familyName,
+      nickname: profile.name.givenName + " " + profile.name.familyName,
+      facebook_id: profile.id.toString()
+    };
+    routes.api.getOrCreateUser(data, function(err, user) {
       if (err) {
         console.log(err);
       } else {
-        if (result.status == 'Active') {
-          done(null, null);
+        if (user.status == 'Active') {
+          done(null, user);
+        } else if (user.status == 'Inactive') {
+          routes.api.activateUser(user, function(err, user) {
+            if (err) {
+              done(null, null);
+            } else {
+              done(null, user);
+            }
+          });
         } else {
-          done(null, result);
+          done(null, user);
         }
       }
     });

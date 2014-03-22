@@ -35,15 +35,9 @@ var pool = poolModule.Pool({
 var _begin,
 _commit, 
 _rollback,
-_transfer,
-_passportToUser,
-_getUserByUserId,
-_getUserByEmail, 
-_getUserByFBId,
-_createUserByFB, 
-_createUserByFBId,
-_getOrCreateUserByFB,
-_getOrCreateUserByFBId
+_getUser,
+_createUser, 
+_getOrCreateUser
 ;
 
 _begin = function(client, callback) {
@@ -56,18 +50,6 @@ _begin = function(client, callback) {
     }
   });
 };
-
-_passportToUser = function(profile) {
-  //  TODO: error check passport data (if necessary?)
-  var user = [
-    profile.emails[0].value,
-    profile.name.givenName,
-    profile.name.familyName,
-    profile.name.givenName + " " + profile.name.familyName,
-    profile.id.toString()
-  ];
-  return user;
-}
 
 _commit = function(client, callback) {
   client.query("COMMIT", function(err, result) {
@@ -93,35 +75,22 @@ _rollback = function(client, error_code, callback) {
   });
 };
 
-_createUserByFBId = function(client, facebook_id, nickname, callback) {
-  client.query("INSERT INTO users (facebook_id, status, nickname) VALUES ($1, 'Inactive', $2)", [facebook_id, nickname], function(err, result) {
-    if (err) {
-      console.log(err);
-      callback(ec.QUERY_ERR, null);
-    } else {
-      callback(null, result);
-    }
-  });
-};
+_createUser = function(client, data, callback) {
+  //  Having an email address from FB is how we determine whether user has auth'd with us
+  var account_status = data.email ? "Active" : "Inactive";
 
-_getUserByEmail = function(client, email, callback) {
-  client.query("SELECT * FROM users WHERE email=$1", [email], function(err, result) {
-    if (err) {
-      console.log(err);
-      callback(ec.QUERY_ERR, null);
-    } else if (result.rows.length == 0) {
-      //  User not found
-      callback(ec.GET_USER_ERR, null);
-    } else if (result.rows.length == 1) {
-      user = result.rows[0];
-      callback(null, user);
-    }
-  });
-};
+  var user = [
+    data.email,
+    data.firstname,
+    data.lastname,
+    data.nickname,
+    data.facebook_id,
+    account_status
+  ];
 
-_createUserByFB = function(client, passport_profile, callback) {
-  var user = _passportToUser(passport_profile);
-  client.query("INSERT INTO users (email, firstname, lastname, nickname, facebook_id, status) VALUES ($1, $2, $3, $4, $5, 'Active')", 
+  console.log(user);
+
+  client.query("INSERT INTO users (email, firstname, lastname, nickname, facebook_id, status) VALUES ($1, $2, $3, $4, $5, $6)", 
     user, 
     function (err, result) { 
       if (err) {
@@ -134,29 +103,27 @@ _createUserByFB = function(client, passport_profile, callback) {
   );
 };
 
-_getUserByFBId = function(client, facebook_id, callback) {
-  client.query("SELECT * FROM users WHERE facebook_id=$1", [facebook_id], function(err, result) {
-    if (err) {
-      console.log(err);
-      callback(ec.QUERY_ERR, null);
-    } else if (result.rows.length == 0) {
-      //  User not found
-      callback(ec.GET_USER_ERR, null);
-    } else if (result.rows.length == 1) {
-      user = result.rows[0];
-      callback(null, user);
-    }
-  });
-};
+exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
+  var select = null;
+  var values = null;
+  
+  if (data.id) {
+    select = "SELECT * FROM users WHERE id=$1";
+    values = [data.id];
+  } else if (data.facebook_id) {
+    select = "SELECT * FROM users WHERE facebook_id=$1";
+    values = [data.facebook_id];
+  } else {
+    callback(ec.INPUT_ERR);
+    return;
+  }
 
-exports.getUserByUserId = pool.pooled(_getUserByUserId = function(client, user_id, callback) {
-  client.query("SELECT * FROM users WHERE id=$1", [user_id], function(err, result) {
+  client.query(select, values, function(err, result) {
     if (err) {
       console.log(err);
       callback(ec.QUERY_ERR, null);
     } else if (result.rows.length == 0) {
-      //  User not found
-      callback(ec.GET_USER_ERR, null);
+      callback(ec.USER_NOT_FOUND, null);
     } else if (result.rows.length == 1) {
       var row = result.rows[0];
       var user = {
@@ -175,18 +142,16 @@ exports.getUserByUserId = pool.pooled(_getUserByUserId = function(client, user_i
   });
 });
 
-exports.getOrCreateUserByFB = pool.pooled(_getOrCreateUserByFB = function(client, profile, callback) {
-  _getUserByEmail(client, profile.emails[0].value, function(err, result) {
+exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, callback) {
+  _getUser(client, data, function(err, result) {
     if (err) {
-      _createUserByFB(client, profile, function(err, result) {
+      _createUser(client, data, function(err, result) {
         if (err) {
-          //  Unable to create FB user
           callback(ec.CREATE_USER_ERR, null);
         } else {
-          _getUserByEmail(client, profile.emails[0].value, function(err, result) {
+          _getUser(client, data, function(err, result) {
             if (err) {
-              //  Unable to find created FB user
-              callback(ec.GET_USER_ERR, null);              
+              callback(ec.USER_NOT_FOUND, null);              
             } else {
               callback(null, result);      
             }
@@ -199,64 +164,58 @@ exports.getOrCreateUserByFB = pool.pooled(_getOrCreateUserByFB = function(client
   });
 });
 
-exports.getOrCreateUserByFBId = pool.pooled(_getOrCreateUserByFBId = function(client, facebook_id, nickname, callback) {
-  _getUserByFBId(client, facebook_id, function(err, result) {
+exports.activateUser = pool.pooled(function(client, user, callback) {
+  client.query("UPDATE users SET status = 'Active' WHERE id=$1", [user.id], function(err, result) {
     if (err) {
-      _createUserByFBId(client, facebook_id, nickname, function(err, result) {
+      console.log(err);
+      callback(ec.QUERY_ERR, null);
+    } else {
+      _getUser(client, user, function() {
         if (err) {
-
-          //  Unable to create FB identity
-          callback(ec.CREATE_USER_ERR, null);
+          callback(ec.QUERY_ERR, null);              
         } else {
-          _getUserByFBId(client, facebook_id, function(err, result) {
-            if (err) {
-              //  Unable to find created FB identity
-              callback(ec.GET_USER_ERR, null);
-            } else {
-              callback(null, result);
-            }
-          });
+          callback(null, user);      
         }
       });
-    } else {
-      callback(null, result);
     }
   });
 });
 
-_transfer = function(client, form, callback) {
+exports.transfer = pool.pooled(function(client, data, callback) {
 
   //  START TXN
   _begin(client, function(err, result) {
     if (err) {
       _rollback(client, err, callback);
     } else {
+
       //  GET SOURCE ACCT
-      console.log(form);
-      _getUserByUserId(client, form.source_id, function(err, source) {
+      _getUser(client, data.source, function(err, source) {
         if (err) {
           _rollback(client, err, callback);
         } else {
-          console.log(source);
+
           //  GET DEST ACCT
-          _getOrCreateUserByFBId(client, form.destination_fbid, form.nickname, function(err, destination) {
+          _getOrCreateUser(client, data.destination, function(err, destination) {
             if (err) {
               _rollback(client, err, callback);
             } else {
+
               //  TRANSFER FUNDS
               client.query("INSERT INTO transactions (source, destination, amount, memo, type) VALUES ($1, $2, $3, $4, $5)", 
                 [
                   source.id,
                   destination.id,
-                  form.amount,
-                  form.memo,
-                  form.type
+                  data.amount,
+                  data.memo,
+                  data.type
                 ], 
                 function(err, result) {
                   if (err) {
                     console.log(err);
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
+                    
                     //  END TXN
                     _commit(client, callback);
                   }
@@ -266,38 +225,6 @@ _transfer = function(client, form, callback) {
           });
         }
       });
-    }
-  });
-};
-
-exports.pay = pool.pooled(function(client, form, callback) {
-  form.type = "Payment";
-  _transfer(client, form, function(err, result) {
-    callback(err, result);
-  });
-});
-
-exports.withdraw = pool.pooled(function(client, form, callback) {
-  form.type = "Withdrawal";
-  form.destination_fbid = 1;
-  _transfer(client, form, function(err, result) {
-    if (err) {
-      callback(ec.QUERY_ERR, null);
-    } else {
-      callback(null, result);
-    }
-  });
-});
-
-exports.deposit = pool.pooled(function(client, form, callback) {
-  form.type = "Deposit";
-  form.source_id = 1;
-  form.memo = "Address: 31uEbMgunupShBVTewXjtqbBv5MndwfXhb";
-  _transfer(client, form, function(err, result) {
-    if (err) {
-      callback(ec.QUERY_ERR, null);
-    } else {
-      callback(null, result);
     }
   });
 });
@@ -340,4 +267,4 @@ exports.track = pool.pooled(function(client, id, callback) {
       callback(null, rValue);
     }
   });
-})
+});

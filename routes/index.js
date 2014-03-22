@@ -1,4 +1,5 @@
 
+var http = require('http');
 var api = require('./api');
 var ec = require('./error-codes');
 exports.api = api;
@@ -7,8 +8,19 @@ exports.api = api;
 //HELPER FUNCTIONS
 
 
-function render(res, content) {
-  var params = {};
+function render(req, res, content) {
+  var success;
+  if (req.query.success == "true"){
+    success = true;
+  } else if (req.query.success == "false"){
+    success = false;
+  } else {
+    success = null;
+  }
+
+  var params = {
+    success: success
+  };
 
   for (var key in content) {
     // important check that this is objects own property 
@@ -30,14 +42,46 @@ function loggedIn(req) {
   return rValue;
 }
 
-function userId(req) {
-  return req.user.id;
+function getFacebookName(facebook_id, callback) {
+  http.get("http://graph.facebook.com/"+facebook_id, function(res) {
+    var body = '';
+
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
+
+    res.on('end', function() {
+      var fbResponse = JSON.parse(body);
+      callback(null, fbResponse.name);
+    });
+  }).on('error', function(e) {
+      callback("Unable to connect", null);
+  });
 }
 
-function facebookId(req) {
-  return req.user.facebook_id;
-}
+function prepareTransfer(data, callback) {
 
+  //  TODO: Sanitize inputs here
+
+  //  GET SOURCE ACCT
+  api.getUser(data.source, function(err, source) {
+    if (err) {
+      callback(err, null);
+    } else {
+
+      //  GET DEST ACCT
+      api.getOrCreateUser(data.destination, function(err, destination) {
+        if (err) {
+          callback(err, null);
+        } else {
+          data.source = source;
+          data.destination = destination;
+          callback(null, data);
+        }
+      });
+    }
+  });
+};
 
 //HOMEPAGE
 
@@ -45,9 +89,8 @@ exports.index = function(req, res){
   //TODO: Whats the default page for logged in?
   if (loggedIn(req)) {
     res.redirect('/transfer/pay');
-  }
-  else{
-    render(res, {
+  } else {
+    render(req, res, {
       base: 'index',
       view: 'index',
       authenticated: false,
@@ -55,16 +98,17 @@ exports.index = function(req, res){
     });
   }
 };
+
 exports.login = function(req, res) {
   if (loggedIn(req)) {
-    render(res, {
+    render(req, res, {
       base: 'index',
       view: 'index',
       authenticated: true,
       title: 'Social Bitcoin'
     });
   } else {
-    render(res, {
+    render(req, res, {
       base: 'index',
       view: 'login',
       authenticated: false,
@@ -78,9 +122,6 @@ exports.logout = function(req, res) {
   res.redirect('/');
 };
 
-//TRANSFER
-
-
 exports.transfer = function(req, res) {
   if (loggedIn(req)) {
     res.redirect('/transfer/pay');
@@ -91,28 +132,18 @@ exports.transfer = function(req, res) {
 
 exports.viewPay = function(req, res) {  
   if (loggedIn(req)) {
-    api.getUserByUserId(userId(req), function(err, user) {
+    api.getUser(req.user, function(err, user) {
       if (err) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
-        var success;
-        if (req.query.success == "true"){
-            success= "true";
-        }
-        else if (req.query.success == "false"){
-            success = "false";
-        }
-        else {
-            success = "null";
-        }
-        render(res, {
-          success: success,
+        render(req, res, {
           base: 'transfer',
           view: 'pay',
           authenticated: true,
           title: 'Payment',
-          balance: user.balance
+          balance: user.balance,
+          name: user.nickname
         });
       }
     });
@@ -123,7 +154,7 @@ exports.viewPay = function(req, res) {
 
 exports.viewTrack = function(req, res) {
   if (loggedIn(req)) {
-    api.getUserByUserId(userId(req), function(err, user) {
+    api.getUser(req.user, function(err, user) {
       if (err) {
         console.log("Unable to get user");
         res.redirect("/");
@@ -133,12 +164,13 @@ exports.viewTrack = function(req, res) {
             console.log("Unable to get user");
             res.redirect("/");
           } else {
-            render(res, {
+            render(req, res, {
               base: 'transfer',
               view: 'track',
               authenticated: true,
               title: 'Track',
               balance: user.balance,
+              name: user.nickname,
               history: history
             });
           }
@@ -152,17 +184,18 @@ exports.viewTrack = function(req, res) {
 
 exports.viewDeposit = function(req, res) {
   if (loggedIn(req)) {
-    api.getUserByUserId(userId(req), function(err, user) {
+    api.getUser(req.user, function(err, user) {
       if (err) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
-        render(res, {
+        render(req, res, {
           base: 'transfer',
           view: 'deposit',
           authenticated: true,
           title: 'Deposit',
-          balance: user.balance
+          balance: user.balance,
+          name: user.nickname
         });
       }
     });
@@ -173,17 +206,18 @@ exports.viewDeposit = function(req, res) {
 
 exports.viewWithdraw = function(req, res) {
   if (loggedIn(req)) {
-    api.getUserByUserId(userId(req), function(err, user) {
+    api.getUser(req.user, function(err, user) {
       if (err) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
-        render(res, {
+        render(req, res, {
           base: 'transfer',
           view: 'withdraw',
           authenticated: true,
           title: 'Withdraw',
-          balance: user.balance
+          balance: user.balance,
+          name: user.nickname
         });
       }
     });
@@ -194,22 +228,27 @@ exports.viewWithdraw = function(req, res) {
 
 exports.controlPay = function(req, res) {
   if (loggedIn(req)) {
-    //  TODO: SANITIZE!
-
-    var tx = req.body.tx;
-    var form = {
-      source_id: userId(req),
-      destination_fbid: tx.fbid,
-      nickname: tx.fb_name,
-      amount: tx.bits,
-      memo: tx.memo
-    };
-
-    api.pay(form, function(error, result) {
-      if (error != null) {
+    getFacebookName(req.body.pay.facebook_id, function(err, nickname) {
+      if (err) {
         res.redirect('/transfer/pay?success=false');
       } else {
-        res.redirect('/transfer/pay?success=true');
+        api.transfer({
+          source: { id: req.user.id },
+          destination: {
+            facebook_id: req.body.pay.facebook_id,
+            nickname: nickname
+          },
+          type: "Payment",
+          amount: req.body.pay.amount,
+          memo: req.body.pay.memo
+        }, 
+        function(err, result) {
+          if (err) {
+            res.redirect('/transfer/pay?success=false');
+          } else {
+            res.redirect('/transfer/pay?success=true');
+          }
+        });
       }
     });
   } else {
@@ -219,13 +258,14 @@ exports.controlPay = function(req, res) {
 
 exports.controlDeposit = function(req, res) {
   if (loggedIn(req)) {
-    //  TODO: SANITIZE!
-    var form = {
-      destination_fbid: facebookId(req),
-      amount: req.body.amount
-    };
-
-    api.deposit(form, function(err, result) {
+    api.transfer({
+      source: { id: -1 },
+      destination: { id: req.user.id },
+      type: "Deposit",
+      amount: req.body.deposit.amount,
+      memo: "TODO: Actual BTC deposits"
+    }, 
+    function(err, result) {
       if (err) {
         res.redirect('/transfer/deposit?success=false');
       } else {
@@ -239,14 +279,14 @@ exports.controlDeposit = function(req, res) {
 
 exports.controlWithdraw = function(req, res) {
   if (loggedIn(req)) {
-    //  TODO: SANITIZE!
-    var form = {
-      source_id: userId(req),
-      address: req.body.address,
-      amount: req.body.amount,
-    };
 
-    api.withdraw(form, function(err, result) {
+    api.transfer({
+      source: { id: req.user.id },
+      destination: { id: -1 },
+      type: "Withdrawal",
+      amount: req.body.withdraw.amount,
+      memo: req.body.withdraw.address
+    }, function(err, data) {
       if (err) {
         res.redirect('/transfer/withdraw?success=false');
       } else {
@@ -268,10 +308,8 @@ exports.userInfo = function(req, res){
 
 exports.user = function(req, res){
   if (loggedIn(req)) {
-    render(res, {
-
+    render(req, res, {
       //TODO for now fetch data for user from db here but in the future we want to fetch this on login and pass it around
-
       base: 'accounts',
       view: 'user',
       title: 'My Account',
@@ -284,7 +322,7 @@ exports.user = function(req, res){
 
 exports.identity= function(req, res){
   if (loggedIn(req)) {
-    render(res, {
+    render(req, res, {
 
       base: 'accounts',
       view: 'identity',
@@ -295,6 +333,7 @@ exports.identity= function(req, res){
     res.redirect('/liftoff/login');
   }
 };
+
 exports.betaEmail = function(req, res){
   var UNAME = "";
   var PW = "";
@@ -308,17 +347,19 @@ exports.betaEmail = function(req, res){
     }
   });
 };
+
 exports.betaSignUp = function(req, res){
-  render(res, {
+  render(req, res, {
     base: 'beta',
     view: 'signup',
     title: 'Sorry!',
     authenticated: false
   });
 };
+
 exports.security= function(req, res){
   if (loggedIn(req)) {
-    render(res, {
+    render(req, res, {
 
       base: 'accounts',
       view: '2FA',
@@ -331,7 +372,7 @@ exports.security= function(req, res){
 };
 
 exports.lobby = function(req, res) {
-  render(res, {
+  render(req, res, {
     base: 'index',
     view: 'lobby',
     authenticated: false,

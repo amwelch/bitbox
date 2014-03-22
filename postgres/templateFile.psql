@@ -1,3 +1,4 @@
+DROP TRIGGER activate_account ON users;
 DROP TRIGGER update_user_balances ON transactions;
 DROP TRIGGER autocomplete_deposits ON transactions;
 DROP FUNCTION update_balances();
@@ -21,7 +22,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE DEFAULT NULL,
     firstname VARCHAR(100) DEFAULT NULL, 
     lastname VARCHAR(100) DEFAULT NULL, 
-    nickname VARCHAR(200) DEFAULT NULL,
+    nickname VARCHAR(200) NOT NULL,
     status ACCOUNT_STATE NOT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     facebook_id NUMERIC(20) UNIQUE DEFAULT NULL,
@@ -38,7 +39,7 @@ CREATE TABLE transactions (
     memo VARCHAR(100),
     submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     uuid VARCHAR(32) UNIQUE DEFAULT NULL
-);
+);  
 
 GRANT ALL PRIVILEGES ON users TO alexander;
 GRANT ALL PRIVILEGES ON transactions TO alexander;
@@ -46,7 +47,15 @@ GRANT ALL PRIVILEGES ON transactions TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
 
-INSERT INTO users (nickname, status, facebook_id) VALUES ('Bitcoin Network', 'External', -1);
+INSERT INTO users (id, nickname, status) VALUES (-1, 'Bitcoin Network', 'External');
+
+CREATE OR REPLACE FUNCTION activate_balances() RETURNS TRIGGER AS $wrapper$
+BEGIN
+    IF (OLD.status = 'Inactive' AND (NEW.status = 'Admin' OR NEW.status = 'Active')) THEN
+        UPDATE transactions SET status = 'Complete' WHERE status = 'Pending' AND type = 'Payment' AND destination = NEW.id;
+    END IF;
+    RETURN NEW;
+END $wrapper$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION complete_deposits() RETURNS TRIGGER AS $wrapper$
 BEGIN
@@ -112,3 +121,9 @@ BEFORE INSERT
 ON transactions
 FOR EACH ROW
 EXECUTE PROCEDURE complete_deposits();
+
+CREATE TRIGGER activate_account
+AFTER UPDATE
+ON users
+FOR EACH ROW
+EXECUTE PROCEDURE activate_balances();
