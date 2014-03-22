@@ -92,7 +92,7 @@ else{
   strat = {
     clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
     clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
-    callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
+    callbackURL: 'http://'+eip+':80/liftoff/login/facebook/callback',
   };
 }
 passport.use( 
@@ -192,13 +192,14 @@ if (dev){
   });
 }
 else{
-  app.use(requireHTTPS);
+  /*app.use(requireHTTPS);
   var options = {
       key: fs.readFileSync('/keykeeper.pem'),
       cert: fs.readFileSync('/bbcsr.pem'),
-  }
-  var port = process.env.PORT || 443;
-  https.createServer(options, app).listen(port, ip, function() {
+  }*/
+  var port = process.env.PORT || 80;
+  //https.createServer(options, app).listen(port, ip, function() {
+  app.listen(port, ip, function() {
     console.log('Listening on ' + port);
   });
 }
