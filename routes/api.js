@@ -1,6 +1,11 @@
 var ec = require('./error-codes');
 var pg = require('pg');
 var poolModule = require('generic-pool');
+/* New deps, will move them up after code is finalized */
+var sprintf = require("sprintf-js").sprintf; 
+var crypto = require('crypto');
+var http = require('http');
+var https = require('https');
 var pool = poolModule.Pool({
 
     name: 'postgres',
@@ -75,6 +80,90 @@ _rollback = function(client, error_code, callback) {
   });
 };
 
+
+_random = function(len) {
+    return crypto.randomBytes(Math.ceil(len/2)).toString('hex').slice(0,len);
+}
+
+_getJSON = function(options, onResult){
+    var prot = options.port == 443 ? https : http;
+    console.log(options);
+    var req = prot.request(options, function(res){
+        var output = '';
+        console.log(options.host + ':' + res.statusCode);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk){
+            output += chunk; 
+        });
+        res.on('end', function (){
+            var obj = JSON.parse(output);
+            onResult(res.statusCode, obj);
+        });
+    });
+    req.on('error', function(err) {
+        console.log("No go");
+        console.log(err);
+    });
+    req.end();
+}
+/* Sample response from blockchain
+
+  Response to address creation
+  { input_address: '1LsTraiy6PAjbqT83MZFuUx96mN9HmfiS',
+  callback_url: 'http://staging.bitbox.mx/deposit/blockchain?uid=1&secret=a3594b9cce57',
+  fee_percent: 0,
+  destination: '158tK8rpyWWrz4oX1fWeuWkXDV2v8pAgEK' }
+
+*/
+_createDepositAddress = function(client, uid, cb) {
+    //Random secret for the user
+    var secret = _random(12);
+    //TODO When domain settles down this becomes domain
+    callbackURL = encodeURIComponent(sprintf("http://staging.bitbox.mx/deposit/blockchain?uid=%s&secret=%s", uid, secret));
+    //TODO obviously read this from a file containing a cold storage address eventually
+    dest_wallet = "158tK8rpyWWrz4oX1fWeuWkXDV2v8pAgEK";
+    var options = {
+        host: 'blockchain.info',
+        port: 443,
+        path: sprintf('/api/receive?method=create&address=%s&callback=%s',dest_wallet, callbackURL),
+        method: 'GET',
+    }
+    _getJSON(options, function(statusCode, result){
+        if( statusCode != 200 ){
+            var err = "ERROR creating address";
+            console.log(err);
+            cb(err);
+        }
+        else{
+            console.log(result);
+            if (! result.input_address){
+                console.log("NO RETURNED ADDRESS");
+                console.log(result);
+                cb("NO RETURNED ADDRESS");
+            }
+            else{
+                /*Update the users db with deposit address and secret */
+                var data = [
+                   secret, 
+                   result.input_address,
+                   uid
+                ];
+                client.query("UPDATE users set secret=$1, deposit_address=$2 where id=$3", data, function(err, result){
+                   if (err){
+                      console.log("ERROR UPDATING USER");
+                      console.log(err);
+                      cb("error");
+                   }
+                   else{
+                      console.log("UPDATED USER");
+                      cb(null);
+                   }
+                });
+            }
+        }
+    });
+}
+
 _createUser = function(client, data, callback) {
   //  Having an email address from FB is how we determine whether user has auth'd with us
   var account_status = data.email ? "Active" : "Inactive";
@@ -87,8 +176,6 @@ _createUser = function(client, data, callback) {
     data.facebook_id,
     account_status
   ];
-
-  console.log(user);
 
   client.query("INSERT INTO users (email, firstname, lastname, nickname, facebook_id, status) VALUES ($1, $2, $3, $4, $5, $6)", 
     user, 
@@ -142,6 +229,8 @@ exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
   });
 });
 
+
+
 exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, callback) {
   _getUser(client, data, function(err, result) {
     if (err) {
@@ -153,7 +242,14 @@ exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, 
             if (err) {
               callback(ec.USER_NOT_FOUND, null);              
             } else {
-              callback(null, result);      
+              console.log("GOT USER");
+              console.log(result);
+              _createDepositAddress(client, result.id, function(err){
+                 if (err){
+                   callback(ec.CREATE_ADDRESS_FAIL, null);
+                 } 
+                 callback(null, result);      
+              });
             }
           });
         }

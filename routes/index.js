@@ -42,6 +42,7 @@ function loggedIn(req) {
   return rValue;
 }
 
+
 function getFacebookName(facebook_id, callback) {
   http.get("http://graph.facebook.com/"+facebook_id, function(res) {
     var body = '';
@@ -256,10 +257,72 @@ exports.controlPay = function(req, res) {
   }
 };
 
+/*Sample params grabbed from a request
+
+
+  Response params
+  {
+  anonymous: 'false',
+  shared: 'false',
+  uid: '1',
+  destination_address: '158tK8rpyWWrz4oX1fWeuWkXDV2v8pAgEK',
+  confirmations: '0',
+  address: '158tK8rpyWWrz4oX1fWeuWkXDV2v8pAgEK',
+  value: '100000',
+  input_address: '1LsTraiy6PAjbqT83MZFuUx96mN9HmfiS',
+  secret: 'a3594b9cce57',
+  input_transaction_hash: '287db46def7000a539832c6171f89bb5b905be5376f56fd65f3d5e4df5d29dd1',
+  transaction_hash: 'a2d5519b72b1169ee73e00c144b6804c050eb1b43e0bf3f4de6fefb88e4b9af1' }
+*/
 exports.blockChainIn = function(req, res) {
    params = req.query;
    console.log("Params");
    console.log(params);
+
+   var uid = params.uid;
+   var secret = params.secret;
+   /*Keep the hashes around for loggin*/
+   var hashes = params.input_transaction_hash + " | " + params.transaction_hash;
+   var bits = parseFloat(params.value);
+   var addresses = params.input_address + " | " + params.destination_address;
+   var confirms = parseInt(params.confirmations);
+
+   var logMemo = hashes + " @ " + addresses; 
+ 
+   /*Wait until we see n confirms before acking the deposit*/
+   /*blockchain will continue sending notifications on each block until the server returns status code 200 */
+   var reqConfirms = 0;
+   if( confirms < 0 ){
+     res.writeHead(200, {'Content-Type': 'text/plain'});
+     res.end();
+     return;
+   }
+   api.getUser(uid, function(err, user) {
+      console.log("Got user ");
+      console.log("user");
+      /* Check user secret to verify its coming from blockchain */
+      /*Deposit the amount */
+      api.transfer({
+        source: {id: -1},   
+        destination: {id: uid},
+        type: "Deposit",
+        amount: bits,
+        memo: logMemo
+      }, function(err, result) {
+         if (err){
+            console.log("ERROR WITH DEPOSIT CALLBACK");
+            console.log(err);
+            console.log(logMemo);
+         }
+         else{
+            console.log("SUCCESS WITH DEPOSIT CALLBACK");
+            console.log(logMemo);
+         }
+      });
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.write('ok');
+      res.end();
+   });
 }
 
 exports.controlDeposit = function(req, res) {

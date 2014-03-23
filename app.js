@@ -164,7 +164,7 @@ app.post('/transfer/track', postLater);
 app.post('/transfer/deposit', routes.controlDeposit);
 app.post('/transfer/withdraw', routes.controlWithdraw);
 
-app.get('/transfer/blockchain', routes.blockChainIn);
+app.get('/deposit/blockchain', routes.blockChainIn);
 
 app.get('/transfer', routes.transfer);
 

@@ -19,6 +19,8 @@ CREATE TYPE ACCOUNT_STATE AS ENUM ('External','Admin', 'Active', 'Disabled', 'In
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY, 
+    secret VARCHAR(12) DEFAULT NULL,
+    deposit_address VARCHAR(34) DEFAULT NULL,
     email VARCHAR(100) UNIQUE DEFAULT NULL,
     firstname VARCHAR(100) DEFAULT NULL, 
     lastname VARCHAR(100) DEFAULT NULL, 
