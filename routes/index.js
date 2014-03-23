@@ -196,6 +196,7 @@ exports.viewDeposit = function(req, res) {
           authenticated: true,
           title: 'Deposit',
           balance: user.balance,
+          address: user.deposit_address,
           name: user.nickname
         });
       }
@@ -292,22 +293,39 @@ exports.blockChainIn = function(req, res) {
    /*Wait until we see n confirms before acking the deposit*/
    /*blockchain will continue sending notifications on each block until the server returns status code 200 */
    var reqConfirms = 0;
-   if( confirms < 0 ){
-     res.writeHead(200, {'Content-Type': 'text/plain'});
-     res.end();
-     return;
-   }
    api.getUser(uid, function(err, user) {
       console.log("Got user ");
-      console.log("user");
+      console.log(user);
       /* Check user secret to verify its coming from blockchain */
       /*Deposit the amount */
+ 
+     if (uid != 1){
+          console.log("CLEARING OLD");
+          res.writeHead(200, {'Content-Type': 'text/plain'});
+          res.write('ok');
+          res.end();
+      }
+      if (user.secret != params.secret){
+          console.log("MISMATCHED SECRET THIS SHOULD NEVER HAPPEN");
+          res.writeHead(200, {'Content-Type': 'text/plain'});
+          res.write('ok');
+          res.end();
+          return;
+      }
+
+      if( confirms < 60 ){
+         res.writeHead(200, {'Content-Type': 'text/plain'});
+         res.end();
+         return;
+      }
+
       api.transfer({
         source: {id: -1},   
         destination: {id: uid},
         type: "Deposit",
         amount: bits,
-        memo: logMemo
+        memo: logMemo,
+        depositId: params.transaction_hash,
       }, function(err, result) {
          if (err){
             console.log("ERROR WITH DEPOSIT CALLBACK");

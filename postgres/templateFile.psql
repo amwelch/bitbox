@@ -38,7 +38,9 @@ CREATE TABLE transactions (
     status TXN_STATUS NOT NULL DEFAULT 'Pending',
     type TXN_TYPE NOT NULL, 
     amount BIGINT NOT NULL CONSTRAINT positive_amount CHECK (amount > 0), 
-    memo VARCHAR(100),
+    memo VARCHAR(200),
+    confirmations INT DEFAULT 0,
+    blockchain_id VARCHAR(100) DEFAULT NULL,
     submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     uuid VARCHAR(32) UNIQUE DEFAULT NULL
 );  

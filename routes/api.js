@@ -222,6 +222,8 @@ exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
         status: row.status,
         created: row.created,
         facebook_id: row.facebook_id,
+        deposit_address: row.deposit_address,
+        secret: row.secret,
         balance: row.balance
       };
       callback(null, user);
@@ -276,9 +278,79 @@ exports.activateUser = pool.pooled(function(client, user, callback) {
     }
   });
 });
+exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
+  //  START TXN
+  _begin(client, function(err, result) {
+    if (err) {
+      _rollback(client, err, callback);
+    } else {
+      //  GET SOURCE ACCT
+      _getUser(client, data.source, function(err, source) {
+        if (err) {
+          _rollback(client, err, callback);
+        } else {
+          //  GET DEST ACCT
+          _getOrCreateUser(client, data.destination, function(err, destination) {
+            if (err) {
+              _rollback(client, err, callback);
+            } else {
+              client.query("SELECT * FROM transactions where blockchain_id =$1", [data.depositId], function(err, result){
+                  if (err || result.rows.length == 0) {
+                      console.log("CREATING TRANSACTION");
+                      console.log(err);
+                     client.query("INSERT INTO transactions (source, destination, amount, memo, type, blockchain_id, confirmations) VALUES ($1, $2, $3, $4, $5, $6, $7)", 
+                       [
+                         source.id,
+                         destination.id,
+                         data.amount,
+                         data.memo,
+                         data.type,
+                         data.depositId,
+                         data.confirmations,
+                       ], 
+                       function(err, result) {
+                         if (err) {
+                           console.log(err);
+                           _rollback(client, ec.TRANSFER_ERR, callback);
+                         } else {
+                           //  END TXN
+                           _commit(client, callback);
+                         }
+                       }
+                     );
+                  }
+                  else if (result.rows.length != 1){
+                      console.log("ERROR THIS SHOULD NEVER HAPPEN DUPE DEPOSITS");
+                      console.log(result.rows);
+                      _rollback(client, ec.TRANSFER_ERR, callback);
+                  }
+                  else {
+                      res = result.rows[0];
+                      if (res.confirmations != data.confirmations){
+                         client.query("UPDATE transactions set confirmations=$1 where blockchain_id=$2", [data.confirmations, data.depositId], function(err, result){
+                     
+                             if (err){
+                                 console.log(err);
+                                 _rollback(client, ec.TRANSFER_ERR, callback);
+                             }
+                             else{
+                                 _commit(client, callback);
+                                 console.log("Updated # of confirmations");
+                             }
+                         });
+                      }
+                  }
+              });
+            }
+          });
+        }
+      });
+    };
+  });
+});
+
 
 exports.transfer = pool.pooled(function(client, data, callback) {
-
   //  START TXN
   _begin(client, function(err, result) {
     if (err) {
@@ -296,7 +368,6 @@ exports.transfer = pool.pooled(function(client, data, callback) {
             if (err) {
               _rollback(client, err, callback);
             } else {
-
               //  TRANSFER FUNDS
               client.query("INSERT INTO transactions (source, destination, amount, memo, type) VALUES ($1, $2, $3, $4, $5)", 
                 [
@@ -304,7 +375,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                   destination.id,
                   data.amount,
                   data.memo,
-                  data.type
+                  data.type,
                 ], 
                 function(err, result) {
                   if (err) {

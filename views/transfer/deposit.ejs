@@ -10,5 +10,17 @@
     <input type="submit" class="btn btn-lg btn-success" role="button" name="submit" value="Submit"></input>
   </p>
 </form-->
-<h1>18Vm8AvDr9Bkvij6UfVR7MerCyrz3KS3h4</h1>
-<img src="http://i.imgur.com/Mjegy7F.png" />
+<div class="container">
+  <h1> Instructions </h1>
+  <div class="container">
+    <p>
+      Hello! Welcome to bitbox! This section explains how to automatically deposit BTC into bitbox. The following address and corresponding QR code are tied to your account and your account only. Simply deposit any balance into this address at any time and your transaction should appear as pending within 10-15 minutes. We wait for 6 confirmations before validating the balance so around an hour after the balance first appeared as pending it should complete and you are free to send BTC!
+    </p>
+  </div>
+  <h1> Deposit Information </h1>
+  <div class="container">
+    <h3>   Address:  <%= address %></h2> 
+    <h3>   QR Code: </h2>
+    <img src="http://chart.apis.google.com/chart?cht=qr&chld=Q%7C2&chs=200&chl=<%=address%>" />
+  </div>
+</div>
