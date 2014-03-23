@@ -278,6 +278,22 @@ exports.activateUser = pool.pooled(function(client, user, callback) {
     }
   });
 });
+exports.completeDeposit = pool.pooled(function(client, data, callback) {
+   _begin(client, function(err, result) {
+     if (err) {
+       _rollback(client, err, callback);
+     } else {
+       client.query("UPDATE transactions set status='complete' where blockchain_id=$1", [data.depositId], function(err, result){
+         if (err){
+           _rollback(client, err, callback);
+         } else {
+           _commit(client, callback);
+         }
+       });
+     }
+   });
+});
+
 exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
   //  START TXN
   _begin(client, function(err, result) {

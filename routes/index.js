@@ -36,6 +36,7 @@ function render(req, res, content) {
 
 function loggedIn(req) {
   var rValue = false;
+  console.log(req.user);
   if (req.user) {
     rValue = true;
   }
@@ -293,7 +294,7 @@ exports.blockChainIn = function(req, res) {
    /*Wait until we see n confirms before acking the deposit*/
    /*blockchain will continue sending notifications on each block until the server returns status code 200 */
    var reqConfirms = 0;
-   api.getUser(uid, function(err, user) {
+   api.getUser({id:uid}, function(err, user) {
       console.log("Got user ");
       console.log(user);
       /* Check user secret to verify its coming from blockchain */
@@ -313,13 +314,8 @@ exports.blockChainIn = function(req, res) {
           return;
       }
 
-      if( confirms < 60 ){
-         res.writeHead(200, {'Content-Type': 'text/plain'});
-         res.end();
-         return;
-      }
 
-      api.transfer({
+      api.createOrUpdateDeposit({
         source: {id: -1},   
         destination: {id: uid},
         type: "Deposit",
@@ -337,6 +333,11 @@ exports.blockChainIn = function(req, res) {
             console.log(logMemo);
          }
       });
+      if( confirms < 60 ){
+         res.writeHead(200, {'Content-Type': 'text/plain'});
+         res.end();
+         return;
+      }
       res.writeHead(200, {'Content-Type': 'text/plain'});
       res.write('ok');
       res.end();
