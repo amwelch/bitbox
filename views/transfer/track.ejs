@@ -8,6 +8,7 @@
         <th>Gross</th>
         <th>Memo</th>
         <th>Date</th>
+        <th>Confirmations</th>
       </tr>
     </thead>
     <tbody>
@@ -16,9 +17,10 @@
         <td><%= history[i].whom %></td>
         <td><%= history[i].action %></td>
         <td><%= history[i].status %></td>
-        <td><%= history[i].amount %> BTC</td>
+        <td><%= history[i].amount %> Bits</td>
         <td><%= history[i].memo %></td>
         <td><%= history[i].date %></td>
+        <td><%= history[i].confirmations %></td>
       </tr>
     <% } %>
     </tbody>

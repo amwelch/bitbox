@@ -6,6 +6,6 @@
 #Create database
 #createdb bitbox
 #Create tables
-USERNAME=kompreni
+USERNAME=alexander
 FILENAME=templateFile.psql
 psql -U ${USERNAME} -d bitbox -a -f ${FILENAME}
