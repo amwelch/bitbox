@@ -293,19 +293,14 @@ exports.blockChainIn = function(req, res) {
  
    /*Wait until we see n confirms before acking the deposit*/
    /*blockchain will continue sending notifications on each block until the server returns status code 200 */
-   var reqConfirms = 0;
+   var reqConfirms = 60;
+   console.log("GETTING USER WITH ID " + uid);
    api.getUser({id:uid}, function(err, user) {
       console.log("Got user ");
       console.log(user);
       /* Check user secret to verify its coming from blockchain */
       /*Deposit the amount */
  
-     if (uid != 1){
-          console.log("CLEARING OLD");
-          res.writeHead(200, {'Content-Type': 'text/plain'});
-          res.write('ok');
-          res.end();
-      }
       if (user.secret != params.secret){
           console.log("MISMATCHED SECRET THIS SHOULD NEVER HAPPEN");
           res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -314,13 +309,13 @@ exports.blockChainIn = function(req, res) {
           return;
       }
 
-
       api.createOrUpdateDeposit({
         source: {id: -1},   
         destination: {id: uid},
         type: "Deposit",
         amount: bits,
         memo: logMemo,
+        confirmations: confirms,
         depositId: params.transaction_hash,
       }, function(err, result) {
          if (err){
@@ -333,11 +328,20 @@ exports.blockChainIn = function(req, res) {
             console.log(logMemo);
          }
       });
-      if( confirms < 60 ){
+      if( confirms < reqConfirms ){
          res.writeHead(200, {'Content-Type': 'text/plain'});
          res.end();
          return;
       }
+      api.completeDeposit({depositId: params.transaction_hash}, function(err, result){
+          if (err){
+              console.log("ERROR COMPLETING");
+          }
+          else{
+              console.log("Finished COMPLETING");
+          }
+      });
+      console.log("COMPLETING TRANSACTION");
       res.writeHead(200, {'Content-Type': 'text/plain'});
       res.write('ok');
       res.end();
@@ -396,12 +400,14 @@ exports.userInfo = function(req, res){
 
 exports.user = function(req, res){
   if (loggedIn(req)) {
-    render(req, res, {
-      //TODO for now fetch data for user from db here but in the future we want to fetch this on login and pass it around
-      base: 'accounts',
-      view: 'user',
-      title: 'My Account',
-      authenticated: true
+    api.getUser(req.user, function(err, user) {
+      render(req, res, {
+        base: 'accounts',
+        view: 'user',
+        title: 'My Account',
+        name: user.nickname,
+        authenticated: true
+      });
     });
   } else {
     res.redirect('/liftoff/login');
@@ -410,12 +416,14 @@ exports.user = function(req, res){
 
 exports.identity= function(req, res){
   if (loggedIn(req)) {
-    render(req, res, {
-
-      base: 'accounts',
-      view: 'identity',
-      title: 'Identity',
-      authenticated: true
+    api.getUser(req.user, function(err, user) {
+      render(req, res, {
+        base: 'accounts',
+        view: 'identity',
+        title: 'Identity',
+        name: user.nickname,
+        authenticated: true
+      });
     });
   } else {
     res.redirect('/liftoff/login');
@@ -425,7 +433,6 @@ exports.identity= function(req, res){
 exports.betaEmail = function(req, res){
   var UNAME = "";
   var PW = "";
-  console.log("Made it here");
   console.log(req.body.email);
   require('child_process').exec('python ~/credism/misc/sendMail.py -f '+UNAME+' -t '+req.body.email+' -p '+PW, function(err, stdout, stderr){
     console.log('stdout: ' + stdout);
@@ -447,12 +454,14 @@ exports.betaSignUp = function(req, res){
 
 exports.security= function(req, res){
   if (loggedIn(req)) {
-    render(req, res, {
-
-      base: 'accounts',
-      view: '2FA',
-      title: '2FA',
-      authenticated: true
+    api.getUser(req.user, function(err, user) {
+      render(req, res, {
+        base: 'accounts',
+        view: '2FA',
+        title: '2FA',
+        name: user.nickname,
+        authenticated: true
+      });
     });
   } else {
     res.redirect('/liftoff/login');
