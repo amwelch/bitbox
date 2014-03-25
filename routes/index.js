@@ -304,7 +304,7 @@ exports.blockChainIn = function(req, res) {
       if (user.secret != params.secret){
           console.log("MISMATCHED SECRET THIS SHOULD NEVER HAPPEN");
           res.writeHead(200, {'Content-Type': 'text/plain'});
-          res.write('ok');
+          res.write('*ok*');
           res.end();
           return;
       }
@@ -343,7 +343,7 @@ exports.blockChainIn = function(req, res) {
       });
       console.log("COMPLETING TRANSACTION");
       res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.write('ok');
+      res.write('*ok*');
       res.end();
    });
 }
