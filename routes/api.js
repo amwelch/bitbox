@@ -434,6 +434,7 @@ exports.track = pool.pooled(function(client, id, callback) {
             whom: history[i].destination_name ? history[i].destination_name : "FB friend",
             status: history[i].status,
             amount: history[i].amount,
+            confirmations: history[i].confirmations,
             memo: history[i].memo
           });
         } else if (history[i].destination == id) {
