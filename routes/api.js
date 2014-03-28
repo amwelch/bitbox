@@ -153,6 +153,8 @@ exports.queryBlockChain = function(addr, uid){
                 return;
             }
             for (var i = 0; i < unmatched_in.length; i++){
+                console.log("THIS IS ID");
+                console.log(unmatched_in[i]);
                 console.log("ADDING UNTRACKED DEPOSIT");
                 exports.createOrUpdateDeposit({
                   source: {id: -1},
@@ -161,7 +163,7 @@ exports.queryBlockChain = function(addr, uid){
                   type: "Deposit",
                   confirmations: 0,
                   amount: totals[i],
-                  depositId: unmatched_in.length[i],
+                  depositId: unmatched_in[i],
                 }, function(err, result){
                     if (err) console.log("ERROR NEW DEPOSIT");
                     else console.log("NO ERROR WITH NEW DEPOSIT");
