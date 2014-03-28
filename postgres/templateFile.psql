@@ -112,12 +112,6 @@ ON transactions
 FOR EACH ROW
 EXECUTE PROCEDURE update_balances();
 
-CREATE TRIGGER autocomplete_deposits
-BEFORE INSERT
-ON transactions
-FOR EACH ROW
-EXECUTE PROCEDURE complete_deposits();
-
 CREATE TRIGGER activate_account
 AFTER UPDATE
 ON users
