@@ -85,6 +85,91 @@ _random = function(len) {
     return crypto.randomBytes(Math.ceil(len/2)).toString('hex').slice(0,len);
 }
 
+exports.queryBlockChain = function(addr, uid){
+    url = "http://blockchain.info/address/" + addr + "?format=json";
+    var options = {
+        host: 'blockchain.info',
+        port: 443,
+        path: sprintf('/address/%s?format=json',addr),
+        method: 'GET',
+    }
+    _getJSON(options, function(statusCode, result){
+        if( statusCode != 200 ){
+            var err = "ERROR querying address";
+            console.log(err);
+            cb(err);
+        }
+        else{
+            console.log("GOT STUFF");
+            console.log(result);
+ 
+            /*First check the balance if its 0 then we can end right here*/
+            var total = parseInt(result.final_balance);
+            if (total == 0){
+                console.log("0 balance");
+                return;
+            }
+
+            //TXNS will be a list
+            var txns = result.txs;
+            var unmatched_in = [];
+            var totals = [];
+            var unmatched_out = [];
+            //We now pair up transactions in and transactions out. If we find one in without a corresponding transaction out
+            //We know the target address so we just check inputs and outputs. If we see this address in one of the two categories we know which type of transaction this is. (Caveat: its valid to include an address as an input and output but we hopefully won't see this)
+            for (var i = 0; i < txns.length; i++)
+            {        
+                var tx = txns[i];
+                var id = tx.hash;
+                for (var j = 0; j < tx.inputs.length; j++){
+                    if (tx.inputs[j].prev_out.addr == addr){
+                        unmatched_out.push(id);
+                        break;
+                    }
+                }
+                for (var j = 0; j < tx.out.length; j++){
+                    if (tx.out[j].addr == addr){
+                        unmatched_in.push(id);
+                        totals.push(parseInt(tx.out[j].value));
+                        break;
+                    }
+                }
+            }
+            //Remove hashes that appear in inputs and outputs
+            var removed = 0;
+            for (var i =0; i < unmatched_out.length; i++){
+                var j = unmatched_in.indexOf(unmatched_out[i]);
+                if ( j > -1){
+                    unmatched_in.splice(j,1);
+                    totals.splice(j,1);
+                    removed+=1;
+                }
+            }
+            console.log(unmatched_out);
+            console.log(unmatched_in);
+            console.log(removed);
+            if (removed != unmatched_out.length){
+                console.log("SOMETHING WRONG, SOME JUNK IN ADDRESS");
+                return;
+            }
+            for (var i = 0; i < unmatched_in.length; i++){
+                console.log("ADDING UNTRACKED DEPOSIT");
+                exports.createOrUpdateDeposit({
+                  source: {id: -1},
+                  destination: {id: uid},
+                  memo: "Deposit to Address: " + addr,
+                  type: "Deposit",
+                  confirmations: 0,
+                  amount: totals[i],
+                  depositId: unmatched_in.length[i],
+                }, function(err, result){
+                    if (err) console.log("ERROR NEW DEPOSIT");
+                    else console.log("NO ERROR WITH NEW DEPOSIT");
+                });
+            }
+        }
+    });
+}
 _getJSON = function(options, onResult){
     var prot = options.port == 443 ? https : http;
     console.log(options);

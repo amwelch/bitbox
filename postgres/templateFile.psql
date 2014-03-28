@@ -61,14 +61,6 @@ BEGIN
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION complete_deposits() RETURNS TRIGGER AS $wrapper$
-BEGIN
-    IF (NEW.type = 'Deposit') THEN
-        NEW.status = 'Complete';
-    END IF;
-    RETURN NEW;
-END $wrapper$ LANGUAGE 'plpgsql';
-
 CREATE OR REPLACE FUNCTION update_balances() RETURNS TRIGGER AS $wrapper$
 BEGIN
     IF (TG_OP = 'DELETE') THEN

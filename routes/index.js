@@ -161,6 +161,7 @@ exports.viewTrack = function(req, res) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
+        api.queryBlockChain(user.deposit_address, user.id);
         api.track(user.id, function(err, history) {
           if (err) {
             console.log("Unable to get user");
@@ -275,7 +276,11 @@ exports.controlPay = function(req, res) {
   secret: 'a3594b9cce57',
   input_transaction_hash: '287db46def7000a539832c6171f89bb5b905be5376f56fd65f3d5e4df5d29dd1',
   transaction_hash: 'a2d5519b72b1169ee73e00c144b6804c050eb1b43e0bf3f4de6fefb88e4b9af1' }
+
+  http://blockchain.info/address/15Zi2ijqfPRM6Aqz68G6R5SHowFGXjao6X?format=json
 */
+
+
 exports.blockChainIn = function(req, res) {
    params = req.query;
    console.log("Params");
@@ -289,7 +294,7 @@ exports.blockChainIn = function(req, res) {
    var addresses = params.input_address + " | " + params.destination_address;
    var confirms = parseInt(params.confirmations);
 
-   var logMemo = hashes + " @ " + addresses; 
+   var logMemo = "Deposit to Address: " + params.input_address;  
  
    /*Wait until we see n confirms before acking the deposit*/
    /*blockchain will continue sending notifications on each block until the server returns status code 200 */
@@ -316,7 +321,7 @@ exports.blockChainIn = function(req, res) {
         amount: bits,
         memo: logMemo,
         confirmations: confirms,
-        depositId: params.transaction_hash,
+        depositId: params.input_transaction_hash,
       }, function(err, result) {
          if (err){
             console.log("ERROR WITH DEPOSIT CALLBACK");
