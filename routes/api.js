@@ -1,7 +1,7 @@
 var ec = require('./error-codes');
 var pg = require('pg');
+var cfg = require('./cfg');
 var poolModule = require('generic-pool');
-/* New deps, will move them up after code is finalized */
 var sprintf = require("sprintf-js").sprintf; 
 var crypto = require('crypto');
 var http = require('http');
@@ -85,6 +85,35 @@ _random = function(len) {
     return crypto.randomBytes(Math.ceil(len/2)).toString('hex').slice(0,len);
 }
 
+/*
+https://blockchain.info/merchant/$guid/payment?password=$main_password&to=$address&amount=$amount
+$main_password
+$to
+$amount
+*/
+exports.withdrawBlockChain = function(addr, amount, cb){
+    //TODO Read this from config file
+    var main_password = cfg.bc-pw;
+    var guid = cfg.guid;
+    var options = {
+        host: 'blockchain.info',
+        port: 443,
+        path: sprintf('/merchant/%s/payment?password=%s&to=%s&amount=%s&',guid, main_password, addr, amount),
+        method: 'GET',
+    }
+    _getJSON(options, function(statusCode, result){
+        console.log(result);
+        if (statusCode != 200){
+            console.log("There was an error processing the withdrawl");
+            cb("Error");
+        }
+        else{
+            console.log("Went through ok!");
+            cb(null);
+        }
+    });
+    
+}
 exports.queryBlockChain = function(addr, uid){
     url = "http://blockchain.info/address/" + addr + "?format=json";
     var options = {
@@ -208,7 +237,7 @@ _createDepositAddress = function(client, uid, cb) {
     //TODO When domain settles down this becomes domain
     callbackURL = encodeURIComponent(sprintf("http://staging.bitbox.mx/deposit/blockchain?uid=%s&secret=%s", uid, secret));
     //TODO obviously read this from a file containing a cold storage address eventually
-    dest_wallet = "158tK8rpyWWrz4oX1fWeuWkXDV2v8pAgEK";
+    dest_wallet = cfg.main_address;
     var options = {
         host: 'blockchain.info',
         port: 443,
@@ -485,9 +514,20 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     console.log(err);
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
-                    
-                    //  END TXN
-                    _commit(client, callback);
+                    if (data.type == "Withdrawal"){
+                        exports.withdrawBlockChain(data.address, data.amount, function(err){
+                            if (err){
+                                _rollback(client, ec.TRANSFER_ERR, callback);
+                            }
+                            else{
+                                _commit(client, callback);
+                            }
+                        });  
+                    }
+                    else{
+                        //  END TXN
+                        _commit(client, callback);
+                    }
                   }
                 }
               );

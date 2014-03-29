@@ -286,6 +286,10 @@ exports.blockChainIn = function(req, res) {
    console.log("Params");
    console.log(params);
 
+   if (params.test){
+       console.log("Test callback, ignoring");
+   }
+
    var uid = params.uid;
    var secret = params.secret;
    /*Keep the hashes around for loggin*/
@@ -333,7 +337,8 @@ exports.blockChainIn = function(req, res) {
             console.log(logMemo);
          }
       });
-      if( confirms < reqConfirms ){
+      if( parseInt(confirms) < reqConfirms ){
+         console.log("NOT ENOUGH CONFIRMS");
          res.writeHead(200, {'Content-Type': 'text/plain'});
          res.end();
          return;
@@ -375,14 +380,21 @@ exports.controlDeposit = function(req, res) {
 };
 
 exports.controlWithdraw = function(req, res) {
-  if (loggedIn(req)) {
 
+  //Add in miner tax
+  console.log("Before Tax " + req.body.withdraw.amount);
+  var amount = parseInt(req.body.withdraw.amount) + 50000;
+
+  console.log("Withdrawing " + amount);
+
+  if (loggedIn(req)) {
     api.transfer({
       source: { id: req.user.id },
       destination: { id: -1 },
       type: "Withdrawal",
-      amount: req.body.withdraw.amount,
-      memo: req.body.withdraw.address
+      amount: amount,
+      address: req.body.withdraw.address,
+      memo: "Withdrawing to: " + req.body.withdraw.address
     }, function(err, data) {
       if (err) {
         res.redirect('/transfer/withdraw?success=false');
