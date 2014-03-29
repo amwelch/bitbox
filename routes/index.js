@@ -302,7 +302,7 @@ exports.blockChainIn = function(req, res) {
  
    /*Wait until we see n confirms before acking the deposit*/
    /*blockchain will continue sending notifications on each block until the server returns status code 200 */
-   var reqConfirms = 60;
+   var reqConfirms = 6;
    console.log("GETTING USER WITH ID " + uid);
    api.getUser({id:uid}, function(err, user) {
       console.log("Got user ");
