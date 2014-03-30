@@ -1,7 +1,4 @@
 <script>
-    var setCurrency = function(name){
-        $.cookie('currency-display', name);
-    }
     //Takes bits as a number and outputs the currency we display
     var currencyOutput = function(bits){
         var outStr = "";
@@ -25,16 +22,4 @@
         console.log("Output: " + outStr);
         return outStr;
     }
-    $("#USD-select").click(function(){
-        setCurrency("usd");
-        location.reload();
-    });
-    $("#BTC-select").click(function(){
-        setCurrency("bitcoin");
-        location.reload();
-    });
-    $("#SATOSHI-select").click(function(){
-        setCurrency("satoshi");
-        location.reload();
-    });
 </script>

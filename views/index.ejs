@@ -90,5 +90,8 @@
     <script src="/bootstrap/bootstrap.min.js"></script>
     <script src="/bootstrap/docs.min.js"></script>
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
+    <% if (authenticated) { %>
+      <%- include generic/in/nav-scripts.ejs %>
+    <% } %>
   </body>
 </html>
