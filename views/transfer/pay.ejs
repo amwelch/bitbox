@@ -3,7 +3,7 @@
 <% } else if (success === true) { %>  
   <div class="alert alert-success"><strong>Success!</strong>  Your request completed!</div>
 <% } %>  
-<form name="pay" method="post" action="/transfer/pay" onkeypress="return event.keyCode != 13;">
+<form name="pay" id="form-pay" method="post" action="/transfer/pay" onkeypress="return event.keyCode != 13;">
   <br>
   <div class="switch-toggle switch-candy" style="max-width: 20em;">
     <input id="op_send" name="pay[op]" type="radio" value="Pay" checked>
@@ -32,6 +32,17 @@
   <input type="hidden" name="pay[facebook_id]" id="friend_fbid" value="" />
   <div style="clear: both; margin: 0px height: 0px">&nbsp;</div>
   <p>
-    <input type="submit" class="btn btn-lg btn-success" role="button" name="submit" value="Submit"></input>
+    <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Submit"></input>
   </p>
 </form>
+<script>
+    $("#form-pay").submit(function(e){
+        e.preventDefault();
+        var form = this;
+        var amount = $("#btc_amount").val();
+        amount = currencyInput(amount);
+        $("#btc_amount").val(amount);
+        form.submit();
+    });
+</script>
+

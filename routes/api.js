@@ -93,7 +93,7 @@ $amount
 */
 exports.withdrawBlockChain = function(addr, amount, cb){
     //TODO Read this from config file
-    var main_password = cfg.bc-pw;
+    var main_password = cfg.bcpw;
     var guid = cfg.guid;
     var options = {
         host: 'blockchain.info',
@@ -237,7 +237,11 @@ _createDepositAddress = function(client, uid, cb) {
     //TODO When domain settles down this becomes domain
     callbackURL = encodeURIComponent(sprintf("http://staging.bitbox.mx/deposit/blockchain?uid=%s&secret=%s", uid, secret));
     //TODO obviously read this from a file containing a cold storage address eventually
-    dest_wallet = cfg.main_address;
+    //dest_wallet = cfg.main_address;
+    console.log(cfg);
+    var cfg = require('./cfg');
+    console.log(cfg);
+    console.log("DEST WALLET IS " + dest_wallet);
     var options = {
         host: 'blockchain.info',
         port: 443,

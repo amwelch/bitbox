@@ -1,5 +1,25 @@
 <script>
-    //Takes bits as a number and outputs the currency we display
+    //Takes input in currency entered and converts it to Satoshis
+    var currencyInput = function(amount){
+        var satoshis = 0;
+        var num_amount = parseFloat(amount);
+        var btc_to_usd = <%= bitbox_btc_to_usd %>
+        var satoshi_to_btc = 0.00000001;
+        var currency = $.cookie('currency-display');
+        if (currency == "usd"){
+            satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
+        }
+        else if(currency == "bitcoin"){
+            satoshis = parseInt(num_amount / satoshi_to_bc);
+        }
+        else {
+            //If its in satoshis we don't have to do anything
+            satoshis = parseInt(num_amount);
+        }
+        console.log("Returning: " + satoshis);
+        return satoshis;
+    }
+    //Takes Satoshis as a number and outputs the currency we display
     var currencyOutput = function(bits){
         var outStr = "";
         var btc_to_usd = <%= bitbox_btc_to_usd %>
