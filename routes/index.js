@@ -2,6 +2,8 @@
 var http = require('http');
 var api = require('./api');
 var ec = require('./error-codes');
+var redis = require("redis");
+var redis_client = redis.createClient();
 exports.api = api;
 
 
@@ -18,19 +20,27 @@ function render(req, res, content) {
     success = null;
   }
 
-  var params = {
-    success: success
-  };
-
-  for (var key in content) {
-    // important check that this is objects own property 
-    // not from prototype prop inherited
-    if(content.hasOwnProperty(key)) {
-      params[key] = content[key];
-    }
-  }
-
-  res.render('index', params);
+  redis_client.get("bitbox_btc_to_usd", function(err, conversion){
+      if(err){
+          console.log("ERROR IS err: " + err);
+      }
+      else{
+       console.log("GOT CONVERSION: " + conversion);
+       var params = {
+         success: success,
+         bitbox_btc_to_usd: conversion,
+       };
+       
+       for (var key in content) {
+         // important check that this is objects own property 
+         // not from prototype prop inherited
+         if(content.hasOwnProperty(key)) {
+           params[key] = content[key];
+         }
+       }
+       res.render('index', params);
+     }
+  });
 
 };
 
