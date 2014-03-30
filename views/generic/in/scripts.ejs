@@ -1,0 +1,40 @@
+<script>
+    var setCurrency = function(name){
+        $.cookie('currency-display', name);
+    }
+    //Takes bits as a number and outputs the currency we display
+    var currencyOutput = function(bits){
+        var outStr = "";
+        var btc_to_usd = <%= bitbox_btc_to_usd %>
+        var satoshi_to_btc = 0.00000001;
+        var currency = $.cookie('currency-display');
+        console.log("CURRENCY IS " + currency);
+        if (currency == "usd"){
+            var total = Number((bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
+            console.log("!Converting to USD rate: " + btc_to_usd);
+            outStr = total + " Dollars";
+        }
+        else if (currency == "satoshi"){
+            console.log("Converting to Satoshi");
+            outStr = bits + " Satoshis";
+        }
+        else {
+            console.log("Defaulting to BTC");
+            outStr = Number((bits*satoshi_to_btc).toFixed(5)) + " BTC";
+        }
+        console.log("Output: " + outStr);
+        return outStr;
+    }
+    $("#USD-select").click(function(){
+        setCurrency("usd");
+        location.reload();
+    });
+    $("#BTC-select").click(function(){
+        setCurrency("bitcoin");
+        location.reload();
+    });
+    $("#SATOSHI-select").click(function(){
+        setCurrency("satoshi");
+        location.reload();
+    });
+</script>
