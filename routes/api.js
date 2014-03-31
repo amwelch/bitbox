@@ -334,7 +334,6 @@ _createUser = function(client, data, callback) {
     }
   );
 };
-
 exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
   var select = null;
   var values = null;
@@ -376,7 +375,6 @@ exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
     }
   });
 });
-
 
 
 exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, callback) {
@@ -438,6 +436,25 @@ exports.completeDeposit = pool.pooled(function(client, data, callback) {
        });
      }
    });
+});
+
+exports.updateUser = pool.pooled(function(client, data, callback) {
+  _begin(client, function(err, result){
+    if (err){
+      _rollback(client, err, callback);
+    } else {
+      client.query("UPDATE users set facebookPost=$1,nickname=$2 where id=$3", [data.facebookPost, data.nickname, data.id], function(err, result){
+       if (err){
+         console.log("error updating user data");
+         _rollback(client, err, callback);
+       }
+       else{
+         console.log("successfully updated user data")
+         _commit(client, callback);
+       }
+      });
+    }
+  });    
 });
 
 exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {

@@ -172,7 +172,7 @@ app.get('/deposit/blockchain', routes.blockChainIn);
 app.get('/transfer', routes.transfer);
 
 app.get('/accounts/user', routes.user);
-app.post('/accounts/user', postLater);
+app.post('/accounts/user', routes.controlUser);
 
 app.get('/accounts/security', routes.security);
 app.post('/accounts/security', postLater);

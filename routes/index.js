@@ -527,3 +527,29 @@ exports.lobby = function(req, res) {
     title: 'Lobby'
   });
 }
+/*{ displayname: 'Test123', pay: { op: 'true' } }*/
+exports.controlUser = function(req, res){
+  if (loggedIn(req)){
+      api.getUser(req.user, function(err, user){
+          var name = req.body.displayname;
+          if (!name){
+              name = user.nickname;
+          }
+          var data={
+            id: req.user.id,
+            facebookPost: req.body.post.op,
+            nickname: name
+          }
+          api.updateUser(data, function(err){
+              if (err){
+                  res.redirect('/accounts/user?success=false');
+              }
+              else{
+                  res.redirect('/accounts/user?success=true');
+              }
+          });
+      });
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};
