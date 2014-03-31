@@ -25,6 +25,7 @@ CREATE TABLE users (
     firstname VARCHAR(100) DEFAULT NULL, 
     lastname VARCHAR(100) DEFAULT NULL, 
     nickname VARCHAR(200) NOT NULL,
+    facebookPost boolean DEFAULT false,
     status ACCOUNT_STATE NOT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     facebook_id NUMERIC(20) UNIQUE DEFAULT NULL,

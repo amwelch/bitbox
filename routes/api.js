@@ -81,14 +81,27 @@ _rollback = function(client, error_code, callback) {
   });
 };
 
-exports.facebookPost = function(accessToken,body ){
+exports.facebookPost = function(accessToken,body,uid ){
    fb.setAccessToken(accessToken);
-   fb.api('me/feed', 'post', {message: body}, function (res) {
-       if (!res || res.error){
-           console.log(!res ? 'error occurred' : res.error);
-           return;
+   exports.getUser({id:uid}, function(err, user) {
+       if (err){
+           console.log("ERROR GETTING USER");
        }
-       console.log("Worked with post id: " + res.id);
+       else{
+           console.log("Facebook permission: " + user.facebookPost);
+           if (user.facebookPost != "true"){
+               console.log("No Post Permission for this user");
+           }
+           else{
+               fb.api('me/feed', 'post', {message: body}, function (res) {
+                   if (!res || res.error){
+                       console.log(!res ? 'error occurred' : res.error);
+                       return;
+                   }
+                   console.log("Worked with post id: " + res.id);
+               });
+           }
+       }
    });
 }
 
@@ -356,6 +369,7 @@ exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
         facebook_id: row.facebook_id,
         deposit_address: row.deposit_address,
         secret: row.secret,
+        facebookPost: row.facebookpost,
         balance: row.balance
       };
       callback(null, user);
@@ -517,13 +531,14 @@ exports.transfer = pool.pooled(function(client, data, callback) {
               _rollback(client, err, callback);
             } else {
               //  TRANSFER FUNDS
-              client.query("INSERT INTO transactions (source, destination, amount, memo, type) VALUES ($1, $2, $3, $4, $5)", 
+              client.query("INSERT INTO transactions (source, destination, amount, memo, type, confirmations) VALUES ($1, $2, $3, $4, $5, $6)", 
                 [
                   source.id,
                   destination.id,
                   data.amount,
                   data.memo,
                   data.type,
+                  -1
                 ], 
                 function(err, result) {
                   if (err) {

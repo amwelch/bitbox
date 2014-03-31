@@ -49,4 +49,11 @@
        $(this).html(val);
        console.log("value: " + val);
    });
+   //Convert all -1 to n/a
+   $("#track-table").find("td:nth-child(7)").each(function () {
+       var val = parseInt($(this).html());
+       if (val < 0 ){
+           $(this).html("n/a");
+       }
+   });
 </script>

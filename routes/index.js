@@ -274,7 +274,7 @@ exports.controlPay = function(req, res) {
                 else{
                     var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
                     message = "I just sent " + btc_total +" BTC ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
-                    api.facebookPost(req.session.accessToken, message);
+                    api.facebookPost(req.session.accessToken, message, req.user.id);
                     res.redirect('/transfer/pay?success=true');
                 }
             });
