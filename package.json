@@ -6,6 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "fb": "*",
     "express": "3.4.0",
     "ejs": "*",
     "stylus": "*",

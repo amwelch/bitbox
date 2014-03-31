@@ -5,6 +5,7 @@ var poolModule = require('generic-pool');
 var sprintf = require("sprintf-js").sprintf; 
 var crypto = require('crypto');
 var http = require('http');
+var fb = require('fb');
 var https = require('https');
 var pool = poolModule.Pool({
 
@@ -80,10 +81,23 @@ _rollback = function(client, error_code, callback) {
   });
 };
 
+exports.facebookPost = function(accessToken){
+   console.log("Posting to fb");
+   fb.setAccessToken(accessToken);
+   var body = "Test post with facebook-node-sdk";
+   fb.api('me/feed', 'post', {message: body}, function (res) {
+       if (!res || res.error){
+           console.log(!res ? 'error occurred' : res.error);
+           return;
+       }
+       console.log("Worked with post id: " + res.id);
+   });
+}
 
 _random = function(len) {
     return crypto.randomBytes(Math.ceil(len/2)).toString('hex').slice(0,len);
 }
+
 
 /*
 https://blockchain.info/merchant/$guid/payment?password=$main_password&to=$address&amount=$amount
@@ -93,6 +107,8 @@ $amount
 */
 exports.withdrawBlockChain = function(addr, amount, cb){
     //TODO Read this from config file
+    console.log("CONFIG IS ");
+    console.log(cfg);
     var main_password = cfg.bcpw;
     var guid = cfg.guid;
     var options = {
@@ -237,10 +253,8 @@ _createDepositAddress = function(client, uid, cb) {
     //TODO When domain settles down this becomes domain
     callbackURL = encodeURIComponent(sprintf("http://staging.bitbox.mx/deposit/blockchain?uid=%s&secret=%s", uid, secret));
     //TODO obviously read this from a file containing a cold storage address eventually
-    //dest_wallet = cfg.main_address;
     console.log(cfg);
-    var cfg = require('./cfg');
-    console.log(cfg);
+    dest_wallet = cfg.main_address;
     console.log("DEST WALLET IS " + dest_wallet);
     var options = {
         host: 'blockchain.info',

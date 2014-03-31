@@ -3,9 +3,10 @@ var http = require('http');
 var api = require('./api');
 var ec = require('./error-codes');
 var redis = require("redis");
+var cfg = require('./cfg');
+
 var redis_client = redis.createClient();
 exports.api = api;
-
 
 //HELPER FUNCTIONS
 
@@ -417,6 +418,13 @@ exports.controlWithdraw = function(req, res) {
   }
 };
 
+
+exports.fb_test = function(req, res){
+    console.log("Test is go");
+    console.log("Token: " + req.session.accessToken);
+    api.facebookPost(req.session.accessToken);
+    res.redirect('/');
+}
 exports.userInfo = function(req, res){
   if (loggedIn(req)) {
       res.json(req.user);

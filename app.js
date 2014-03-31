@@ -86,6 +86,7 @@ if (dev){
     clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
     clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
     callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
+    passReqToCallback: true
   };
 }
 else{
@@ -93,11 +94,13 @@ else{
     clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
     clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
     callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
+    passReqToCallback: true
   };
 }
 passport.use( 
   new FacebookStrategy(strat,
-  function(accessToken, refreshToken, profile, done) {
+  function(req, accessToken, refreshToken, profile, done) {
+    req.session.accessToken = accessToken;
     var data = {
       email: profile.emails[0].value,
       firstname: profile.name.givenName,
@@ -136,7 +139,7 @@ var postLater = function(req, res) {
 //  Facebook Login. Loops back to ./callback
 app.get('/liftoff/login/facebook',
   passport.authenticate('facebook', { 
-    scope: 'email',
+    scope: ['email', 'publish_actions'],
     display: 'popup',
     authType: 'reauthenticate'
   })
@@ -187,6 +190,7 @@ app.get('/liftoff/login', routes.index);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
+app.get('/testFacebookPost', routes.fb_test);
 
 if (dev){
   var port = process.env.PORT || 3000;
