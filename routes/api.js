@@ -81,10 +81,8 @@ _rollback = function(client, error_code, callback) {
   });
 };
 
-exports.facebookPost = function(accessToken){
-   console.log("Posting to fb");
+exports.facebookPost = function(accessToken,body ){
    fb.setAccessToken(accessToken);
-   var body = "Test post with facebook-node-sdk";
    fb.api('me/feed', 'post', {message: body}, function (res) {
        if (!res || res.error){
            console.log(!res ? 'error occurred' : res.error);

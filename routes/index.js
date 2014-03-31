@@ -261,7 +261,23 @@ exports.controlPay = function(req, res) {
           if (err) {
             res.redirect('/transfer/pay?success=false');
           } else {
-            res.redirect('/transfer/pay?success=true');
+            //TODO ALLOW THE USER TO TURN OFF POSTING TO WALL
+            //Need to submit app for review before we can tag peopl
+            //var user_string = "@["+req.body.pay.facebook_id+":1:"+nickname+"]";
+            var user_string = nickname;
+            console.log("Using: " + user_string);
+            var btc_total = Number((req.body.pay.amount*0.00000001).toFixed(4));
+            redis_client.get("bitbox_btc_to_usd", function(err, conversion){
+                if(err){
+                    console.log("ERROR IS err: " + err);
+                }
+                else{
+                    var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
+                    message = "I just sent " + btc_total +" BTC ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
+                    api.facebookPost(req.session.accessToken, message);
+                    res.redirect('/transfer/pay?success=true');
+                }
+            });
           }
         });
       }
