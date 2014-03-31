@@ -6,6 +6,8 @@ var sprintf = require("sprintf-js").sprintf;
 var crypto = require('crypto');
 var http = require('http');
 var https = require('https');
+var connections = require('../app').connections;
+
 var pool = poolModule.Pool({
 
     name: 'postgres',

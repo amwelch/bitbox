@@ -45,6 +45,12 @@ var ec = require('./routes/error-codes');
 var app = express();  
 app.configure(function() {
   app.use(express.favicon());
+  if(dev) {
+    app.set('port', process.env.PORT || 3000);
+  }
+  else {
+    app.set('port', process.env.PORT || 443);
+  }
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(express.static('public'));
@@ -127,6 +133,20 @@ passport.use(
   })
 );
 
+//  ------- Sockets Configuration -------
+// Sockets used for notifications
+// TODO: we need to use https for the sockets as well
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server);
+
+// This is a dictionary were we save the socket connections
+// of the clients to the server
+var connections = {}
+exports.connections = connections;
+
+// Handlers for socket events
+var sio = require('./routes/socket');
+
 //  ------- Rendering Configuration -------
 var postLater = function(req, res) {
   console.log("Endpoint not implemented: "+req.url);
@@ -187,12 +207,17 @@ app.get('/liftoff/login', routes.index);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
+// Sockets
+io.sockets.on('connection', sio.socket_connection);
+
 
 if (dev){
-  var port = process.env.PORT || 3000;
-  app.listen(port, function() {
-    console.log('Listening on ' + port)
+  server.listen(app.get('port'), function() {
+    console.log('Bitbox server listening on port ' + app.get('port'));
   });
+  // app.listen(port, function() {
+  //   console.log('Listening on ' + port)
+  // });
 }
 else{
   /*app.use(requireHTTPS);
@@ -200,9 +225,11 @@ else{
       key: fs.readFileSync('/keykeeper.pem'),
       cert: fs.readFileSync('/bbcsr.pem'),
   }*/
-  var port = process.env.PORT || 443;
   //https.createServer(options, app).listen(port, ip, function() {
-  app.listen(port, ip, function() {
-    console.log('Listening on ' + port);
+  // app.listen(port, ip, function() {
+  //   console.log('Listening on ' + port);
+  // });
+  server.listen(app.get('port'), ip, function() {
+    console.log('Bitbox server listening on port ' + app.get('port'));
   });
 }

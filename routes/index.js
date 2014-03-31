@@ -4,6 +4,7 @@ var api = require('./api');
 var ec = require('./error-codes');
 exports.api = api;
 
+var connections = require('../app').connections;
 
 //HELPER FUNCTIONS
 
@@ -248,8 +249,13 @@ exports.controlPay = function(req, res) {
         function(err, result) {
           if (err) {
             res.redirect('/transfer/pay?success=false');
-          } else {
-            res.redirect('/transfer/pay?success=true');
+          } else {            
+            api.getUser({facebook_id: req.body.pay.facebook_id}, function(err, dst_user) {
+              if(err != ec.USER_NOT_FOUND && connections[dst_user.id]) {
+                connections[dst_user.id].emit('notification')
+              }
+              res.redirect('/transfer/pay?success=true');
+            });
           }
         });
       }
