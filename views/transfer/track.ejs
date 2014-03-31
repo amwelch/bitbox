@@ -1,5 +1,5 @@
-<div class="table-responsive">
-  <table class="table table-striped">
+<div class="table-responsive" style="display:hidden;">
+  <table id="track-table" class="table table-striped">
     <thead>
       <tr>
         <th>With</th>
@@ -17,7 +17,7 @@
         <td><%= history[i].whom %></td>
         <td><%= history[i].action %></td>
         <td><%= history[i].status %></td>
-        <td><%= history[i].amount %> Bits</td>
+        <td><%= history[i].amount %></td>
         <td><%= history[i].memo %></td>
         <td><%= history[i].date %></td>
         <td><%= history[i].confirmations %></td>
@@ -26,3 +26,27 @@
     </tbody>
   </table>
 </div>
+<script>
+   var conversion_factor = 0;
+   var currency = $.cookie('currency-display');
+   var name = "";
+   if (currency == "usd"){
+       var btc_to_usd = <%= bitbox_btc_to_usd %>;
+       conversion_factor = (1.0/0.00000001)*btc_to_usd;
+       name = "USD";
+   }
+   else if (currency == "bitcoin"){
+       conversion_factor = 1.0/0.00000001;
+       name = "BTC";
+   }
+   else{
+       conversion_factor = 1.0;
+       name = "Satoshis";
+   }
+   $("#track-table").find("td:nth-child(4)").each(function () {
+       var val = parseInt($(this).html());
+       val = currencyOutput(val);
+       $(this).html(val);
+       console.log("value: " + val);
+   });
+</script>

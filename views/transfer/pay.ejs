@@ -40,7 +40,9 @@
         e.preventDefault();
         var form = this;
         var amount = $("#btc_amount").val();
+        console.log("Before: " + amount);
         amount = currencyInput(amount);
+        console.log("After: " + amount);
         $("#btc_amount").val(amount);
         form.submit();
     });
