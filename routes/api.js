@@ -1,10 +1,11 @@
 var ec = require('./error-codes');
 var pg = require('pg');
+var cfg = require('./cfg');
 var poolModule = require('generic-pool');
-/* New deps, will move them up after code is finalized */
 var sprintf = require("sprintf-js").sprintf; 
 var crypto = require('crypto');
 var http = require('http');
+var fb = require('fb');
 var https = require('https');
 var connections = require('../app').connections;
 
@@ -82,11 +83,153 @@ _rollback = function(client, error_code, callback) {
   });
 };
 
+exports.facebookPost = function(accessToken,body,uid ){
+   fb.setAccessToken(accessToken);
+   exports.getUser({id:uid}, function(err, user) {
+       if (err){
+           console.log("ERROR GETTING USER");
+       }
+       else{
+           console.log("Facebook permission: " + user.facebookPost);
+           if (user.facebookPost != "true"){
+               console.log("No Post Permission for this user");
+           }
+           else{
+               fb.api('me/feed', 'post', {message: body}, function (res) {
+                   if (!res || res.error){
+                       console.log(!res ? 'error occurred' : res.error);
+                       return;
+                   }
+                   console.log("Worked with post id: " + res.id);
+               });
+           }
+       }
+   });
+}
 
 _random = function(len) {
     return crypto.randomBytes(Math.ceil(len/2)).toString('hex').slice(0,len);
 }
 
+
+/*
+https://blockchain.info/merchant/$guid/payment?password=$main_password&to=$address&amount=$amount
+$main_password
+$to
+$amount
+*/
+exports.withdrawBlockChain = function(addr, amount, cb){
+    //TODO Read this from config file
+    console.log("CONFIG IS ");
+    console.log(cfg);
+    var main_password = cfg.bcpw;
+    var guid = cfg.guid;
+    var options = {
+        host: 'blockchain.info',
+        port: 443,
+        path: sprintf('/merchant/%s/payment?password=%s&to=%s&amount=%s&',guid, main_password, addr, amount),
+        method: 'GET',
+    }
+    _getJSON(options, function(statusCode, result){
+        console.log(result);
+        if (statusCode != 200){
+            console.log("There was an error processing the withdrawl");
+            cb("Error");
+        }
+        else{
+            console.log("Went through ok!");
+            cb(null);
+        }
+    });
+    
+}
+exports.queryBlockChain = function(addr, uid){
+    url = "http://blockchain.info/address/" + addr + "?format=json";
+    var options = {
+        host: 'blockchain.info',
+        port: 443,
+        path: sprintf('/address/%s?format=json',addr),
+        method: 'GET',
+    }
+    _getJSON(options, function(statusCode, result){
+        if( statusCode != 200 ){
+            var err = "ERROR querying address";
+            console.log(err);
+            cb(err);
+        }
+        else{
+            console.log("GOT STUFF");
+            console.log(result);
+ 
+            /*First check the balance if its 0 then we can end right here*/
+            var total = parseInt(result.final_balance);
+            if (total == 0){
+                console.log("0 balance");
+                return;
+            }
+
+            //TXNS will be a list
+            var txns = result.txs;
+            var unmatched_in = [];
+            var totals = [];
+            var unmatched_out = [];
+            //We now pair up transactions in and transactions out. If we find one in without a corresponding transaction out
+            //We know the target address so we just check inputs and outputs. If we see this address in one of the two categories we know which type of transaction this is. (Caveat: its valid to include an address as an input and output but we hopefully won't see this)
+            for (var i = 0; i < txns.length; i++)
+            {        
+                var tx = txns[i];
+                var id = tx.hash;
+                for (var j = 0; j < tx.inputs.length; j++){
+                    if (tx.inputs[j].prev_out.addr == addr){
+                        unmatched_out.push(id);
+                        break;
+                    }
+                }
+                for (var j = 0; j < tx.out.length; j++){
+                    if (tx.out[j].addr == addr){
+                        unmatched_in.push(id);
+                        totals.push(parseInt(tx.out[j].value));
+                        break;
+                    }
+                }
+            }
+            //Remove hashes that appear in inputs and outputs
+            var removed = 0;
+            for (var i =0; i < unmatched_out.length; i++){
+                var j = unmatched_in.indexOf(unmatched_out[i]);
+                if ( j > -1){
+                    unmatched_in.splice(j,1);
+                    totals.splice(j,1);
+                    removed+=1;
+                }
+            }
+            console.log(unmatched_out);
+            console.log(unmatched_in);
+            console.log(removed);
+            if (removed != unmatched_out.length){
+                console.log("SOMETHING WRONG, SOME JUNK IN ADDRESS");
+                return;
+            }
+            for (var i = 0; i < unmatched_in.length; i++){
+                console.log("THIS IS ID");
+                console.log(unmatched_in[i]);
+                console.log("ADDING UNTRACKED DEPOSIT");
+                exports.createOrUpdateDeposit({
+                  source: {id: -1},
+                  destination: {id: uid},
+                  memo: "Deposit to Address: " + addr,
+                  type: "Deposit",
+                  confirmations: 0,
+                  amount: totals[i],
+                  depositId: unmatched_in[i],
+                }, function(err, result){
+                    if (err) console.log("ERROR NEW DEPOSIT");
+                    else console.log("NO ERROR WITH NEW DEPOSIT");
+                });
+            }
+        }
+    });
+}
 _getJSON = function(options, onResult){
     var prot = options.port == 443 ? https : http;
     console.log(options);
@@ -123,7 +266,9 @@ _createDepositAddress = function(client, uid, cb) {
     //TODO When domain settles down this becomes domain
     callbackURL = encodeURIComponent(sprintf("http://staging.bitbox.mx/deposit/blockchain?uid=%s&secret=%s", uid, secret));
     //TODO obviously read this from a file containing a cold storage address eventually
-    dest_wallet = "158tK8rpyWWrz4oX1fWeuWkXDV2v8pAgEK";
+    console.log(cfg);
+    dest_wallet = cfg.main_address;
+    console.log("DEST WALLET IS " + dest_wallet);
     var options = {
         host: 'blockchain.info',
         port: 443,
@@ -191,7 +336,6 @@ _createUser = function(client, data, callback) {
     }
   );
 };
-
 exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
   var select = null;
   var values = null;
@@ -226,13 +370,13 @@ exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
         facebook_id: row.facebook_id,
         deposit_address: row.deposit_address,
         secret: row.secret,
+        facebookPost: row.facebookpost,
         balance: row.balance
       };
       callback(null, user);
     }
   });
 });
-
 
 
 exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, callback) {
@@ -294,6 +438,25 @@ exports.completeDeposit = pool.pooled(function(client, data, callback) {
        });
      }
    });
+});
+
+exports.updateUser = pool.pooled(function(client, data, callback) {
+  _begin(client, function(err, result){
+    if (err){
+      _rollback(client, err, callback);
+    } else {
+      client.query("UPDATE users set facebookPost=$1,nickname=$2 where id=$3", [data.facebookPost, data.nickname, data.id], function(err, result){
+       if (err){
+         console.log("error updating user data");
+         _rollback(client, err, callback);
+       }
+       else{
+         console.log("successfully updated user data")
+         _commit(client, callback);
+       }
+      });
+    }
+  });    
 });
 
 exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
@@ -387,22 +550,34 @@ exports.transfer = pool.pooled(function(client, data, callback) {
               _rollback(client, err, callback);
             } else {
               //  TRANSFER FUNDS
-              client.query("INSERT INTO transactions (source, destination, amount, memo, type) VALUES ($1, $2, $3, $4, $5)", 
+              client.query("INSERT INTO transactions (source, destination, amount, memo, type, confirmations) VALUES ($1, $2, $3, $4, $5, $6)", 
                 [
                   source.id,
                   destination.id,
                   data.amount,
                   data.memo,
                   data.type,
+                  -1
                 ], 
                 function(err, result) {
                   if (err) {
                     console.log(err);
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
-                    
-                    //  END TXN
-                    _commit(client, callback);
+                    if (data.type == "Withdrawal"){
+                        exports.withdrawBlockChain(data.address, data.amount, function(err){
+                            if (err){
+                                _rollback(client, ec.TRANSFER_ERR, callback);
+                            }
+                            else{
+                                _commit(client, callback);
+                            }
+                        });  
+                    }
+                    else{
+                        //  END TXN
+                        _commit(client, callback);
+                    }
                   }
                 }
               );
@@ -436,6 +611,7 @@ exports.track = pool.pooled(function(client, id, callback) {
             whom: history[i].destination_name ? history[i].destination_name : "FB friend",
             status: history[i].status,
             amount: history[i].amount,
+            confirmations: history[i].confirmations,
             memo: history[i].memo
           });
         } else if (history[i].destination == id) {
@@ -445,6 +621,7 @@ exports.track = pool.pooled(function(client, id, callback) {
             whom: history[i].source_name ? history[i].source_name : "FB friend",
             status: history[i].status,
             amount: history[i].amount,
+            confirmations: history[i].confirmations,
             memo: history[i].memo
           });
         }

@@ -10,9 +10,22 @@
 </div>
 <% if (view == 'user') { %>
   <div class="container-user container">
+    <% if (success === false) { %>  
+      <div class="alert alert-danger"><strong>We are sorry!</strong>  There was a problem updating your information!</div>
+    <% } else if (success === true) { %>  
+      <div class="alert alert-success"><strong>Success!</strong>  Information Updated!</div>
+    <% } %>  
     <form class="form-signin" role="form" action="#" method="post">
         <h2>User Configuration</h2>
-        <input id="inputDisplayName" type="text"  name="displayname" class="user-form form-control" placeholder="Display Name">
+        <input id="inputDisplayName" type="text"  name="displayname" class="user-form form-control" placeholder="<%= name%>">
+        <div class="switch-toggle switch-candy" style="max-width: 20em;float:none;margin:0 auto">
+            <input id="fbPost_enabled" name="post[op]" type="radio" value="true" checked>
+            <label for="fbPost_disabled" onclick="">Enabled</label>        
+            <input id="fbPost_disabled" name="post[op]" type="radio" value="false">
+            <label for="fbPost_disabled" onclick="">Disabled</label>
+          <a></a>
+        </div>
+        <br>
         <div class="form-submit">
           <button id="save-button" class="user-btn btn btn-lg" type="submit"> Save</button>
           <button id="reset-button" class="user-btn btn btn-lg" type="submit"> Reset</button>
@@ -22,10 +35,8 @@
   <script>
     //Global data
     $(document).ready(function(){
-        console.log("Running req");
-        $('#save-button').on('click', function(){
-            alert('Changes Saved!');
-        });
+        //$('#save-button').on('click', function(){
+        //});
         $("#reset-button").click(function(e){
             e.preventDefault();
             if (window.user != undefined){

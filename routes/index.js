@@ -1,10 +1,14 @@
 
 var http = require('http');
 var api = require('./api');
+var sio = require('./socket');
 var ec = require('./error-codes');
-exports.api = api;
+var redis = require("redis");
+var cfg = require('./cfg');
 
 var connections = require('../app').connections;
+var redis_client = redis.createClient();
+exports.api = api;
 
 //HELPER FUNCTIONS
 
@@ -19,19 +23,27 @@ function render(req, res, content) {
     success = null;
   }
 
-  var params = {
-    success: success
-  };
-
-  for (var key in content) {
-    // important check that this is objects own property 
-    // not from prototype prop inherited
-    if(content.hasOwnProperty(key)) {
-      params[key] = content[key];
-    }
-  }
-
-  res.render('index', params);
+  redis_client.get("bitbox_btc_to_usd", function(err, conversion){
+      if(err){
+          console.log("ERROR IS err: " + err);
+      }
+      else{
+       console.log("GOT CONVERSION: " + conversion);
+       var params = {
+         success: success,
+         bitbox_btc_to_usd: conversion,
+       };
+       
+       for (var key in content) {
+         // important check that this is objects own property 
+         // not from prototype prop inherited
+         if(content.hasOwnProperty(key)) {
+           params[key] = content[key];
+         }
+       }
+       res.render('index', params);
+     }
+  });
 
 };
 
@@ -162,6 +174,7 @@ exports.viewTrack = function(req, res) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
+        api.queryBlockChain(user.deposit_address, user.id);
         api.track(user.id, function(err, history) {
           if (err) {
             console.log("Unable to get user");
@@ -249,12 +262,28 @@ exports.controlPay = function(req, res) {
         function(err, result) {
           if (err) {
             res.redirect('/transfer/pay?success=false');
-          } else {            
-            api.getUser({facebook_id: req.body.pay.facebook_id}, function(err, dst_user) {
-              if(err != ec.USER_NOT_FOUND && connections[dst_user.id]) {
-                connections[dst_user.id].emit('notification')
-              }
-              res.redirect('/transfer/pay?success=true');
+          } else {
+            //TODO ALLOW THE USER TO TURN OFF POSTING TO WALL
+            //Need to submit app for review before we can tag peopl
+            //var user_string = "@["+req.body.pay.facebook_id+":1:"+nickname+"]";
+            var user_string = nickname;
+            console.log("Using: " + user_string);
+            var btc_total = Number((req.body.pay.amount*0.00000001).toFixed(4));
+            redis_client.get("bitbox_btc_to_usd", function(err, conversion){
+                if(err){
+                    console.log("ERROR IS err: " + err);
+                }
+                else{
+                    var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
+                    message = "I just sent " + btc_total +" BTC ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
+                    api.facebookPost(req.session.accessToken, message, req.user.id);
+                    
+                    // Send notification using sockets
+                    notification_msg = " just sent you" + btc_total +" BTC ($"+usd+").\nMessage:\t" + req.body.pay.memo;
+                    sio.sendNotification({dst_fb_id: req.body.pay.facebook_id, src_id: req.user.id}, notification_msg);         
+
+                    res.redirect('/transfer/pay?success=true');
+                }
             });
           }
         });
@@ -281,11 +310,19 @@ exports.controlPay = function(req, res) {
   secret: 'a3594b9cce57',
   input_transaction_hash: '287db46def7000a539832c6171f89bb5b905be5376f56fd65f3d5e4df5d29dd1',
   transaction_hash: 'a2d5519b72b1169ee73e00c144b6804c050eb1b43e0bf3f4de6fefb88e4b9af1' }
+
+  http://blockchain.info/address/15Zi2ijqfPRM6Aqz68G6R5SHowFGXjao6X?format=json
 */
+
+
 exports.blockChainIn = function(req, res) {
    params = req.query;
    console.log("Params");
    console.log(params);
+
+   if (params.test){
+       console.log("Test callback, ignoring");
+   }
 
    var uid = params.uid;
    var secret = params.secret;
@@ -295,11 +332,11 @@ exports.blockChainIn = function(req, res) {
    var addresses = params.input_address + " | " + params.destination_address;
    var confirms = parseInt(params.confirmations);
 
-   var logMemo = hashes + " @ " + addresses; 
+   var logMemo = "Deposit to Address: " + params.input_address;  
  
    /*Wait until we see n confirms before acking the deposit*/
    /*blockchain will continue sending notifications on each block until the server returns status code 200 */
-   var reqConfirms = 60;
+   var reqConfirms = 6;
    console.log("GETTING USER WITH ID " + uid);
    api.getUser({id:uid}, function(err, user) {
       console.log("Got user ");
@@ -322,7 +359,7 @@ exports.blockChainIn = function(req, res) {
         amount: bits,
         memo: logMemo,
         confirmations: confirms,
-        depositId: params.transaction_hash,
+        depositId: params.input_transaction_hash,
       }, function(err, result) {
          if (err){
             console.log("ERROR WITH DEPOSIT CALLBACK");
@@ -334,7 +371,8 @@ exports.blockChainIn = function(req, res) {
             console.log(logMemo);
          }
       });
-      if( confirms < reqConfirms ){
+      if( parseInt(confirms) < reqConfirms ){
+         console.log("NOT ENOUGH CONFIRMS");
          res.writeHead(200, {'Content-Type': 'text/plain'});
          res.end();
          return;
@@ -376,14 +414,21 @@ exports.controlDeposit = function(req, res) {
 };
 
 exports.controlWithdraw = function(req, res) {
-  if (loggedIn(req)) {
 
+  //Add in miner tax
+  console.log("Before Tax " + req.body.withdraw.amount);
+  var amount = parseInt(req.body.withdraw.amount) + 50000;
+
+  console.log("Withdrawing " + amount);
+
+  if (loggedIn(req)) {
     api.transfer({
       source: { id: req.user.id },
       destination: { id: -1 },
       type: "Withdrawal",
-      amount: req.body.withdraw.amount,
-      memo: req.body.withdraw.address
+      amount: amount,
+      address: req.body.withdraw.address,
+      memo: "Withdrawing to: " + req.body.withdraw.address
     }, function(err, data) {
       if (err) {
         res.redirect('/transfer/withdraw?success=false');
@@ -396,6 +441,13 @@ exports.controlWithdraw = function(req, res) {
   }
 };
 
+
+exports.fb_test = function(req, res){
+    console.log("Test is go");
+    console.log("Token: " + req.session.accessToken);
+    api.facebookPost(req.session.accessToken);
+    res.redirect('/');
+}
 exports.userInfo = function(req, res){
   if (loggedIn(req)) {
       res.json(req.user);
@@ -482,3 +534,29 @@ exports.lobby = function(req, res) {
     title: 'Lobby'
   });
 }
+/*{ displayname: 'Test123', pay: { op: 'true' } }*/
+exports.controlUser = function(req, res){
+  if (loggedIn(req)){
+      api.getUser(req.user, function(err, user){
+          var name = req.body.displayname;
+          if (!name){
+              name = user.nickname;
+          }
+          var data={
+            id: req.user.id,
+            facebookPost: req.body.post.op,
+            nickname: name
+          }
+          api.updateUser(data, function(err){
+              if (err){
+                  res.redirect('/accounts/user?success=false');
+              }
+              else{
+                  res.redirect('/accounts/user?success=true');
+              }
+          });
+      });
+  } else {
+    res.redirect('/liftoff/login');
+  }
+};

@@ -1,3 +1,5 @@
 <h1><%= title %></h1>
-<h3>Balance: <%= balance %> Bits</h3>
-<h5>1 Bit = 1 Satoshi = 0.00000001 BTC</h5>
+<h3 id="track-balance">Balance: <%= balance %> Bits</h3>
+<script>
+    $("#track-balance").text("Balance: " + currencyOutput(<%= balance%>));
+</script>

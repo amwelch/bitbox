@@ -25,6 +25,7 @@ CREATE TABLE users (
     firstname VARCHAR(100) DEFAULT NULL, 
     lastname VARCHAR(100) DEFAULT NULL, 
     nickname VARCHAR(200) NOT NULL,
+    facebookPost boolean DEFAULT false,
     status ACCOUNT_STATE NOT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     facebook_id NUMERIC(20) UNIQUE DEFAULT NULL,
@@ -57,14 +58,6 @@ CREATE OR REPLACE FUNCTION activate_balances() RETURNS TRIGGER AS $wrapper$
 BEGIN
     IF (OLD.status = 'Inactive' AND (NEW.status = 'Admin' OR NEW.status = 'Active')) THEN
         UPDATE transactions SET status = 'Complete' WHERE status = 'Pending' AND type = 'Payment' AND destination = NEW.id;
-    END IF;
-    RETURN NEW;
-END $wrapper$ LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION complete_deposits() RETURNS TRIGGER AS $wrapper$
-BEGIN
-    IF (NEW.type = 'Deposit') THEN
-        NEW.status = 'Complete';
     END IF;
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
@@ -119,12 +112,6 @@ BEFORE INSERT OR UPDATE OR DELETE
 ON transactions
 FOR EACH ROW
 EXECUTE PROCEDURE update_balances();
-
-CREATE TRIGGER autocomplete_deposits
-BEFORE INSERT
-ON transactions
-FOR EACH ROW
-EXECUTE PROCEDURE complete_deposits();
 
 CREATE TRIGGER activate_account
 AFTER UPDATE

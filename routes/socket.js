@@ -1,3 +1,6 @@
+
+var api = require('./api');
+
 // This is the pool of socket connections.
 var connections = require('../app').connections;
 
@@ -43,3 +46,20 @@ exports.socket_connection = function(socket) {
   //   console.log(data);
   // });	
 };
+
+// Socket Notifications API functions
+exports.sendNotification = function(users, notification_msg) {
+  api.getUser({facebook_id: users.dst_fb_id}, function(err, dst_user) {
+    if(err != ec.USER_NOT_FOUND && connections[dst_user.id]) {
+      api.getUser({id: users.src_id}, function(err, src_user) {
+        if(err) {
+          console.log("ERROR GETTING USER in sendNotification");
+        }
+        else {
+          notify_msg = src_user.nickname + notification_msg;
+          connections[dst_user.id].emit('notification', {msg: notify_msg}); 
+        }
+      });
+    }
+  });
+}

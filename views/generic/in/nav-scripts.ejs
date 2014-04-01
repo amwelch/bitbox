@@ -1,0 +1,21 @@
+<script>
+    var setCurrency = function(name){
+        $.cookie('currency-display', name);
+    }
+    $("#USD-select").click(function(e){
+        console.log("Clicked usd");
+        e.preventDefault();
+        setCurrency("usd");
+        location.reload();
+    });
+    $("#BTC-select").click(function(e){
+        e.preventDefault();
+        setCurrency("bitcoin");
+        location.reload();
+    });
+    $("#SATOSHI-select").click(function(e){
+        e.preventDefault();
+        setCurrency("satoshi");
+        location.reload();
+    });
+</script>

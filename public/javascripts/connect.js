@@ -22,7 +22,7 @@ function startSocketConnection() {
 	});	
 
 	socket.on('notification', function(data) {
-		
+		alert(data.msg);
 	});
 
 	socket.on('alert', function(msg) {
