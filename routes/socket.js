@@ -2,10 +2,9 @@
 var api = require('./api');
 
 // This is the pool of socket connections.
-var connections = require('../app').connections;
+var connections = {};
 
 exports.socket_connection = function(socket) {
-
 	// Adds the socket to the pool of connections using
 	// the user id. 		
 	socket.on('user', function(user) {
@@ -57,7 +56,15 @@ exports.sendNotification = function(users, notification_msg) {
         }
         else {
           notify_msg = src_user.nickname + notification_msg;
-          connections[dst_user.id].emit('notification', {msg: notify_msg}); 
+          if(connections[dst_user.id]) {          	
+	          // Send the notification only if the socket to 
+	          // the dst user is open
+          	connections[dst_user.id].emit('notification', {msg: notify_msg}); 
+          }
+          else {
+          	// Add this notification to a dst_table with notifications
+
+          }
         }
       });
     }

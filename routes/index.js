@@ -6,7 +6,6 @@ var ec = require('./error-codes');
 var redis = require("redis");
 var cfg = require('./cfg');
 
-var connections = require('../app').connections;
 var redis_client = redis.createClient();
 exports.api = api;
 

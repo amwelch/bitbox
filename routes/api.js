@@ -7,7 +7,6 @@ var crypto = require('crypto');
 var http = require('http');
 var fb = require('fb');
 var https = require('https');
-var connections = require('../app').connections;
 
 var pool = poolModule.Pool({
 

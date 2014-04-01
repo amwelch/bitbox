@@ -142,11 +142,6 @@ passport.use(
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
-// This is a dictionary were we save the socket connections
-// of the clients to the server
-var connections = {}
-exports.connections = connections;
-
 // Handlers for socket events
 var sio = require('./routes/socket');
 
@@ -216,7 +211,6 @@ app.get('/testFacebookPost', routes.fb_test);
 io.sockets.on('connection', sio.socket_connection);
 
 if (dev){
-  console.log("HERE");
   server.listen(app.get('port'), function() {
     console.log('Bitbox server listening on port ' + app.get('port'));
   });
