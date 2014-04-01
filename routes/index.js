@@ -247,12 +247,32 @@ exports.controlPay = function(req, res) {
       if (err) {
         res.redirect('/transfer/pay?success=false');
       } else {
-        api.transfer({
-          source: { id: req.user.id },
-          destination: {
+        var source;
+        var destination;
+        if (req.body.pay.op == "ask") {
+          destination = {
+            id: req.user.id
+          };
+          source = {
             facebook_id: req.body.pay.facebook_id,
             nickname: nickname
-          },
+          };
+        } else if (req.body.pay.op == "send") {
+          source = {
+            id: req.user.id
+          };
+          destination = {
+            facebook_id: req.body.pay.facebook_id,
+            nickname: nickname
+          };
+        } else {
+          res.redirect('/transfer/pay?success=false');
+          return;
+        }
+
+        api.transfer({
+          source: source,
+          destination: destination,
           type: "Payment",
           amount: req.body.pay.amount,
           memo: req.body.pay.memo
