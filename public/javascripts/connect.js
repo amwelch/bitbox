@@ -1,11 +1,19 @@
 var socket;
 
+var connection = false;
+
 // DOM Ready =============================================================
 $(document).ready(function() {
 
-	socket = io.connect('http://localhost');
+	if (!connection) {
+		connection = true;
 
-  startSocketConnection();
+		socket = io.connect('http://localhost');
+
+	  startSocketConnection();
+	}
+	// console.log(connection['done']);
+
 
 });
 
@@ -22,6 +30,7 @@ function startSocketConnection() {
 	});	
 
 	socket.on('notification', function(data) {
+		console.log(notification);
 		alert(data.msg);
 	});
 

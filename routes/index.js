@@ -250,6 +250,7 @@ exports.controlPay = function(req, res) {
       } else {
         var source;
         var destination;
+        console.log(req.body.pay);
         if (req.body.pay.op == "ask") {
           destination = {
             id: req.user.id
