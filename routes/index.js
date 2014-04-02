@@ -3,10 +3,6 @@ var http = require('http');
 var api = require('./api');
 var sio = require('./socket');
 var ec = require('./error-codes');
-var redis = require("redis");
-var cfg = require('./cfg');
-
-var redis_client = redis.createClient();
 exports.api = api;
 
 //HELPER FUNCTIONS
@@ -22,7 +18,7 @@ function render(req, res, content) {
     success = null;
   }
 
-  redis_client.get("bitbox_btc_to_usd", function(err, conversion){
+  REDIS.get("bitbox_btc_to_usd", function(err, conversion){
       if(err){
           console.log("ERROR IS err: " + err);
       }
@@ -31,6 +27,7 @@ function render(req, res, content) {
        var params = {
          success: success,
          bitbox_btc_to_usd: conversion,
+         fb_app_id: FB_APP_ID
        };
        
        for (var key in content) {
@@ -173,7 +170,9 @@ exports.viewTrack = function(req, res) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
-        api.queryBlockChain(user.deposit_address, user.id);
+        if (ENVIRONMENT != 'dev') {
+          api.queryBlockChain(user.deposit_address, user.id);
+        }
         api.track(user.id, function(err, history) {
           if (err) {
             console.log("Unable to get user");
@@ -248,16 +247,17 @@ exports.controlPay = function(req, res) {
       if (err) {
         res.redirect('/transfer/pay?success=false');
       } else {
+
         var source;
         var destination;
         console.log(req.body.pay);
         if (req.body.pay.op == "ask") {
-          destination = {
-            id: req.user.id
-          };
           source = {
             facebook_id: req.body.pay.facebook_id,
             nickname: nickname
+          };
+          destination = {
+            id: req.user.id
           };
         } else if (req.body.pay.op == "send") {
           source = {

@@ -1,43 +1,32 @@
-/*Temporary ips*/
-var ip = '172.31.9.227';
-var eip = '54.200.103.29';
-
+//  Determine ENV
 var args = process.argv.slice(2);
-var dev = false;
+ENVIRONMENT = 'prod';
 if (args.indexOf('dev') != -1){
-    dev = true;
+    ENVIRONMENT = 'dev';
 }
-/**
- * Module dependencies.
- */
 
 var express = require('express');
-
-//  Authentication
+var cfg = require('./config.js')(ENVIRONMENT);
+var sprintf = require("sprintf-js").sprintf; 
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
+var RedisStore = require("connect-redis")(express);
+FB_APP_ID =  cfg.fb.app_id;
+REDIS = new RedisStore({
+  host: cfg.redis.host,
+  port: cfg.redis.port,
+  //db: 
+  //pass: 
+});
 
-/* Redis only on production */
-if (!dev){
-    RedisStore = require("connect-redis")(express);
-    redis = require("redis").createClient();
-}
-// Used for transactions
-var pg = require('pg');
-var app = express();
-var https = require('https');
 var fs = require('fs');
+var app = express();
 
+var http = require('http');
+var https = require('https');
 
-//If not dev redirect to https for all requests
-function requireHTTPS(req, res, next) {
-    if (!req.secure){
-        return res.redirect('https://' + req.get('host') + req.url);
-    }
-    next();
-}
-//  Rendering
 var routes = require('./routes');
+var sio = require('./routes/socket');
 
 var ec = require('./routes/error-codes');
 
@@ -45,12 +34,6 @@ var ec = require('./routes/error-codes');
 var app = express();  
 app.configure(function() {
   app.use(express.favicon());
-  if(dev) {
-    app.set('port', process.env.PORT || 3000);
-  }
-  else {
-    app.set('port', process.env.PORT || 443);
-  }
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(express.static('public'));
@@ -58,17 +41,11 @@ app.configure(function() {
   //app.use(express.bodyParser()); // Replaced by following 2 lines:
   app.use(express.json());       // to support JSON-encoded bodies
   app.use(express.urlencoded()); // to support URL-encoded bodies
-  if (!dev){
-    app.use(express.session({ 
-      secret: 'lsfkahfasho124h18087fahg0db0123g12r',
-      store: new RedisStore({client:redis})
-    }));
-  }
-  else{
-    app.use(express.session({ 
-      secret: 'lsfkahfasho124h18087fahg0db0123g12r'
-    }));
-  }
+  app.use(express.session({ 
+    secret: cfg.redis.secret,
+    store: REDIS,
+    //cookie: { secure: true }
+  }));
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
@@ -86,27 +63,13 @@ passport.deserializeUser(function(serialized_user, done) {
   done(null, JSON.parse(serialized_user));
 });
 
-var strat;
-if (dev){
-  strat = {
-    clientID: process.env.FACEBOOK_APP_ID || '609051335829720',
-    clientSecret: process.env.FACEBOOK_SECRET || '34320f120be92b774111a4f1d6d34743',
-    callbackURL: 'http://localhost:3000/liftoff/login/facebook/callback',
-    passReqToCallback: true
-  };
-}
-else{
-  strat = {
-    clientID: process.env.FACEBOOK_APP_ID || '761870430491153',
-    clientSecret: process.env.FACEBOOK_SECRET || '9295cdcd4e95c520e5602fe9de90ce8c',
-    callbackURL: 'http://'+eip+':443/liftoff/login/facebook/callback',
-    passReqToCallback: true
-  };
-}
 passport.use( 
-  new FacebookStrategy(strat,
-  function(req, accessToken, refreshToken, profile, done) {
-    req.session.accessToken = accessToken;
+  new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID || cfg.fb.app_id,
+    clientSecret: process.env.FACEBOOK_SECRET || cfg.fb.app_secret,
+    callbackURL: sprintf('%s://%s:%s/liftoff/login/facebook/callback', cfg.app.protocol, cfg.app.hostname, cfg.app.port),
+  },
+  function(accessToken, refreshToken, profile, done) {
     var data = {
       email: profile.emails[0].value,
       firstname: profile.name.givenName,
@@ -136,15 +99,6 @@ passport.use(
   })
 );
 
-//  ------- Sockets Configuration -------
-// Sockets used for notifications
-// TODO: we need to use https for the sockets as well
-var server = require('http').createServer(app);
-var io = require('socket.io').listen(server);
-
-// Handlers for socket events
-var sio = require('./routes/socket');
-
 //  ------- Rendering Configuration -------
 var postLater = function(req, res) {
   console.log("Endpoint not implemented: "+req.url);
@@ -154,7 +108,7 @@ var postLater = function(req, res) {
 //  Facebook Login. Loops back to ./callback
 app.get('/liftoff/login/facebook',
   passport.authenticate('facebook', { 
-    scope: ['email', 'publish_actions'],
+    scope: 'email',
     display: 'popup',
     authType: 'reauthenticate'
   })
@@ -187,7 +141,7 @@ app.get('/deposit/blockchain', routes.blockChainIn);
 app.get('/transfer', routes.transfer);
 
 app.get('/accounts/user', routes.user);
-app.post('/accounts/user', routes.controlUser);
+app.post('/accounts/user', postLater);
 
 app.get('/accounts/security', routes.security);
 app.post('/accounts/security', postLater);
@@ -205,30 +159,36 @@ app.get('/liftoff/login', routes.index);
 app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
-app.get('/testFacebookPost', routes.fb_test);
+var port = process.env.PORT || cfg.app.port;
+var ip = process.env.IP || cfg.app.ip;
+/*
+https
 
-// Sockets
+function requireHTTPS(req, res, next) {
+    if (!req.secure){
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+
+}
+app.use(requireHTTPS);
+
+var options = {
+    key: fs.readFileSync('/keykeeper.pem'),
+    cert: fs.readFileSync('/bbcsr.pem')
+};
+https.createServer(options, app).listen(443);
+*/
+
+var httpServer = http.createServer(app);
+
+httpServer.listen(port, ip, function() {
+  console.log('BitBox server listening on port ' + port);
+});
+
+//  ------- Sockets Configuration -------
+// Sockets used for notifications
+// TODO: we need to use https for the sockets as well
+var io = require('socket.io').listen(httpServer);
+
 io.sockets.on('connection', sio.socket_connection);
-
-if (dev){
-  server.listen(app.get('port'), function() {
-    console.log('Bitbox server listening on port ' + app.get('port'));
-  });
-  // app.listen(port, function() {
-  //   console.log('Listening on ' + port)
-  // });
-}
-else{
-  /*app.use(requireHTTPS);
-  var options = {
-      key: fs.readFileSync('/keykeeper.pem'),
-      cert: fs.readFileSync('/bbcsr.pem'),
-  }*/
-  //https.createServer(options, app).listen(port, ip, function() {
-  // app.listen(port, ip, function() {
-  //   console.log('Listening on ' + port);
-  // });
-  server.listen(app.get('port'), ip, function() {
-    console.log('Bitbox server listening on port ' + app.get('port'));
-  });
-}

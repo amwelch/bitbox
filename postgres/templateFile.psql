@@ -1,6 +1,6 @@
 DROP TRIGGER activate_account ON users;
 DROP TRIGGER update_user_balances ON transactions;
-DROP TRIGGER autocomplete_deposits ON transactions;
+DROP FUNCTION activate_balances();
 DROP FUNCTION update_balances();
 DROP TABLE transactions;
 DROP TABLE users;
@@ -13,7 +13,7 @@ DROP USER alexander;
 CREATE USER alexander WITH PASSWORD 'testing123';
 GRANT ALL PRIVILEGES ON DATABASE bitbox TO alexander;
 
-CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete');
+CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete', 'Requested');
 CREATE TYPE TXN_TYPE AS ENUM ('Payment', 'Deposit', 'Withdrawal');
 CREATE TYPE ACCOUNT_STATE AS ENUM ('External','Admin', 'Active', 'Disabled', 'Inactive');
 
@@ -69,41 +69,48 @@ BEGIN
     END IF;
 
     IF (NEW.type = 'Payment') THEN
+        
         IF (TG_OP = 'INSERT') THEN
             IF (NEW.status = 'Pending') THEN
                 UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
-            ELSEIF (NEW.status = 'Complete') THEN
-                UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source AND users.status != 'External');
-                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
+        
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             ELSEIF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source AND users.status != 'External');
+            ELSEIF (OLD.status = 'Requested' AND NEW.status = 'Pending') THEN
+                UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
             END IF;
         END IF;
+
     ELSEIF (NEW.type = 'Deposit') THEN
+        
         IF (TG_OP = 'INSERT') THEN
             IF (NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
+        
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
         END IF;
+
     ELSEIF (NEW.type = 'Withdrawal') THEN
         IF (TG_OP = 'INSERT') THEN
             IF (NEW.status = 'Pending') THEN
                 UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
             END IF;
+        
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source);
             END IF;
         END IF;
     END IF;
+
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
 

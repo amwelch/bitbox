@@ -1,6 +1,6 @@
 var ec = require('./error-codes');
 var pg = require('pg');
-var cfg = require('./cfg');
+var cfg = require('../config.js')(ENVIRONMENT);
 var poolModule = require('generic-pool');
 var sprintf = require("sprintf-js").sprintf; 
 var crypto = require('crypto');
@@ -121,12 +121,12 @@ exports.withdrawBlockChain = function(addr, amount, cb){
     //TODO Read this from config file
     console.log("CONFIG IS ");
     console.log(cfg);
-    var main_password = cfg.bcpw;
-    var guid = cfg.guid;
+    var account_pw = cfg.bc.password;
+    var account_id = cfg.bc.id;
     var options = {
         host: 'blockchain.info',
         port: 443,
-        path: sprintf('/merchant/%s/payment?password=%s&to=%s&amount=%s&',guid, main_password, addr, amount),
+        path: sprintf('/merchant/%s/payment?password=%s&to=%s&amount=%s&',account_id, account_pw, addr, amount),
         method: 'GET',
     }
     _getJSON(options, function(statusCode, result){
@@ -230,25 +230,28 @@ exports.queryBlockChain = function(addr, uid){
     });
 }
 _getJSON = function(options, onResult){
-    var prot = options.port == 443 ? https : http;
-    console.log(options);
-    var req = prot.request(options, function(res){
-        var output = '';
-        console.log(options.host + ':' + res.statusCode);
-        res.setEncoding('utf8');
-        res.on('data', function (chunk){
-            output += chunk; 
-        });
-        res.on('end', function (){
-            var obj = JSON.parse(output);
-            onResult(res.statusCode, obj);
-        });
+  var prot = options.port == 443 ? https : http;
+  console.log("-----OPTIONS-----");
+  console.log(options);
+  console.log("-----SNOITPO-----");
+  var req = prot.request(options, function(res){
+    var output = '';
+    console.log(options.host + ':' + res.statusCode);
+    res.setEncoding('utf8');
+    res.on('data', function (chunk){
+      output += chunk; 
     });
-    req.on('error', function(err) {
-        console.log("No go");
-        console.log(err);
+    res.on('end', function (){
+      var obj = JSON.parse(output);
+      onResult(res.statusCode, obj);
     });
-    req.end();
+  });
+  req.on('error', function(err) {
+    onResult(res.statusCode, obj);
+    console.log("No go");
+    console.log(err);
+  });
+  req.end();
 }
 /* Sample response from blockchain
 
@@ -260,18 +263,19 @@ _getJSON = function(options, onResult){
 
 */
 _createDepositAddress = function(client, uid, cb) {
-    //Random secret for the user
+    //  TODO: store secret somewhere
     var secret = _random(12);
+
     //TODO When domain settles down this becomes domain
-    callbackURL = encodeURIComponent(sprintf("http://staging.bitbox.mx/deposit/blockchain?uid=%s&secret=%s", uid, secret));
-    //TODO obviously read this from a file containing a cold storage address eventually
-    console.log(cfg);
-    dest_wallet = cfg.main_address;
-    console.log("DEST WALLET IS " + dest_wallet);
+    callbackURL = encodeURIComponent(sprintf("%s://%s/deposit/blockchain?uid=%s&secret=%s", cfg.app.protocol, cfg.app.hostname, uid, secret));
+    
+    //TODO make destination cold storage address
+    dest_address = cfg.bc.address;
+    console.log("DEST ADDRESS IS " + dest_address);
     var options = {
         host: 'blockchain.info',
         port: 443,
-        path: sprintf('/api/receive?method=create&address=%s&callback=%s',dest_wallet, callbackURL),
+        path: sprintf('/api/receive?method=create&address=%s&callback=%s', dest_address, callbackURL),
         method: 'GET',
     }
     _getJSON(options, function(statusCode, result){
@@ -388,6 +392,8 @@ exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, 
           _getUser(client, data, function(err, result) {
             if (err) {
               callback(ec.USER_NOT_FOUND, null);              
+            } else if (ENVIRONMENT == 'dev') {
+              callback(null, result);
             } else {
               console.log("GOT USER");
               console.log(result);
@@ -395,7 +401,7 @@ exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, 
                  if (err){
                    callback(ec.CREATE_ADDRESS_FAIL, null);
                  } 
-                 callback(null, result);      
+                 callback(null, result);
               });
             }
           });
@@ -567,7 +573,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     console.log(err);
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
-                    if (data.type == "Withdrawal"){
+                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev'){
                         exports.withdrawBlockChain(data.address, data.amount, function(err){
                             if (err){
                                 _rollback(client, ec.TRANSFER_ERR, callback);
