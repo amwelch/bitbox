@@ -1,6 +1,7 @@
 
 var ec = require('./error-codes');
 var api = require('./api');
+var ec = require('./error-codes');
 
 // This is the pool of socket connections.
 var connections = {};
@@ -57,9 +58,11 @@ exports.sendNotification = function(users, notification_msg) {
         }
         else {
           notify_msg = src_user.nickname + notification_msg;
+	        connections[user.src_id].emit('notification', {msg: notify_msg}); 
           if(connections[dst_user.id]) {          	
 	          // Send the notification only if the socket to 
 	          // the dst user is open
+	          // This line is just for testing how the notifications would look. 
           	connections[dst_user.id].emit('notification', {msg: notify_msg}); 
           }
           else {

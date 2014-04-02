@@ -540,18 +540,22 @@ exports.transfer = pool.pooled(function(client, data, callback) {
   //  START TXN
   _begin(client, function(err, result) {
     if (err) {
+      console.log("Error when starting transaction");
       _rollback(client, err, callback);
     } else {
 
       //  GET SOURCE ACCT
+      //TODO: shouldn't this also be getOrCreateUser???
       _getUser(client, data.source, function(err, source) {
         if (err) {
+          console.log("Error when getting source account in transfer");
           _rollback(client, err, callback);
         } else {
 
           //  GET DEST ACCT
           _getOrCreateUser(client, data.destination, function(err, destination) {
             if (err) {
+              console.log("Error when getting dst account in transfer");
               _rollback(client, err, callback);
             } else {
               //  TRANSFER FUNDS

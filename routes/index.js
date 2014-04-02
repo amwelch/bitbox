@@ -251,6 +251,7 @@ exports.controlPay = function(req, res) {
 
         var source;
         var destination;
+        console.log(req.body.pay);
         if (req.body.pay.op == "ask") {
           source = {
             facebook_id: req.body.pay.facebook_id,
