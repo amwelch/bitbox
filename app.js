@@ -12,6 +12,7 @@ var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var RedisStore = require("connect-redis")(express);
 FB_APP_ID =  cfg.fb.app_id;
+
 REDIS = new RedisStore({
   host: cfg.redis.host,
   port: cfg.redis.port,
@@ -160,7 +161,7 @@ app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
 var port = process.env.PORT || cfg.app.port;
-var ip = process.env.IP || cfg.app.ip;
+var ip = process.env.IP || cfg.app.internal_ip;
 /*
 https
 

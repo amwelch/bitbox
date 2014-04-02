@@ -42,6 +42,7 @@ module.exports = function(environment) {
       protocol: 'http',
       hostname: '54.200.103.29',
       ip: '127.0.0.1',
+      internal_ip: '172.31.9.227',
       port: '443',
     };
 
