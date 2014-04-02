@@ -242,6 +242,7 @@ exports.viewWithdraw = function(req, res) {
 };
 
 exports.controlPay = function(req, res) {
+  console.log(req.body);
   if (loggedIn(req)) {
     getFacebookName(req.body.pay.facebook_id, function(err, nickname) {
       if (err) {
@@ -288,7 +289,7 @@ exports.controlPay = function(req, res) {
             var user_string = nickname;
             console.log("Using: " + user_string);
             var btc_total = Number((req.body.pay.amount*0.00000001).toFixed(4));
-            redis_client.get("bitbox_btc_to_usd", function(err, conversion){
+            REDIS.get("bitbox_btc_to_usd", function(err, conversion){
                 if(err){
                     console.log("ERROR IS err: " + err);
                 }

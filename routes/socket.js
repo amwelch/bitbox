@@ -1,4 +1,5 @@
 
+var ec = require('./error-codes');
 var api = require('./api');
 
 // This is the pool of socket connections.
