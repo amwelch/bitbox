@@ -1,6 +1,6 @@
 var ec = require('./error-codes');
 var pg = require('pg');
-var cfg = require('../config.js');
+var cfg = require('../config.js')(ENVIRONMENT);
 var poolModule = require('generic-pool');
 var sprintf = require("sprintf-js").sprintf; 
 var crypto = require('crypto');
@@ -392,6 +392,8 @@ exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, 
           _getUser(client, data, function(err, result) {
             if (err) {
               callback(ec.USER_NOT_FOUND, null);              
+            } else if (ENVIRONMENT == 'dev') {
+              callback(null, result);
             } else {
               console.log("GOT USER");
               console.log(result);
@@ -399,7 +401,7 @@ exports.getOrCreateUser = pool.pooled(_getOrCreateUser = function(client, data, 
                  if (err){
                    callback(ec.CREATE_ADDRESS_FAIL, null);
                  } 
-                 callback(null, result);      
+                 callback(null, result);
               });
             }
           });
@@ -567,7 +569,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     console.log(err);
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
-                    if (data.type == "Withdrawal"){
+                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev'){
                         exports.withdrawBlockChain(data.address, data.amount, function(err){
                             if (err){
                                 _rollback(client, ec.TRANSFER_ERR, callback);
