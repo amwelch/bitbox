@@ -11,6 +11,7 @@ var sprintf = require("sprintf-js").sprintf;
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var RedisStore = require("connect-redis")(express);
+FB_APP_ID =  cfg.fb.app_id;
 REDIS = new RedisStore({
   host: cfg.redis.host,
   port: cfg.redis.port,
@@ -33,12 +34,14 @@ var ec = require('./routes/error-codes');
 var app = express();  
 app.configure(function() {
   app.use(express.favicon());
+  /*  TODO remove?
   if(dev) {
     app.set('port', process.env.PORT || 3000);
   }
   else {
     app.set('port', process.env.PORT || 443);
   }
+  */
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(express.static('public'));

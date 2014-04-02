@@ -32,7 +32,7 @@ var init = function() {
 };
 window.fbAsyncInit = function() {
   FB.init({
-    appId: '761870430491153'
+    appId: '<%- fb_app_id %>'
   });
 
   FB.Event.subscribe('auth.authResponseChange', function(response) {

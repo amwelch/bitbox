@@ -27,6 +27,7 @@ function render(req, res, content) {
        var params = {
          success: success,
          bitbox_btc_to_usd: conversion,
+         fb_app_id: FB_APP_ID
        };
        
        for (var key in content) {
