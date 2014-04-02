@@ -40,8 +40,8 @@ module.exports = function(environment) {
 
     rObject.app = {
       protocol: 'http',
-      hostname: 'staging.bitbox.mx',
-      ip: '54.200.103.29',
+      hostname: '54.200.103.29',
+      ip: '127.0.0.1',
       port: '443',
     };
 
