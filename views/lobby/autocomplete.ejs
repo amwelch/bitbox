@@ -23,7 +23,7 @@ var init = function() {
 };
 window.fbAsyncInit = function() {
   FB.init({
-    appId: '609051335829720'
+    appId: '<%- fb_app_id %>'
   });
 
   FB.Event.subscribe('auth.authResponseChange', function(response) {
