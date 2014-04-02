@@ -25,8 +25,8 @@ var app = express();
 var http = require('http');
 var https = require('https');
 
-//  Rendering
 var routes = require('./routes');
+var sio = require('./routes/socket');
 
 var ec = require('./routes/error-codes');
 
@@ -34,14 +34,6 @@ var ec = require('./routes/error-codes');
 var app = express();  
 app.configure(function() {
   app.use(express.favicon());
-  /*  TODO remove?
-  if(dev) {
-    app.set('port', process.env.PORT || 3000);
-  }
-  else {
-    app.set('port', process.env.PORT || 443);
-  }
-  */
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(express.static('public'));
@@ -107,15 +99,6 @@ passport.use(
   })
 );
 
-//  ------- Sockets Configuration -------
-// Sockets used for notifications
-// TODO: we need to use https for the sockets as well
-var server = require('http').createServer(app);
-var io = require('socket.io').listen(server);
-
-// Handlers for socket events
-var sio = require('./routes/socket');
-
 //  ------- Rendering Configuration -------
 var postLater = function(req, res) {
   console.log("Endpoint not implemented: "+req.url);
@@ -177,7 +160,7 @@ app.get('/liftoff', routes.index);
 app.get('/', routes.index);
 
 var port = process.env.PORT || cfg.app.port;
-
+var ip = process.env.IP || cfg.app.ip;
 /*
 https
 
@@ -197,4 +180,15 @@ var options = {
 https.createServer(options, app).listen(443);
 */
 
-http.createServer(app).listen(port);
+var httpServer = http.createServer(app);
+
+httpServer.listen(port, ip, function() {
+  console.log('BitBox server listening on port ' + port);
+});
+
+//  ------- Sockets Configuration -------
+// Sockets used for notifications
+// TODO: we need to use https for the sockets as well
+var io = require('socket.io').listen(httpServer);
+
+io.sockets.on('connection', sio.socket_connection);
