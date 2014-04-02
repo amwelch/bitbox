@@ -3,6 +3,8 @@ var http = require('http');
 var api = require('./api');
 var sio = require('./socket');
 var ec = require('./error-codes');
+var redis = require("redis");
+var REDIS=redis.createClient();
 exports.api = api;
 
 //HELPER FUNCTIONS
@@ -17,7 +19,7 @@ function render(req, res, content) {
   } else {
     success = null;
   }
-
+  console.log(REDIS);
   REDIS.get("bitbox_btc_to_usd", function(err, conversion){
       if(err){
           console.log("ERROR IS err: " + err);
