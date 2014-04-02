@@ -1,6 +1,7 @@
 
 var http = require('http');
 var api = require('./api');
+var sio = require('./socket');
 var ec = require('./error-codes');
 exports.api = api;
 
@@ -294,6 +295,11 @@ exports.controlPay = function(req, res) {
                     var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
                     message = "I just sent " + btc_total +" BTC ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
                     api.facebookPost(req.session.accessToken, message, req.user.id);
+                    
+                    // Send notification using sockets
+                    notification_msg = " just sent you" + btc_total +" BTC ($"+usd+").\nMessage:\t" + req.body.pay.memo;
+                    sio.sendNotification({dst_fb_id: req.body.pay.facebook_id, src_id: req.user.id}, notification_msg);         
+
                     res.redirect('/transfer/pay?success=true');
                 }
             });

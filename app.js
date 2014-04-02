@@ -33,6 +33,12 @@ var ec = require('./routes/error-codes');
 var app = express();  
 app.configure(function() {
   app.use(express.favicon());
+  if(dev) {
+    app.set('port', process.env.PORT || 3000);
+  }
+  else {
+    app.set('port', process.env.PORT || 443);
+  }
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(express.static('public'));
@@ -97,6 +103,15 @@ passport.use(
     });
   })
 );
+
+//  ------- Sockets Configuration -------
+// Sockets used for notifications
+// TODO: we need to use https for the sockets as well
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server);
+
+// Handlers for socket events
+var sio = require('./routes/socket');
 
 //  ------- Rendering Configuration -------
 var postLater = function(req, res) {
@@ -168,6 +183,7 @@ function requireHTTPS(req, res, next) {
         return res.redirect('https://' + req.get('host') + req.url);
     }
     next();
+
 }
 app.use(requireHTTPS);
 
