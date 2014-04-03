@@ -21,17 +21,19 @@ def main(argv):
     req = urllib2.Request(url)
     ret = json.loads(opener.open(req).read())
     ret = ret["rates"]
-    con.set("bitbox_usd_to_ca", ret["CAD"])
-    con.set("bitbox_usd_to_eu", ret["EUR"])
-    con.set("bitbox_usd_to_uk", ret["GBP"])
-    con.set("bitbox_usd_to_au", ret["AUD"])
-    con.set("bitbox_usd_to_mx", ret["MXN"])
-    con.set("bitbox_usd_to_br", ret["BRL"])
-    con.set("bitbox_usd_to_ar", ret["ARS"])
-    con.set("bitbox_usd_to_jp", ret["JPY"])
-    con.set("bitbox_usd_to_ch", ret["CNY"])
+   
+    rs = {}
 
-
+    rs["bitbox_usd_to_ca"]= ret["CAD"]
+    rs["bitbox_usd_to_eu"]= ret["EUR"]
+    rs["bitbox_usd_to_uk"]= ret["GBP"]
+    rs["bitbox_usd_to_au"]= ret["AUD"]
+    rs["bitbox_usd_to_mx"]= ret["MXN"]
+    rs["bitbox_usd_to_br"]= ret["BRL"]
+    rs["bitbox_usd_to_ar"]= ret["ARS"]
+    rs["bitbox_usd_to_jp"]= ret["JPY"]
+    rs["bitbox_usd_to_ch"]= ret["CNY"]
+    con.set("usd_to_other", json.dumps(rs))
 
 if __name__ == '__main__':
     main(sys.argv)
