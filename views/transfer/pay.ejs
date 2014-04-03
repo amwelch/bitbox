@@ -22,8 +22,8 @@
   </div>
   <div style="inlne-block; float: left; padding-bottom: 10px; margin-right: 10px;">
     <label for="btc_amount">Amount</label><br>
-    <input type="text" name="pay[amount]" id="btc_amount" style="width: 20em; padding: 10px" placeholder="bitcoins">
-    <span class="input_option" id="yolo">Bits</span>
+    <input type="text" name="pay[amount]" id="btc_amount" style="width: 20em; padding: 10px" placeholder="Bits">
+    <span id="pay-currency" class="input_option">Bits</span>
   </div>
   <div style="inlne-block; float: left; padding-bottom: 10px;">
     <label for="memo">Memo</label><br>
@@ -46,5 +46,9 @@
         $("#btc_amount").val(amount);
         form.submit();
     });
+    var curName = currencyName();
+    console.log("GOT CURRENCY AS ", curName);
+    $("#pay-currency").text(curName);
+    $("#btc_amount").attr("placeholder", curName);
 </script>
 
