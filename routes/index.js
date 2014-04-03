@@ -27,6 +27,15 @@ function render(req, res, content) {
        var params = {
          success: success,
          bitbox_btc_to_usd: conversion,
+         bitbox_usd_to_ca :1.0,
+         bitbox_usd_to_eu :1.0,
+         bitbox_usd_to_uk :1.0,
+         bitbox_usd_to_au :1.0,
+         bitbox_usd_to_mx :1.0,
+         bitbox_usd_to_br :1.0,
+         bitbox_usd_to_ar :1.0,
+         bitbox_usd_to_jp :1.0,
+         bitbox_usd_to_ch :1.0,
          fb_app_id: FB_APP_ID
        };
        
