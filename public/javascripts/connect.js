@@ -19,8 +19,9 @@ socket.on('ready', function() {
 });	
 
 socket.on('notification', function(data) {
-	console.log(data);
+	// document.getElementById("notification_icon").className = "glyphicon glyphicon-asterisk red";
 	alert(data.msg);
+	// console.log(data);
 });
 
 socket.on('alert', function(msg) {
