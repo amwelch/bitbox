@@ -1,20 +1,30 @@
-var socket;
+// var socket;
 
-var connection = false;
+// $.cookie.json = true;
+// var socket = $.cookie('socket');
 
-// DOM Ready =============================================================
-$(document).ready(function() {
+console.log(socket);
 
-	if (!connection) {
-		connection = true;
+// if(socket == undefined) {
+console.log("Initializing Socket");
+var socket = io.connect('http://localhost');
+	// var string_sio = JSON.stringify(socket);
+	// console.log(socket);
+	// $.cookie('socket', socket, { secure: true } );
+startSocketConnection();
+// }
 
-		socket = io.connect('http://localhost');
+socket.on('ready', function() {
+	console.log("Ready");
+});	
 
-	  startSocketConnection();
-	}
-	// console.log(connection['done']);
+socket.on('notification', function(data) {
+	console.log(data);
+	alert(data.msg);
+});
 
-
+socket.on('alert', function(msg) {
+	alert(msg.data);
 });
 
 function startSocketConnection() {
@@ -23,18 +33,5 @@ function startSocketConnection() {
 	$.get( '/api/userInfo', function( data ) {
 		console.log(data);
 		socket.emit('user', data);	
-	});	
-
-	socket.on('ready', function() {
-		console.log("Ready");
-	});	
-
-	socket.on('notification', function(data) {
-		console.log(notification);
-		alert(data.msg);
-	});
-
-	socket.on('alert', function(msg) {
-		alert(msg.data);
-	});
+	});		
 }

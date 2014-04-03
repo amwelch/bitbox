@@ -13,12 +13,13 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var RedisStore = require("connect-redis")(express);
 FB_APP_ID =  cfg.fb.app_id;
 
-REDIS = new RedisStore({
+var redis_store = new RedisStore({
   host: cfg.redis.host,
   port: cfg.redis.port,
   //db: 
   //pass: 
 });
+REDIS = require('redis').createClient();
 
 var fs = require('fs');
 var app = express();
@@ -44,7 +45,8 @@ app.configure(function() {
   app.use(express.urlencoded()); // to support URL-encoded bodies
   app.use(express.session({ 
     secret: cfg.redis.secret,
-    store: REDIS,
+    store: redis_store,
+    client: REDIS
     //cookie: { secure: true }
   }));
   app.use(passport.initialize());

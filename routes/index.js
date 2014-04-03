@@ -3,8 +3,6 @@ var http = require('http');
 var api = require('./api');
 var sio = require('./socket');
 var ec = require('./error-codes');
-var redis = require("redis");
-var REDIS=redis.createClient();
 exports.api = api;
 
 //HELPER FUNCTIONS
@@ -253,23 +251,30 @@ exports.controlPay = function(req, res) {
 
         var source;
         var destination;
-        console.log(req.body.pay);
+        var status;
+
         if (req.body.pay.op == "ask") {
+          
           source = {
             facebook_id: req.body.pay.facebook_id,
             nickname: nickname
           };
-          destination = {
-            id: req.user.id
-          };
+          
+          destination = { id: req.user.id };
+          
+          status = 'Requested';
+
         } else if (req.body.pay.op == "send") {
-          source = {
-            id: req.user.id
-          };
+          
+          source = { id: req.user.id };
+          
           destination = {
             facebook_id: req.body.pay.facebook_id,
             nickname: nickname
           };
+
+          status = 'Pending';
+
         } else {
           res.redirect('/transfer/pay?success=false');
           return;
@@ -278,6 +283,7 @@ exports.controlPay = function(req, res) {
         api.transfer({
           source: source,
           destination: destination,
+          status: status,
           type: "Payment",
           amount: req.body.pay.amount,
           memo: req.body.pay.memo
@@ -420,6 +426,7 @@ exports.controlDeposit = function(req, res) {
     api.transfer({
       source: { id: -1 },
       destination: { id: req.user.id },
+      status: 'Pending',
       type: "Deposit",
       amount: req.body.deposit.amount,
       memo: "TODO: Actual BTC deposits"
@@ -448,6 +455,7 @@ exports.controlWithdraw = function(req, res) {
     api.transfer({
       source: { id: req.user.id },
       destination: { id: -1 },
+      status: 'Pending',
       type: "Withdrawal",
       amount: amount,
       address: req.body.withdraw.address,

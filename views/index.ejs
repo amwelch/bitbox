@@ -92,18 +92,18 @@
         </div>
       <% } %>
       <%- include liftoff/index.ejs %>
-    <% } else if (base == 'transfer') { %>
-      <script src='/javascripts/connect.js'></script>
+    <% } else if (base == 'transfer') { %>      
       <%- include transfer/index.ejs %>
     <% } else if (base == 'beta') { %>
       <%- include beta/signUp.ejs %>
-    <% } else if (base == 'accounts') { %>
-      <script src='/javascripts/connect.js'></script>
+    <% } else if (base == 'accounts') { %>      
       <%- include accounts/index.ejs %>
     <% } %>    
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
     <% if (authenticated) { %>
       <%- include generic/in/nav-scripts.ejs %>
+      <%- include generic/in/notification-scripts.ejs %>
+      <script src='/javascripts/connect.js'></script>
     <% } %>
   </body>
 </html>

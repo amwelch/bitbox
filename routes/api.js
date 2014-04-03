@@ -15,7 +15,7 @@ var pool = poolModule.Pool({
     create: function(callback) {
       //  TOOD: Set connection string using
       //        environment variables
-      var connectionString = "pg://alexander:testing123@localhost:5432/bitbox";
+      var connectionString = sprintf('%s://%s:%s@%s:%s/bitbox', cfg.db.protocol, cfg.db.username, cfg.db.password, cfg.db.host, cfg.db.port);
       var client = new pg.Client(connectionString);
       client.connect(function(err) {
         callback(err, client);
@@ -267,7 +267,7 @@ _createDepositAddress = function(client, uid, cb) {
     var secret = _random(12);
 
     //TODO When domain settles down this becomes domain
-    callbackURL = encodeURIComponent(sprintf("%s://%s/deposit/blockchain?uid=%s&secret=%s", cfg.app.protocol, cfg.app.hostname, uid, secret));
+    callbackURL = encodeURIComponent(sprintf("%s://%s:%s/deposit/blockchain?uid=%s&secret=%s", cfg.app.protocol, cfg.app.hostname, cfg.app.port, uid, secret));
     
     //TODO make destination cold storage address
     dest_address = cfg.bc.address;
@@ -545,8 +545,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
     } else {
 
       //  GET SOURCE ACCT
-      //TODO: shouldn't this also be getOrCreateUser???
-      _getUser(client, data.source, function(err, source) {
+      _getOrCreateUser(client, data.source, function(err, source) {
         if (err) {
           console.log("Error when getting source account in transfer");
           _rollback(client, err, callback);
@@ -559,10 +558,11 @@ exports.transfer = pool.pooled(function(client, data, callback) {
               _rollback(client, err, callback);
             } else {
               //  TRANSFER FUNDS
-              client.query("INSERT INTO transactions (source, destination, amount, memo, type, confirmations) VALUES ($1, $2, $3, $4, $5, $6)", 
+              client.query("INSERT INTO transactions (source, destination, status, amount, memo, type, confirmations) VALUES ($1, $2, $3, $4, $5, $6, $7)", 
                 [
                   source.id,
                   destination.id,
+                  data.status,
                   data.amount,
                   data.memo,
                   data.type,
