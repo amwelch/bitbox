@@ -2,7 +2,10 @@
     var currencyName = function(){
         var currency = $.cookie('currency-display');
         if (currency == "ca"){
-            return "CADs"
+            return "CAD"
+        }
+        else if (currency == "usd"){
+            return "USD"
         }
         else if (currency == "eu"){
             return "Euro"
@@ -109,52 +112,52 @@
         console.log("CURRENCY IS " + currency);
         if (currency == "usd"){
             var total = Number((bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Dollars";
+            outStr = " $"+total;
         }
         else if (currency == "ca"){
             var conversion = <%= bitbox_usd_to_ca %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " CAD";
+            outStr = " c$"+total;
         }
         else if (currency == "eu"){
             var conversion = <%= bitbox_usd_to_eu %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Euros";
+            outStr = " €"+total;
         }
         else if (currency == "uk"){
             var conversion = <%= bitbox_usd_to_uk%>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Pounds";
+            outStr = " £"+total;
         }
         else if (currency == "au"){
             var conversion = <%= bitbox_usd_to_au %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " AUD";
+            outStr = " A$" + total;
         }
         else if (currency == "mx"){
             var conversion = <%= bitbox_usd_to_mx %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Pesos";
+            outStr = " Mex$" + total;
         }
         else if (currency == "br"){
             var conversion = <%= bitbox_usd_to_br %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Reals";
+            outStr = " R$"+total;
         }
         else if (currency == "ar"){
             var conversion = <%= bitbox_usd_to_ar %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Pesos";
+            outStr = total + " Argentine Pesos";
         }
         else if (currency == "jp"){
             var conversion = <%= bitbox_usd_to_jp %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Yen";
+            outStr = " ¥"+total + " (Japanese)";
         }
         else if (currency == "ch"){
             var conversion = <%= bitbox_usd_to_ch %>
             var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Yuan";
+            outStr = " ¥" +total + " (Chinese)";
         }
         else if (currency == "satoshi"){
             console.log("Converting to Satoshi");
