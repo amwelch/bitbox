@@ -1,4 +1,40 @@
 <script>
+    var currencyName = function(){
+        var currency = $.cookie('currency-display');
+        if (currency == "ca"){
+            return "CADs"
+        }
+        else if (currency == "eu"){
+            return "Euro"
+        }
+        else if (currency == "uk"){
+            return "GBP"
+        }
+        else if (currency == "au"){
+            return "AUD"
+        }
+        else if (currency == "mx"){
+            return "Peso"
+        }
+        else if (currency == "br"){
+            return "Real"
+        }
+        else if (currency == "ar"){
+            return "Peso"
+        }
+        else if (currency == "jp"){
+            return "Yen"
+        }
+        else if (currency == "ch"){
+            return "Yuan"
+        }
+        else if (currency == "bitcoin"){
+            return "BTC"
+        }
+        else{
+            return "Satoshis"
+        }
+    }
     //Takes input in currency entered and converts it to Satoshis
     var currencyInput = function(amount){
         var satoshis = 0;
