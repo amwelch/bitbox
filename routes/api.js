@@ -267,7 +267,7 @@ _createDepositAddress = function(client, uid, cb) {
     var secret = _random(12);
 
     //TODO When domain settles down this becomes domain
-    callbackURL = encodeURIComponent(sprintf("%s://%s/deposit/blockchain?uid=%s&secret=%s", cfg.app.protocol, cfg.app.hostname, uid, secret));
+    callbackURL = encodeURIComponent(sprintf("%s://%s:%s/deposit/blockchain?uid=%s&secret=%s", cfg.app.protocol, cfg.app.hostname, cfg.app.port, uid, secret));
     
     //TODO make destination cold storage address
     dest_address = cfg.bc.address;
@@ -559,10 +559,11 @@ exports.transfer = pool.pooled(function(client, data, callback) {
               _rollback(client, err, callback);
             } else {
               //  TRANSFER FUNDS
-              client.query("INSERT INTO transactions (source, destination, amount, memo, type, confirmations) VALUES ($1, $2, $3, $4, $5, $6)", 
+              client.query("INSERT INTO transactions (source, destination, status, amount, memo, type, confirmations) VALUES ($1, $2, $3, $4, $5, $6, $7)", 
                 [
                   source.id,
                   destination.id,
+                  data.status,
                   data.amount,
                   data.memo,
                   data.type,
