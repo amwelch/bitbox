@@ -15,7 +15,7 @@ var pool = poolModule.Pool({
     create: function(callback) {
       //  TOOD: Set connection string using
       //        environment variables
-      var connectionString = "pg://alexander:testing123@localhost:5433/bitbox";
+      var connectionString = sprintf('%s://%s:%s@%s:%s/bitbox', cfg.db.protocol, cfg.db.username, cfg.db.password, cfg.db.host, cfg.db.port);
       var client = new pg.Client(connectionString);
       client.connect(function(err) {
         callback(err, client);
