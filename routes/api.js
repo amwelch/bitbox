@@ -15,7 +15,7 @@ var pool = poolModule.Pool({
     create: function(callback) {
       //  TOOD: Set connection string using
       //        environment variables
-      var connectionString = "pg://alexander:testing123@localhost:5432/bitbox";
+      var connectionString = "pg://alexander:testing123@localhost:5433/bitbox";
       var client = new pg.Client(connectionString);
       client.connect(function(err) {
         callback(err, client);
@@ -545,8 +545,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
     } else {
 
       //  GET SOURCE ACCT
-      //TODO: shouldn't this also be getOrCreateUser???
-      _getUser(client, data.source, function(err, source) {
+      _getOrCreateUser(client, data.source, function(err, source) {
         if (err) {
           console.log("Error when getting source account in transfer");
           _rollback(client, err, callback);

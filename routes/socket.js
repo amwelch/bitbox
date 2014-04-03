@@ -57,8 +57,10 @@ exports.sendNotification = function(users, notification_msg) {
         }
         else {
           notify_msg = src_user.nickname + notification_msg;
-	        connections[user.src_id].emit('notification', {msg: notify_msg}); 
+	        // connections[src_id].emit('notification', {msg: notify_msg}); 
+          console.log("----------------->>>>About to send connection to dst user");
           if(connections[dst_user.id]) {          	
+            console.log("----------------->>>>Connection is open!");
 	          // Send the notification only if the socket to 
 	          // the dst user is open
 	          // This line is just for testing how the notifications would look. 
