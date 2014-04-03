@@ -33,6 +33,8 @@ button.user-btn:hover {
 	background-color: #783919;
 }
 
+
+
 div.container-user {
     width: 100%;
     margin-left: auto;
@@ -66,7 +68,7 @@ button .icon-bar {
 	border:0px;
 	border-width:0px;
 }
-ul.nav.navbar-right li > a:hover, ul.nav.navbar-right li > a:active {
+ul.nav.navbar-right li > a:hover, ul.nav.navbar-right li > a:active, ul.nav.navbar-right li > a:focus {
 	background-color: #783919;
 }
 
