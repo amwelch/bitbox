@@ -6,6 +6,7 @@ module.exports = function(environment) {
 
     rObject.db = {
       protocol: 'pg',
+      host: 'localhost',
       username: 'alexander',
       password: 'testing123',
       port: '5432'
@@ -44,6 +45,14 @@ module.exports = function(environment) {
       ip: '127.0.0.1',
       internal_ip: '172.31.9.227',
       port: '443',
+    };
+
+    rObject.db = {
+      protocol: 'pg',
+      host: 'localhost',
+      username: 'alexander',
+      password: 'testing123',
+      port: '5432'
     };
 
     rObject.redis = {
