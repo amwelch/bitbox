@@ -1,0 +1,24 @@
+<div class="table-responsive" style="display:hidden;">
+  <table id="track-table" class="table table-striped">
+    <tr>
+      <th>With</th>
+      <th>Status</th>
+      <th>Gross</th>
+      <th>Date</th>
+      <!--th>Memo</th>
+      <th>Action</th>
+      <th>Confirmations</th-->
+    </tr>
+    <% for (var i = 0; i < history.length; i++) { %>
+      <tr class="linked" onclick="location.href='/transfer/track/<%= history[i].uuid %>';">
+        <td><%= history[i].whom %></td>
+        <td><%= history[i].status %></td>
+        <td><span class="currency"><%= history[i].amount %></span> <span class="denomination">BTC</span></td>
+        <td><span class="date"><%= history[i].date %></span></td>
+        <!--td><%= history[i].memo %></td>
+        <td><%= history[i].type %></td>
+        <td><%= history[i].confirmations %></td-->
+      </tr>
+    <% } %>
+  </table>
+</div>
