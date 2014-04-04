@@ -1,57 +1,42 @@
 
 var http = require('http');
-var api = require('./api');
+var api = require('../api/');
 var sio = require('./socket');
-var ec = require('./error-codes');
-exports.api = api;
 
-//HELPER FUNCTIONS
-
+function require_login(res) {
+  res.redirect('/liftoff/login');
+}
 
 function render(req, res, content) {
   var success;
-  if (req.query.success == "true"){
+  if (req.query.success == "true") {
     success = true;
-  } else if (req.query.success == "false"){
+  } else if (req.query.success == "false") {
     success = false;
   } else {
     success = null;
   }
-  console.log(REDIS);
+
   REDIS.get("bitbox_btc_to_usd", function(err, conversion){
-      if(err){
-          console.log("ERROR IS err: " + err);
-      }
-      else{
-       console.log("GOT CONVERSION: " + conversion);
-       var params = {
-         success: success,
-         bitbox_btc_to_usd: conversion,
-         fb_app_id: FB_APP_ID
-       };
+    if (err) {
+      console.log("ERROR IS err: " + err);
+    } else {
+      console.log("GOT CONVERSION: " + conversion);
+      var params = {
+        success: success,
+        bitbox_btc_to_usd: conversion,
+        fb_app_id: FB_APP_ID
+      };
        
-       for (var key in content) {
-         // important check that this is objects own property 
-         // not from prototype prop inherited
-         if(content.hasOwnProperty(key)) {
-           params[key] = content[key];
-         }
-       }
-       res.render('index', params);
-     }
+      for (var key in content) {
+        if(content.hasOwnProperty(key)) {
+          params[key] = content[key];
+        }
+      }
+      res.render('index', params);
+    }
   });
-
 };
-
-function loggedIn(req) {
-  var rValue = false;
-  console.log(req.user);
-  if (req.user) {
-    rValue = true;
-  }
-  return rValue;
-}
-
 
 function getFacebookName(facebook_id, callback) {
   http.get("http://graph.facebook.com/"+facebook_id, function(res) {
@@ -70,35 +55,9 @@ function getFacebookName(facebook_id, callback) {
   });
 }
 
-function prepareTransfer(data, callback) {
-
-  //  TODO: Sanitize inputs here
-
-  //  GET SOURCE ACCT
-  api.getUser(data.source, function(err, source) {
-    if (err) {
-      callback(err, null);
-    } else {
-
-      //  GET DEST ACCT
-      api.getOrCreateUser(data.destination, function(err, destination) {
-        if (err) {
-          callback(err, null);
-        } else {
-          data.source = source;
-          data.destination = destination;
-          callback(null, data);
-        }
-      });
-    }
-  });
-};
-
-//HOMEPAGE
-
 exports.index = function(req, res){
   //TODO: Whats the default page for logged in?
-  if (loggedIn(req)) {
+  if (req.user.valid) {
     res.redirect('/transfer/pay');
   } else {
     render(req, res, {
@@ -111,21 +70,12 @@ exports.index = function(req, res){
 };
 
 exports.login = function(req, res) {
-  if (loggedIn(req)) {
-    render(req, res, {
-      base: 'index',
-      view: 'index',
-      authenticated: true,
-      title: 'Social Bitcoin'
-    });
-  } else {
-    render(req, res, {
-      base: 'index',
-      view: 'login',
-      authenticated: false,
-      title: 'Login'
-    });
-  }
+  render(req, res, {
+    base: 'index',
+    view: 'login',
+    authenticated: req.user.valid,
+    title: 'Social Bitcoin'
+  });
 };
 
 exports.logout = function(req, res) {
@@ -134,152 +84,130 @@ exports.logout = function(req, res) {
 };
 
 exports.transfer = function(req, res) {
-  if (loggedIn(req)) {
+  if (req.user.valid) {
     res.redirect('/transfer/pay');
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 }
 
 exports.viewPay = function(req, res) {  
-  if (loggedIn(req)) {
-    api.getUser(req.user, function(err, user) {
-      if (err) {
-        console.log("Unable to get user");
-        res.redirect("/");
-      } else {
-        render(req, res, {
-          base: 'transfer',
-          view: 'pay',
-          authenticated: true,
-          title: 'Payment',
-          balance: user.balance,
-          name: user.nickname
-        });
-      }
+  if (req.user.valid) {
+    render(req, res, {
+      base: 'transfer',
+      view: 'pay',
+      authenticated: true,
+      title: 'Payment',
+      balance: req.user.balance,
+      name: req.user.nickname
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
-exports.viewTrack = function(req, res) {
-  if (loggedIn(req)) {
-    api.getUser(req.user, function(err, user) {
+exports.viewTransfer = function(req, res) {
+  console.log(req.params.id);
+  res.redirect('/transfer/track');
+};
+
+exports.viewTransfers = function(req, res) {
+  if (req.user.valid) {
+    if (ENVIRONMENT != 'dev') {
+      api.queryBlockChain(req.user.deposit_address, req.user.id);
+    }
+    api.track(req.user.id, function(err, history) {
       if (err) {
         console.log("Unable to get user");
         res.redirect("/");
       } else {
-        if (ENVIRONMENT != 'dev') {
-          api.queryBlockChain(user.deposit_address, user.id);
-        }
-        api.track(user.id, function(err, history) {
-          if (err) {
-            console.log("Unable to get user");
-            res.redirect("/");
-          } else {
-            render(req, res, {
-              base: 'transfer',
-              view: 'track',
-              authenticated: true,
-              title: 'Track',
-              balance: user.balance,
-              name: user.nickname,
-              history: history
-            });
-          }
+        console.log(history);
+        render(req, res, {
+          base: 'transfer',
+          view: 'track',
+          authenticated: true,
+          title: 'Track',
+          balance: req.user.balance,
+          name: req.user.nickname,
+          history: history
         });
       }
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
 exports.viewDeposit = function(req, res) {
-  if (loggedIn(req)) {
-    api.getUser(req.user, function(err, user) {
-      if (err) {
-        console.log("Unable to get user");
-        res.redirect("/");
-      } else {
-        render(req, res, {
-          base: 'transfer',
-          view: 'deposit',
-          authenticated: true,
-          title: 'Deposit',
-          balance: user.balance,
-          address: user.deposit_address,
-          name: user.nickname
-        });
-      }
+  if (req.user.valid) {
+    render(req, res, {
+      base: 'transfer',
+      view: 'deposit',
+      authenticated: true,
+      title: 'Deposit',
+      balance: req.user.balance,
+      address: req.user.deposit_address,
+      name: req.user.nickname
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
 exports.viewWithdraw = function(req, res) {
-  if (loggedIn(req)) {
-    api.getUser(req.user, function(err, user) {
-      if (err) {
-        console.log("Unable to get user");
-        res.redirect("/");
-      } else {
-        render(req, res, {
-          base: 'transfer',
-          view: 'withdraw',
-          authenticated: true,
-          title: 'Withdraw',
-          balance: user.balance,
-          name: user.nickname
-        });
-      }
+  if (req.user.valid) {
+    render(req, res, {
+      base: 'transfer',
+      view: 'withdraw',
+      authenticated: true,
+      title: 'Withdraw',
+      balance: req.user.balance,
+      name: req.user.nickname
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
 exports.controlPay = function(req, res) {
-  console.log(req.body);
-  if (loggedIn(req)) {
+  if (req.user.valid) {
+
+    //  TODO: Error check these
+    var source;
+    var destination;
+    var status;
+
+    if (req.body.pay.op == "ask") {
+      
+      source = {
+        facebook_id: req.body.pay.facebook_id,
+        nickname: req.user.nickname
+      };
+      
+      destination = { id: req.user.id };
+      
+      status = 'Requested';
+
+    } else if (req.body.pay.op == "send") {
+      
+      source = { id: req.user.id };
+      
+      destination = {
+        facebook_id: req.body.pay.facebook_id,
+        nickname: req.user.nickname
+      };
+
+      status = 'Pending';
+
+    } else {
+      res.redirect('/transfer/pay?success=false');
+      return;
+    }
+
     getFacebookName(req.body.pay.facebook_id, function(err, nickname) {
       if (err) {
         res.redirect('/transfer/pay?success=false');
       } else {
-
-        var source;
-        var destination;
-        var status;
-
-        if (req.body.pay.op == "ask") {
-          
-          source = {
-            facebook_id: req.body.pay.facebook_id,
-            nickname: nickname
-          };
-          
-          destination = { id: req.user.id };
-          
-          status = 'Requested';
-
-        } else if (req.body.pay.op == "send") {
-          
-          source = { id: req.user.id };
-          
-          destination = {
-            facebook_id: req.body.pay.facebook_id,
-            nickname: nickname
-          };
-
-          status = 'Pending';
-
-        } else {
-          res.redirect('/transfer/pay?success=false');
-          return;
-        }
-
         api.transfer({
           source: source,
           destination: destination,
@@ -319,7 +247,7 @@ exports.controlPay = function(req, res) {
       }
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
@@ -422,7 +350,7 @@ exports.blockChainIn = function(req, res) {
 }
 
 exports.controlDeposit = function(req, res) {
-  if (loggedIn(req)) {
+  if (req.user.valid) {
     api.transfer({
       source: { id: -1 },
       destination: { id: req.user.id },
@@ -439,7 +367,7 @@ exports.controlDeposit = function(req, res) {
       }
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
@@ -451,7 +379,7 @@ exports.controlWithdraw = function(req, res) {
 
   console.log("Withdrawing " + amount);
 
-  if (loggedIn(req)) {
+  if (req.user.valid) {
     api.transfer({
       source: { id: req.user.id },
       destination: { id: -1 },
@@ -468,54 +396,51 @@ exports.controlWithdraw = function(req, res) {
       }
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
 
 exports.fb_test = function(req, res){
-    console.log("Test is go");
-    console.log("Token: " + req.session.accessToken);
-    api.facebookPost(req.session.accessToken);
-    res.redirect('/');
+  console.log("Test is go");
+  console.log("Token: " + req.session.accessToken);
+  api.facebookPost(req.session.accessToken);
+  res.redirect('/');
 }
 exports.userInfo = function(req, res){
-  if (loggedIn(req)) {
-      res.json(req.user);
+  if (req.user.valid) {
+    // TODO scope this object
+    res.json(req.user);
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
 exports.user = function(req, res){
-  if (loggedIn(req)) {
-    api.getUser(req.user, function(err, user) {
-      render(req, res, {
-        base: 'accounts',
-        view: 'user',
-        title: 'My Account',
-        name: user.nickname,
-        authenticated: true
-      });
+  if (req.user.valid) {
+    render(req, res, {
+      base: 'accounts',
+      view: 'user',
+      title: 'My Account',
+      name: req.user.nickname,
+      authenticated: true
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
 exports.identity= function(req, res){
-  if (loggedIn(req)) {
-    api.getUser(req.user, function(err, user) {
-      render(req, res, {
-        base: 'accounts',
-        view: 'identity',
-        title: 'Identity',
-        name: user.nickname,
-        authenticated: true
-      });
+  if (req.user.valid) {
+    render(req, res, {
+      base: 'accounts',
+      view: 'identity',
+      title: 'Identity',
+      name: req.user.nickname,
+      authenticated: true
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
@@ -542,18 +467,16 @@ exports.betaSignUp = function(req, res){
 };
 
 exports.security= function(req, res){
-  if (loggedIn(req)) {
-    api.getUser(req.user, function(err, user) {
-      render(req, res, {
-        base: 'accounts',
-        view: '2FA',
-        title: '2FA',
-        name: user.nickname,
-        authenticated: true
-      });
+  if (req.user.valid) {
+    render(req, res, {
+      base: 'accounts',
+      view: '2FA',
+      title: '2FA',
+      name: req.user.nickname,
+      authenticated: true
     });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };
 
@@ -567,27 +490,24 @@ exports.lobby = function(req, res) {
 }
 /*{ displayname: 'Test123', pay: { op: 'true' } }*/
 exports.controlUser = function(req, res){
-  if (loggedIn(req)){
-      api.getUser(req.user, function(err, user){
-          var name = req.body.displayname;
-          if (!name){
-              name = user.nickname;
-          }
-          var data={
-            id: req.user.id,
-            facebookPost: req.body.post.op,
-            nickname: name
-          }
-          api.updateUser(data, function(err){
-              if (err){
-                  res.redirect('/accounts/user?success=false');
-              }
-              else{
-                  res.redirect('/accounts/user?success=true');
-              }
-          });
-      });
+  if (req.user.valid) {
+    var name = req.body.displayname;
+    if (!name){
+      name = req.user.nickname;
+    }
+    var data = {
+      id: req.user.id,
+      facebookPost: req.body.post.op,
+      nickname: name
+    }
+    api.updateUser(data, function(err){
+      if (err){
+        res.redirect('/accounts/user?success=false');
+      } else {
+        res.redirect('/accounts/user?success=true');
+      }
+    });
   } else {
-    res.redirect('/liftoff/login');
+    require_login(res);
   }
 };

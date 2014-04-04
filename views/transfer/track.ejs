@@ -1,59 +1,59 @@
 <div class="table-responsive" style="display:hidden;">
   <table id="track-table" class="table table-striped">
-    <thead>
-      <tr>
-        <th>With</th>
-        <th>Action</th>
-        <th>Status</th>
-        <th>Gross</th>
-        <!--th>Memo</th>
-        <th>Date</th>
-        <th>Confirmations</th-->
-      </tr>
-    </thead>
-    <tbody>
-    <% for(var i=0; i < history.length; i++) {%>
+    <tr>
+      <th>With</th>
+      <th>Status</th>
+      <th>Gross</th>
+      <th>Date</th>
+      <!--th>Memo</th>
+      <th>Action</th>
+      <th>Confirmations</th-->
+    </tr>
+    <% for (var i = 0; i < history.length; i++) { %>
       <tr>
         <td><%= history[i].whom %></td>
-        <td><%= history[i].action %></td>
         <td><%= history[i].status %></td>
-        <td><%= history[i].amount %></td>
-        <!--td><%= history[i].memo %></td>
+        <td><span class="currency"><%= history[i].amount %></span> <span class="denomination">BTC</span></td>
         <td><%= history[i].date %></td>
+        <!--td><%= history[i].memo %></td>
+        <td><%= history[i].action %></td>
         <td><%= history[i].confirmations %></td-->
       </tr>
     <% } %>
-    </tbody>
   </table>
 </div>
 <script>
-   var conversion_factor = 0;
-   var currency = $.cookie('currency-display');
-   var name = "";
-   if (currency == "usd"){
-       var btc_to_usd = <%= bitbox_btc_to_usd %>;
-       conversion_factor = (1.0/0.00000001)*btc_to_usd;
-       name = "USD";
-   }
-   else if (currency == "bitcoin"){
-       conversion_factor = 1.0/0.00000001;
-       name = "BTC";
-   }
-   else{
-       conversion_factor = 1.0;
-       name = "Satoshis";
-   }
-   $("#track-table").find("td:nth-child(4)").each(function () {
-       var val = parseInt($(this).html());
-       val = currencyOutput(val);
-       $(this).html(val);
-       console.log("value: " + val);
-   });
-   //Convert all -1 to n/a
-   $("#track-table").find("td:nth-child(7)").each(function () {
-       var val = parseInt($(this).html());
-       if (val < 0 ){
-           $(this).html("n/a");
-       }
-   });
+  var conversion_factor = 0;
+  var currency = $.cookie('currency-display');
+  var name = "";
+  if (currency == "usd") {
+    var btc_to_usd = <%= bitbox_btc_to_usd %>;
+    conversion_factor = (1.0/0.00000001)*btc_to_usd;
+    name = "USD";
+  } else if (currency == "bitcoin") {
+    conversion_factor = (1.0/0.00000001);
+    name = "BTC";
+  } else {
+    conversion_factor = 1.0;
+    name = "Satoshi";
+  }
+  $("body").find(".currency").each(function () {
+    //  parsing satoshis
+    var val = parseInt($(this).html());
+    val = currencyOutput(val);
+    $(this).html(val);
+    console.log("value: " + val);
+  });
+  $("body").find(".denomination").each(function () {
+    //  parsing satoshis
+
+    $(this).html(name);
+  });
+  //Convert all -1 to n/a
+  /*$("#track-table").find("td:nth-child(7)").each(function () {
+    var val = parseInt($(this).html());
+    if (val < 0 ) {
+      $(this).html("n/a");
+    }
+  });*/
 </script>
