@@ -62,4 +62,28 @@
         setCurrency("satoshi");
         location.reload();
     });
+  $("body").find(".currency").each(function () {
+    //  parsing satoshis
+    var val = parseInt($(this).html());
+    val = currencyOutput(val);
+    $(this).html(val);
+    console.log("value: " + val);
+  });
+  $("body").find(".denomination").each(function () {
+    //  parsing satoshis
+    $(this).html(currencyName());
+  });
+  $("body").find(".date").each(function () {
+    //  parsing satoshis
+    $(this).html((new Date($(this).html())).toDateString());
+  });
+
+  document.getElementById("main").style.display = 'block';
+  //Convert all -1 to n/a
+  /*$("#track-table").find("td:nth-child(7)").each(function () {
+    var val = parseInt($(this).html());
+    if (val < 0 ) {
+      $(this).html("n/a");
+    }
+  });*/
 </script>
