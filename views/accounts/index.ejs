@@ -4,8 +4,6 @@
 <div class="col-sm-3 col-md-2 sidebar">
   <ul class="nav nav-sidebar">
   	<li <% if (view == "user") {%>class="active"<% } %>><a href="/accounts/user">General Information</a></li>
-    <li <% if (view == "identity") {%>class="active"<% } %>><a href="/accounts/identity">Verify Identity</a></li>
-    <li <% if (view == "2FA") {%>class="active"<% } %>><a href="/accounts/security">2FA</a></li>
   </ul>
 </div>
 <% if (view == 'user') { %>
