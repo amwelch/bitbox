@@ -33,7 +33,7 @@ def main(argv):
     rs["bitbox_usd_to_ar"]= ret["ARS"]
     rs["bitbox_usd_to_jp"]= ret["JPY"]
     rs["bitbox_usd_to_ch"]= ret["CNY"]
-    con.set("usd_to_other", json.dumps(rs))
+    con.set("bitbox_usd_to_other", json.dumps(rs))
 
 if __name__ == '__main__':
     main(sys.argv)
