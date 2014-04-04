@@ -2,6 +2,7 @@ DROP TRIGGER activate_account ON users;
 DROP TRIGGER update_user_balances ON transactions;
 DROP FUNCTION activate_balances();
 DROP FUNCTION update_balances();
+DROP TABLE notifications;
 DROP TABLE transactions;
 DROP TABLE users;
 DROP TYPE TXN_STATUS;
@@ -45,6 +46,15 @@ CREATE TABLE transactions (
     submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     uuid VARCHAR(32) UNIQUE DEFAULT NULL
 );  
+
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY (id),
+    user_id SERIAL,
+    transaction_id VARCHAR(36), 
+    type TXN_TYPE NOT NULL,
+    FOREIGN KEY (transaction_id) REFERENCES transactions(uuid),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
 GRANT ALL PRIVILEGES ON users TO alexander;
 GRANT ALL PRIVILEGES ON transactions TO alexander;

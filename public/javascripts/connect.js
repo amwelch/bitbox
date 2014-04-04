@@ -20,8 +20,15 @@ socket.on('ready', function() {
 
 socket.on('notification', function(data) {
 	// document.getElementById("notification_icon").className = "glyphicon glyphicon-asterisk red";
+	var bubble = document.getElementById("noti_bubble");
+	bubble.style.visibility="visible";
+	bubble.innerHTML = "1";
 	alert(data.msg);
 	// console.log(data);
+});
+
+socket.on('old_notifications', function(data) {
+	
 });
 
 socket.on('alert', function(msg) {
