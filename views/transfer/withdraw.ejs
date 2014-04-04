@@ -3,7 +3,7 @@
   <div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
     <label for="btc_amount">Amount</label><br>
     <input type="text" id="btc_amount" name="withdraw[amount]" style="width: 20em; padding: 10px" placeholder="bitcoins">
-    <span class="input_option" id="yolo">Bits</span>
+    <span class="input_option" id="withdraw-currency">Bits</span>
   </div>
   <div style="inlne-block; float: left; padding-bottom: 10px;">
     <label for="btc_address">Address</label><br>
@@ -25,4 +25,8 @@
         $("#btc_amount").val(amount);
         form.submit();
     });
+    var curName = currencyName();
+    console.log("GOT CURRENCY AS ", curName);
+    $("#withdraw-currency").text(curName);
+    $("#btc_amount").attr("placeholder", curName);
 </script>
