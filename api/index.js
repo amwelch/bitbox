@@ -7,6 +7,7 @@ var crypto = require('crypto');
 var http = require('http');
 var fb = require('fb');
 var https = require('https');
+var uuid = require('node-uuid');
 
 var pool = poolModule.Pool({
 
@@ -484,7 +485,7 @@ exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
                   if (err || result.rows.length == 0) {
                       console.log("CREATING TRANSACTION");
                       console.log(err);
-                     client.query("INSERT INTO transactions (source, destination, amount, memo, type, blockchain_id, confirmations) VALUES ($1, $2, $3, $4, $5, $6, $7)", 
+                     client.query("INSERT INTO transactions (source, destination, amount, memo, type, blockchain_id, confirmations, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                        [
                          source.id,
                          destination.id,
@@ -493,6 +494,7 @@ exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
                          data.type,
                          data.depositId,
                          data.confirmations,
+                         uuid.v4()
                        ], 
                        function(err, result) {
                          if (err) {
@@ -558,7 +560,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
               _rollback(client, err, callback);
             } else {
               //  TRANSFER FUNDS
-              client.query("INSERT INTO transactions (source, destination, status, amount, memo, type, confirmations) VALUES ($1, $2, $3, $4, $5, $6, $7)", 
+              client.query("INSERT INTO transactions (source, destination, status, amount, memo, type, confirmations, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                 [
                   source.id,
                   destination.id,
@@ -566,7 +568,8 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                   data.amount,
                   data.memo,
                   data.type,
-                  -1
+                  -1,
+                  uuid.v4()
                 ], 
                 function(err, result) {
                   if (err) {
@@ -598,7 +601,44 @@ exports.transfer = pool.pooled(function(client, data, callback) {
   });
 });
 
-exports.track = pool.pooled(function(client, id, callback) {
+exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
+  client.query("SELECT transactions.*, source.nickname AS source_name, destination.nickname AS destination_name "+
+    "FROM transactions "+
+    "LEFT OUTER JOIN users source ON transactions.source=source.id "+
+    "LEFT OUTER JOIN users destination ON transactions.destination=destination.id "+
+    "WHERE (source=$1 OR destination=$1) AND transactions.uuid = $2", [data.user_id, data.transaction_uuid], function(err, result) {
+    if (err) {
+      console.log(err);
+      callback(err, null);
+    } else {
+      if (result.rows.length == 1) {
+        history = result.rows[0];
+        var whom;
+        var actionable = false;
+        if (history.source == data.user_id) {
+          whom = history.destination_name;
+        } else if (history.destination == data.user_id) {
+          whom = history.source_name;
+        }
+        rValue = {
+          date: history.submitted,
+          type: history.type,
+          whom: whom,
+          status: history.status,
+          amount: history.amount,
+          confirmations: history.confirmations,
+          memo: history.memo,
+          uuid: history.uuid
+        };
+        callback(null, rValue);
+      } else {
+        callback("INVALID ROW LENGTH", null);
+      }
+    }
+  });
+});
+
+exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
   id = parseInt(id);
   client.query("SELECT transactions.*, source.nickname AS source_name, destination.nickname AS destination_name "+
     "FROM transactions "+
@@ -616,22 +656,24 @@ exports.track = pool.pooled(function(client, id, callback) {
         if (history[i].source == id) {
           rValue.push({
             date: history[i].submitted,
-            action: history[i].type,
-            whom: history[i].destination_name ? history[i].destination_name : "FB friend",
+            type: history[i].type,
+            whom: history[i].destination_name,
             status: history[i].status,
             amount: history[i].amount,
             confirmations: history[i].confirmations,
-            memo: history[i].memo
+            memo: history[i].memo,
+            uuid: history[i].uuid
           });
         } else if (history[i].destination == id) {
           rValue.push({
             date: history[i].submitted,
-            action: history[i].type,
-            whom: history[i].source_name ? history[i].source_name : "FB friend",
+            type: history[i].type,
+            whom: history[i].source_name,
             status: history[i].status,
             amount: history[i].amount,
             confirmations: history[i].confirmations,
-            memo: history[i].memo
+            memo: history[i].memo,
+            uuid: history[i].uuid
           });
         }
       }

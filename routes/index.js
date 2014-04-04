@@ -120,17 +120,46 @@ exports.viewPay = function(req, res) {
   }
 };
 
-exports.viewTransfer = function(req, res) {
+
+exports.controlTransferSingle = function(req, res) {
   console.log(req.params.id);
   res.redirect('/transfer/track');
 };
 
-exports.viewTransfers = function(req, res) {
+exports.viewTransferSingle = function(req, res) {
+  var transaction_uuid = req.params.id;
+  if (req.user.valid) {
+    api.getTransactionByUuid({
+      user_id: req.user.id, 
+      transaction_uuid: transaction_uuid
+    }, function(err, transaction) {
+      if (err) {
+        console.log("Unable find txn");
+        res.redirect("/");
+      } else {
+        render(req, res, {
+          base: 'transfer',
+          view: 'track',
+          action: 'single',
+          authenticated: true,
+          title: 'View Transaction',
+          balance: req.user.balance,
+          name: req.user.nickname,
+          transaction: transaction
+        });
+      }
+    });
+  } else {
+    require_login(res);
+  }
+};
+
+exports.viewTransferList = function(req, res) {
   if (req.user.valid) {
     if (ENVIRONMENT != 'dev') {
       api.queryBlockChain(req.user.deposit_address, req.user.id);
     }
-    api.track(req.user.id, function(err, history) {
+    api.getTransactionsByUserId(req.user.id, function(err, history) {
       if (err) {
         console.log("Unable to get user");
         res.redirect("/");
@@ -139,6 +168,7 @@ exports.viewTransfers = function(req, res) {
         render(req, res, {
           base: 'transfer',
           view: 'track',
+          action: 'list',
           authenticated: true,
           title: 'Track',
           balance: req.user.balance,

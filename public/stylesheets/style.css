@@ -289,3 +289,11 @@ div.fbac-suggestion-list {
 ul.dropdown-menu > li > a {
 	cursor: pointer;
 }
+
+tr.linked td {
+	cursor: pointer;
+}
+
+tr.linked:hover {
+	font-weight: bold;
+}

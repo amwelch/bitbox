@@ -1,0 +1,7 @@
+<% if (transaction.type == 'Payment') { %>
+PAYMENT
+<% } else if (transaction.type == 'Deposit') { %>
+DEPOSIT
+<% } else if (transaction.type == 'Withdrawal') { %>
+WITHDRAWAL
+<% } %>
