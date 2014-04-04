@@ -6,9 +6,8 @@
 
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>  
+  <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>  -->
 
   <script src="/socket.io/socket.io.js"></script>
   
@@ -18,11 +17,13 @@
     <title>BitBox - <%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel='stylesheet' href='/stylesheets/toggle-switch.css' />
+    <link rel='stylesheet' href='/bootstrap/bootstrap-dialog.min.css' />
 <meta name="viewport" content="width=max-device-width, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>-->
     <script src="/jquery-cookie/jquery.cookie.js"></script>
     <script src="/fb-autocomplete/facebook-friend-autocomplete.js"></script>
+    <script src="/bootstrap/bootstrap-dialog.min.js"></script>
     <% if (authenticated) { %>
         <%- include generic/in/scripts.ejs %>
     <% } %>
