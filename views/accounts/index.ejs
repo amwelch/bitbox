@@ -15,7 +15,11 @@
     <% } %>  
     <form class="form-signin" role="form" action="#" method="post">
         <h2>User Configuration</h2>
+        <br>
+        <h4>Display Name </h3>
         <input id="inputDisplayName" type="text"  name="displayname" class="user-form form-control" placeholder="<%= name%>">
+        <br>
+        <h4>Allow Facebook Posts</h3>
         <div class="switch-toggle switch-candy" style="max-width: 20em;float:none;margin:0 auto">
             <input id="fbPost_enabled" name="post[op]" type="radio" value="true" checked="true">
             <label for="fbPost_enabled" onclick="">Enabled</label>        
@@ -23,6 +27,7 @@
             <label for="fbPost_disabled" onclick="">Disabled</label>
           <a></a>
         </div>
+        <br>
         <br>
         <div class="form-submit">
           <button id="save-button" class="user-btn btn btn-lg" type="submit"> Save</button>
