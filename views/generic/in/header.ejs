@@ -6,9 +6,13 @@
 		</div>	
 	</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Currency<b class="caret"></b></a>
+<li class="dropdown nav-element">
+  <a href="#" class="dropdown-toggle nav-element" data-toggle="dropdown">Currency<b class="nav-element caret"></b></a>
   <ul class="dropdown-menu">
+    <li class="dropdown-header">BTC</li>
+    <li><a id="BTC-select"><img src="/assets/flags/money-bag.png" height = "30" width= "30"></img>BTC </a></li>
+    <li><a id="SATOSHI-select"><img src="/assets/flags/coin-stack-1.png" height = "30" width= "30"></img>Satoshis</a></li>
+    <li class="divider"></li>
     <li class="dropdown-header">Fiat</li>
     <li><a id="USD-select"><img src="/assets/flags/us.png" height = "30" width= "30"></i>USD</a></li>
     <li><a id="CA-select"><img src="/assets/flags/ca.png" height = "30" width= "30"></i>CAD</a></li>
@@ -20,12 +24,8 @@
     <li><a id="AR-select"><img src="/assets/flags/ar.png" height = "30" width= "30"></i>Peso</a></li>
     <li><a id="JP-select"><img src="/assets/flags/jp.png" height = "30" width= "30"></i>Yen</a></li>
     <li><a id="CH-select"><img src="/assets/flags/cn.png" height = "30" width= "30"></i>Yuan</a></li>
-    <li class="divider"></li>
-    <li class="dropdown-header">BTC Denominations</li>
-    <li><a id="BTC-select"><img src="/assets/flags/money-bag.png" height = "30" width= "30"></img>BTC </a></li>
-    <li><a id="SATOSHI-select"><img src="/assets/flags/coin-stack-1.png" height = "30" width= "30"></img>Satoshis</a></li>
   </ul>
 </li>
-<li><a id="accounts_link" href="/accounts/user"><%- name %></a></li>
-<li><a href="/transfer">Transfer</a></li>
-<li><a href="/logout">Logout</a></li>
+<li class="nav-element"><a class="nav-element" id="accounts_link" href="/accounts/user"><%- name %></a></li>
+<li class="nav-element"><a class="nav-element" href="/transfer">Transfer</a></li>
+<li class="nav-element"><a class="nav-element" href="/logout">Logout</a></li>
