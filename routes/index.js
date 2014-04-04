@@ -7,6 +7,7 @@ function require_login(res) {
   res.redirect('/liftoff/login');
 }
 
+
 function render(req, res, content) {
   var success;
   if (req.query.success == "true") {
@@ -18,23 +19,36 @@ function render(req, res, content) {
   }
 
   REDIS.get("bitbox_btc_to_usd", function(err, conversion){
-    if (err) {
-      console.log("ERROR IS err: " + err);
-    } else {
-      console.log("GOT CONVERSION: " + conversion);
-      var params = {
-        success: success,
-        bitbox_btc_to_usd: conversion,
-        fb_app_id: FB_APP_ID
-      };
+    REDIS.get("bitbox_usd_to_other", function(err, conversion_other){
+      if (err) {
+        console.log("ERROR IS err: " + err);
+      } else {
+        console.log("GOT CONVERSION: " + conversion);
+        console.log("GOT CONVERSION OTHER: " + conversion_other);
+        conversion_other = JSON.parse(conversion_other);
+        var params = {
+          success: success,
+          bitbox_btc_to_usd: conversion,
+          bitbox_usd_to_ca : conversion_other["bitbox_usd_to_ca"],
+          bitbox_usd_to_eu :conversion_other["bitbox_usd_to_eu"],
+          bitbox_usd_to_uk :conversion_other["bitbox_usd_to_uk"],
+          bitbox_usd_to_au :conversion_other["bitbox_usd_to_au"],
+          bitbox_usd_to_mx :conversion_other["bitbox_usd_to_mx"],
+          bitbox_usd_to_br :conversion_other["bitbox_usd_to_br"],
+          bitbox_usd_to_ar :conversion_other["bitbox_usd_to_ar"],
+          bitbox_usd_to_jp :conversion_other["bitbox_usd_to_jp"],
+          bitbox_usd_to_ch :conversion_other["bitbox_usd_to_ch"],
+          fb_app_id: FB_APP_ID
+        };
        
-      for (var key in content) {
-        if(content.hasOwnProperty(key)) {
-          params[key] = content[key];
+        for (var key in content) {
+          if(content.hasOwnProperty(key)) {
+            params[key] = content[key];
+          }
         }
+        res.render('index', params);
       }
-      res.render('index', params);
-    }
+    });
   });
 };
 

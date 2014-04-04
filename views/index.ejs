@@ -65,6 +65,7 @@
         </div>
       </div>
     </div>
+    <div id="main" style="display: none">
     <% if (base == 'index') { %>
       <% if (view == 'index') { %>
         <div class="jumbotron">
@@ -95,7 +96,8 @@
       <%- include beta/signUp.ejs %>
     <% } else if (base == 'accounts') { %>      
       <%- include accounts/index.ejs %>
-    <% } %>    
+    <% } %> 
+    </div>   
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
     <% if (authenticated) { %>
       <%- include generic/in/nav-scripts.ejs %>

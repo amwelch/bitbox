@@ -2,8 +2,52 @@
     var setCurrency = function(name){
         $.cookie('currency-display', name);
     }
+    $("#CA-select").click(function(e){
+        e.preventDefault();
+        setCurrency("ca");
+        location.reload();
+    });
+    $("#EU-select").click(function(e){
+        e.preventDefault();
+        setCurrency("eu");
+        location.reload();
+    });
+    $("#UK-select").click(function(e){
+        e.preventDefault();
+        setCurrency("uk");
+        location.reload();
+    });
+    $("#AU-select").click(function(e){
+        e.preventDefault();
+        setCurrency("au");
+        location.reload();
+    });
+    $("#MX-select").click(function(e){
+        e.preventDefault();
+        setCurrency("mx");
+        location.reload();
+    });
+    $("#BR-select").click(function(e){
+        e.preventDefault();
+        setCurrency("br");
+        location.reload();
+    });
+    $("#AR-select").click(function(e){
+        e.preventDefault();
+        setCurrency("ar");
+        location.reload();
+    });
+    $("#JP-select").click(function(e){
+        e.preventDefault();
+        setCurrency("jp");
+        location.reload();
+    });
+    $("#CH-select").click(function(e){
+        e.preventDefault();
+        setCurrency("ch");
+        location.reload();
+    });
     $("#USD-select").click(function(e){
-        console.log("Clicked usd");
         e.preventDefault();
         setCurrency("usd");
         location.reload();
