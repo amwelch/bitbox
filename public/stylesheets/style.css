@@ -281,3 +281,7 @@ div.fbac-suggestion-list {
 	margin-right: auto;
 	width: 20em;
 }
+
+ul.dropdown-menu > li > a {
+	cursor: pointer;
+}

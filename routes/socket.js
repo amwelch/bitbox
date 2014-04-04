@@ -1,6 +1,5 @@
-
-var ec = require('./error-codes');
-var api = require('./api');
+var ec = require('../api/error-codes.js');
+var api = require('../api/');
 
 // This is the pool of socket connections.
 var connections = {};
@@ -52,21 +51,19 @@ exports.sendNotification = function(users, notification_msg) {
   api.getUser({facebook_id: users.dst_fb_id}, function(err, dst_user) {
     if(err != ec.USER_NOT_FOUND && connections[dst_user.id]) {
       api.getUser({id: users.src_id}, function(err, src_user) {
-        if(err) {
+        if (err) {
           console.log("ERROR GETTING USER in sendNotification");
-        }
-        else {
+        } else {
           notify_msg = src_user.nickname + notification_msg;
 	        // connections[src_id].emit('notification', {msg: notify_msg}); 
           console.log("----------------->>>>About to send connection to dst user");
-          if(connections[dst_user.id]) {          	
+          if (connections[dst_user.id]) {          	
             console.log("----------------->>>>Connection is open!");
 	          // Send the notification only if the socket to 
 	          // the dst user is open
 	          // This line is just for testing how the notifications would look. 
           	connections[dst_user.id].emit('notification', {msg: notify_msg}); 
-          }
-          else {
+          } else {
           	// Add this notification to a dst_table with notifications
 
           }

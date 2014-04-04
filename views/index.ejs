@@ -40,9 +40,6 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <% if (authenticated) { %>
-      <%- include generic/in/scripts.ejs %>
-    <% } %>
   </head>
   <body>
     <div id="fb-root"></div>  
@@ -70,6 +67,7 @@
         </div>
       </div>
     </div>
+    <div id="main" style="display: none">
     <% if (base == 'index') { %>
       <% if (view == 'index') { %>
         <div class="jumbotron">
@@ -100,12 +98,14 @@
       <%- include beta/signUp.ejs %>
     <% } else if (base == 'accounts') { %>      
       <%- include accounts/index.ejs %>
-    <% } %>    
+    <% } %> 
+    </div>   
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
     <% if (authenticated) { %>
       <%- include generic/in/nav-scripts.ejs %>
-      <%- include generic/in/notification-scripts.ejs %>
+      <!--%- include generic/in/notification-scripts.ejs %-->
       <script src='/javascripts/connect.js'></script>
     <% } %>
+    <%- include generic/in/scripts.ejs %>
   </body>
 </html>

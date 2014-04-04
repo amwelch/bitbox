@@ -35,14 +35,14 @@
             return "BTC"
         }
         else{
-            return "Satoshis"
+            return "Satoshi"
         }
     }
     //Takes input in currency entered and converts it to Satoshis
     var currencyInput = function(amount){
         var satoshis = 0;
         var num_amount = parseFloat(amount);
-        var btc_to_usd = <%= bitbox_btc_to_usd %>
+        var btc_to_usd = <%= bitbox_btc_to_usd %>;
         var satoshi_to_btc = 0.00000001;
         var currency = $.cookie('currency-display');
         if (currency == "usd"){
@@ -103,71 +103,97 @@
         console.log("Returning: " + satoshis);
         return satoshis;
     }
+
     //Takes Satoshis as a number and outputs the currency we display
     var currencyOutput = function(bits){
         var outStr = "";
-        var btc_to_usd = <%= bitbox_btc_to_usd %>
+        var btc_to_usd = <%= bitbox_btc_to_usd %>;
         var satoshi_to_btc = 0.00000001;
         var currency = $.cookie('currency-display');
         console.log("CURRENCY IS " + currency);
         if (currency == "usd"){
-            var total = Number((bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " $"+total;
+            var total = (bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "ca"){
-            var conversion = <%= bitbox_usd_to_ca %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " c$"+total;
+            var conversion = <%= bitbox_usd_to_ca %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "eu"){
-            var conversion = <%= bitbox_usd_to_eu %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " €"+total;
+            var conversion = <%= bitbox_usd_to_eu %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "uk"){
-            var conversion = <%= bitbox_usd_to_uk%>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " £"+total;
+            var conversion = <%= bitbox_usd_to_uk%>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "au"){
-            var conversion = <%= bitbox_usd_to_au %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " A$" + total;
+            var conversion = <%= bitbox_usd_to_au %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "mx"){
-            var conversion = <%= bitbox_usd_to_mx %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " Mex$" + total;
+            var conversion = <%= bitbox_usd_to_mx %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "br"){
-            var conversion = <%= bitbox_usd_to_br %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " R$"+total;
+            var conversion = <%= bitbox_usd_to_br %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "ar"){
-            var conversion = <%= bitbox_usd_to_ar %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = total + " Argentine Pesos";
+            var conversion = <%= bitbox_usd_to_ar %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "jp"){
-            var conversion = <%= bitbox_usd_to_jp %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " ¥"+total + " (Japanese)";
+            var conversion = <%= bitbox_usd_to_jp %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "ch"){
-            var conversion = <%= bitbox_usd_to_ch %>
-            var total = Number((conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2));
-            outStr = " ¥" +total + " (Chinese)";
+            var conversion = <%= bitbox_usd_to_ch %>;
+            var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
+            outStr = total;
         }
         else if (currency == "satoshi"){
             console.log("Converting to Satoshi");
-            outStr = bits + " Satoshis";
+            outStr = bits;
         }
         else {
             console.log("Defaulting to BTC");
-            outStr = Number((bits*satoshi_to_btc).toFixed(5)) + " BTC";
+            outStr = (bits*satoshi_to_btc).toFixed(8);
         }
         console.log("Output: " + outStr);
         return outStr;
     }
+
+  $("body").find(".currency").each(function () {
+    //  parsing satoshis
+    var val = parseInt($(this).html());
+    val = currencyOutput(val);
+    $(this).html(val);
+    console.log("value: " + val);
+  });
+  $("body").find(".denomination").each(function () {
+    //  parsing satoshis
+    $(this).html(currencyName());
+  });
+  $("body").find(".date").each(function () {
+    //  parsing satoshis
+    $(this).html((new Date($(this).html())).toDateString());
+  });
+
+  document.getElementById("main").style.display = 'block';
+  //Convert all -1 to n/a
+  /*$("#track-table").find("td:nth-child(7)").each(function () {
+    var val = parseInt($(this).html());
+    if (val < 0 ) {
+      $(this).html("n/a");
+    }
+  });*/
 </script>

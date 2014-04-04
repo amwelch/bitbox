@@ -30,7 +30,7 @@ var https = require('https');
 var routes = require('./routes');
 var sio = require('./routes/socket');
 
-var ec = require('./routes/error-codes');
+var api = require('./api');
 
 //  ------- Server Configuration -------
 var app = express();  
@@ -51,6 +51,26 @@ app.configure(function() {
   }));
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use(function(req, res, next) {
+    if (req.user) {
+      api.getUser(req.user, function(err, user) {
+        if (err) {
+          req.user = {
+            valid: false
+          };
+        } else {
+          req.user = user;
+          req.user.valid = true;
+        }
+        next();
+      });
+    } else {
+      req.user = {
+        valid: false
+      };
+      next();
+    }
+  });
   app.use(app.router);
 });
 
@@ -80,14 +100,14 @@ passport.use(
       nickname: profile.name.givenName + " " + profile.name.familyName,
       facebook_id: profile.id.toString()
     };
-    routes.api.getOrCreateUser(data, function(err, user) {
+    api.getOrCreateUser(data, function(err, user) {
       if (err) {
         console.log(err);
       } else {
         if (user.status == 'Active') {
           done(null, user);
         } else if (user.status == 'Inactive') {
-          routes.api.activateUser(user, function(err, user) {
+          api.activateUser(user, function(err, user) {
             if (err) {
               done(null, null);
             } else {
@@ -130,7 +150,8 @@ app.get('/api/userInfo', routes.userInfo);
 app.get('/logout', routes.logout);
 
 app.get('/transfer/pay', routes.viewPay);
-app.get('/transfer/track', routes.viewTrack);
+app.get('/transfer/track/:id', routes.viewTransfer)
+app.get('/transfer/track', routes.viewTransfers);
 app.get('/transfer/deposit', routes.viewDeposit);
 app.get('/transfer/withdraw', routes.viewWithdraw);
 
