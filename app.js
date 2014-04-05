@@ -93,8 +93,9 @@ passport.use(
     clientID: process.env.FACEBOOK_APP_ID || cfg.fb.app_id,
     clientSecret: process.env.FACEBOOK_SECRET || cfg.fb.app_secret,
     callbackURL: sprintf('%s://%s:%s/liftoff/login/facebook/callback', cfg.app.protocol, cfg.app.hostname, cfg.app.port),
+    passReqToCallback: true,
   },
-  function(accessToken, refreshToken, profile, done) {
+  function(req, accessToken, refreshToken, profile, done) {
     var data = {
       email: profile.emails[0].value,
       firstname: profile.name.givenName,
@@ -102,7 +103,7 @@ passport.use(
       nickname: profile.name.givenName + " " + profile.name.familyName,
       facebook_id: profile.id.toString()
     };
-    //req.session.accessToken = accessToken;
+    req.session.accessToken = accessToken;
     api.getOrCreateUser(data, function(err, user) {
       if (err) {
         console.log(err);
