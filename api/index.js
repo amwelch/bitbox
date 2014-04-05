@@ -539,7 +539,7 @@ exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
 });
 
 
-exports.transfer = pool.pooled(function(client, data, callback) {
+exports.transfer = pool.pooled(function(client, data, callback) {  
   //  START TXN
   _begin(client, function(err, result) {
     if (err) {
@@ -560,6 +560,13 @@ exports.transfer = pool.pooled(function(client, data, callback) {
               console.log("Error when getting dst account in transfer");
               _rollback(client, err, callback);
             } else {
+              var unique_id;
+              if(data.tx_uuid) {
+                unique_id = data.tx_uuid;
+              }
+              else {
+                unique_id = uuid.v4();
+              }
               //  TRANSFER FUNDS
               client.query("INSERT INTO transactions (source, destination, status, amount, memo, type, confirmations, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                 [
@@ -570,7 +577,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                   data.memo,
                   data.type,
                   -1,
-                  uuid.v4()
+                  unique_id
                 ], 
                 function(err, result) {
                   if (err) {
@@ -701,7 +708,7 @@ exports.getNotifications = pool.pooled(function(client, user, callback) {
 
 exports.saveNotification = pool.pooled(function(client, data, callback) {
   console.log("----------------->>>>Saving notification");
-  client.query("INSERT INTO notifications (user_id, type, memo) VALUES ($1,$2,$3)", [data.id, data.type, data.msg], function(err) {
+  client.query("INSERT INTO notifications (user_id, type, msg, tx_uuid) VALUES ($1,$2,$3,$4)", [data.id, data.type, data.msg, data.tx_uuid], function(err) {
     if(err) {
       console.log(err);
     }

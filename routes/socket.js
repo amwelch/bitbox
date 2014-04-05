@@ -44,15 +44,11 @@ exports.sendNotification = function(data, notification_msg) {
         } else {
           notify_msg = src_user.nickname + notification_msg;
           console.log("----------------->>>>About to send connection to dst user");
-          api.saveNotification({id: dst_user.id, msg: notify_msg, type: data.type});
+          api.saveNotification({id: dst_user.id, msg: notify_msg, type: data.type, tx_uuid: data.tx_uuid});
           if (connections[dst_user.id] != undefined) {            
-            // Send the notification only if the socket to 
-            // the dst user is open            
+            // Send the notification only if the socket to the dst user is open            
             connections[dst_user.id].emit('notification', {msg: notify_msg}); 
             console.log("----------------->>>>Notification sent!");
-          } else {
-            // Add this notification to the notifications table
-            console.log("----------------->>>>Saving notification to db");
           }
         }
       });

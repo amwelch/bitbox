@@ -2,6 +2,7 @@
 var http = require('http');
 var api = require('../api/');
 var sio = require('./socket');
+var uuid = require('node-uuid');
 
 function require_login(res) {
   res.redirect('/liftoff/login');
@@ -252,6 +253,7 @@ exports.controlPay = function(req, res) {
     }
 
     getFacebookName(req.body.pay.facebook_id, function(err, nickname) {
+      var unique_id = uuid.v4();
       if (err) {
         res.redirect('/transfer/pay?success=false');
       } else {
@@ -261,7 +263,8 @@ exports.controlPay = function(req, res) {
           status: status,
           type: "Payment",
           amount: req.body.pay.amount,
-          memo: req.body.pay.memo
+          memo: req.body.pay.memo,
+          tx_uuid: unique_id
         }, 
         function(err, result) {
           if (err) {
@@ -284,7 +287,12 @@ exports.controlPay = function(req, res) {
 
                     // Send notification using sockets
                     notification_msg = " just " + type + " you " + req.body.pay.amount +" satoshi ($"+usd+").";
-                    sio.sendNotification({dst_fb_id: req.body.pay.facebook_id, src_id: req.user.id, type: req.body.pay.op}, notification_msg);                    
+                    sio.sendNotification({
+                      dst_fb_id: req.body.pay.facebook_id, 
+                      src_id: req.user.id,
+                      type: req.body.pay.op, 
+                      tx_uuid: unique_id
+                    }, notification_msg);                    
 
                     res.redirect('/transfer/pay?success=true');
                 }
