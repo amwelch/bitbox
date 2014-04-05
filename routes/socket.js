@@ -64,7 +64,8 @@ exports.oldNotifications = function(data, id) {
   console.log(data);
   if (connections[id] != undefined) {            
     console.log("Sending old notifications");
-    connections[id].emit('old_notifications', data); 
+    //TODO: get this from the user information.         
+    connections[id].emit('old_notifications', {notify: true, notis: data}); 
   }
   else {
     console.log("Error sending the old notifications");

@@ -26,7 +26,27 @@ socket.on('notification', function(data) {
 });
 
 socket.on('old_notifications', function(data) {
-	console.log(data[0]);
+	notifications = document.getElementById("notis");
+	if(data.notis.length) {
+	console.log(data.notis);
+		if(data.notify)
+			document.getElementById("noti_bubble").innerHTML = data.notis.length;
+		for (var i = 0; i < data.notis.length; i++) {
+			var item = document.createElement('li');
+			item.innerHTML = data.notis[i].memo;
+			notifications.appendChild(item);
+		};
+	}
+	else {
+		// Create the list item:
+		var item = document.createElement('li');
+
+		// Set its contents:
+		item.innerHTML = 'No notifications';
+
+		// Add it to the list:
+		notifications.appendChild(item);
+	}
 });
 
 socket.on('alert', function(msg) {

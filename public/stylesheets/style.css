@@ -112,6 +112,10 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
     /*box-shadow:1px 1px 1px 1px wheat;*/
 }
 
+.dropdown-notifications {
+	color: black;
+}
+
 body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > a:active {
 	background-color:#ddd;
 }

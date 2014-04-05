@@ -283,7 +283,7 @@ exports.controlPay = function(req, res) {
                     api.facebookPost(req.session.accessToken, message, req.user.id);
 
                     // Send notification using sockets
-                    notification_msg = " just " + type + " you " + req.body.pay.amount +" satoshi ($"+usd+").\nMessage:\t" + req.body.pay.memo;
+                    notification_msg = " just " + type + " you " + req.body.pay.amount +" satoshi ($"+usd+").";
                     sio.sendNotification({dst_fb_id: req.body.pay.facebook_id, src_id: req.user.id, type: req.body.pay.op}, notification_msg);                    
 
                     res.redirect('/transfer/pay?success=true');
