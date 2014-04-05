@@ -3,8 +3,6 @@
 // $.cookie.json = true;
 // var socket = $.cookie('socket');
 
-console.log(socket);
-
 // if(socket == undefined) {
 console.log("Initializing Socket");
 var socket = io.connect('http://localhost');
@@ -20,8 +18,35 @@ socket.on('ready', function() {
 
 socket.on('notification', function(data) {
 	// document.getElementById("notification_icon").className = "glyphicon glyphicon-asterisk red";
+	var bubble = document.getElementById("noti_bubble");
+	bubble.style.visibility="visible";
+	bubble.innerHTML = "1";
 	alert(data.msg);
 	// console.log(data);
+});
+
+socket.on('old_notifications', function(data) {
+	notifications = document.getElementById("notis");
+	if(data.notis.length) {
+	console.log(data.notis);
+		if(data.notify)
+			document.getElementById("noti_bubble").innerHTML = data.notis.length;
+		for (var i = 0; i < data.notis.length; i++) {
+			var item = document.createElement('li');
+			item.innerHTML = data.notis[i].memo;
+			notifications.appendChild(item);
+		};
+	}
+	else {
+		// Create the list item:
+		var item = document.createElement('li');
+
+		// Set its contents:
+		item.innerHTML = 'No notifications';
+
+		// Add it to the list:
+		notifications.appendChild(item);
+	}
 });
 
 socket.on('alert', function(msg) {

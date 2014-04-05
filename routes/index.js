@@ -220,6 +220,7 @@ exports.controlPay = function(req, res) {
     var source;
     var destination;
     var status;
+    var type;
 
     if (req.body.pay.op == "ask") {
       
@@ -231,6 +232,7 @@ exports.controlPay = function(req, res) {
       destination = { id: req.user.id };
       
       status = 'Requested';
+      type = 'asked';
 
     } else if (req.body.pay.op == "send") {
       
@@ -242,6 +244,7 @@ exports.controlPay = function(req, res) {
       };
 
       status = 'Pending';
+      type = 'sent';
 
     } else {
       res.redirect('/transfer/pay?success=false');
@@ -276,12 +279,12 @@ exports.controlPay = function(req, res) {
                 }
                 else{
                     var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
-                    message = "I just sent " + btc_total +" BTC ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
+                    message = "I just " + type + " " + req.body.pay.amount +" satoshi ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
                     api.facebookPost(req.session.accessToken, message, req.user.id);
-                    
+
                     // Send notification using sockets
-                    notification_msg = " just sent you" + btc_total +" BTC ($"+usd+").\nMessage:\t" + req.body.pay.memo;
-                    sio.sendNotification({dst_fb_id: req.body.pay.facebook_id, src_id: req.user.id}, notification_msg);         
+                    notification_msg = " just " + type + " you " + req.body.pay.amount +" satoshi ($"+usd+").";
+                    sio.sendNotification({dst_fb_id: req.body.pay.facebook_id, src_id: req.user.id, type: req.body.pay.op}, notification_msg);                    
 
                     res.redirect('/transfer/pay?success=true');
                 }
