@@ -39,7 +39,7 @@ CREATE TABLE users (
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     facebook_id NUMERIC(20) UNIQUE DEFAULT NULL,
     balance BIGINT NOT NULL DEFAULT 0 CONSTRAINT non_negative_balance CHECK (balance >= 0),
-    new_noti boolean DEFAULT false
+    new_notis INT DEFAULT 0
 );
 
 CREATE TABLE transactions (
@@ -60,8 +60,10 @@ CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,
     user_id SERIAL,    
     type TXN_TYPE NOT NULL,    
-    memo VARCHAR(1024),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    msg VARCHAR(1024),
+    tx_uuid VARCHAR(36) UNIQUE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (tx_uuid) REFERENCES transactions(uuid)
 );
 
 CREATE TABLE transaction_logs (
