@@ -1,20 +1,26 @@
 DROP TRIGGER activate_account ON users;
 DROP TRIGGER update_user_balances ON transactions;
+
 DROP FUNCTION activate_balances();
 DROP FUNCTION update_balances();
+
+DROP TABLE transaction_logs;
 DROP TABLE notifications;
 DROP TABLE transactions;
 DROP TABLE users;
+
 DROP TYPE TXN_STATUS;
 DROP TYPE TXN_TYPE;
 DROP TYPE ACCOUNT_STATE;
+
 REVOKE ALL PRIVILEGES ON DATABASE bitbox FROM alexander;
+
 DROP USER alexander;
 
 CREATE USER alexander WITH PASSWORD 'testing123';
 GRANT ALL PRIVILEGES ON DATABASE bitbox TO alexander;
 
-CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete', 'Requested');
+CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete', 'Requested', 'Refunded');
 CREATE TYPE TXN_TYPE AS ENUM ('Payment', 'Deposit', 'Withdrawal', 'send', 'ask');
 CREATE TYPE ACCOUNT_STATE AS ENUM ('External','Admin', 'Active', 'Disabled', 'Inactive');
 
@@ -58,6 +64,13 @@ CREATE TABLE notifications (
     FOREIGN KEY (tx_uuid) REFERENCES transactions(uuid)
 );
 
+CREATE TABLE transaction_logs (
+    id SERIAL PRIMARY KEY,
+    transaction_id NOT NULL REFERENCES transactions(id),
+    status TXN_STATUS NOT NULL,
+    generated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 GRANT ALL PRIVILEGES ON users TO alexander;
 GRANT ALL PRIVILEGES ON transactions TO alexander;
 GRANT ALL PRIVILEGES ON notifications TO alexander;
@@ -65,6 +78,7 @@ GRANT ALL PRIVILEGES ON notifications TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE notifications_id_seq TO alexander;
+GRANT USAGE, SELECT ON SEQUENCE transaction_logs_id_seq TO alexander;
 
 INSERT INTO users (id, nickname, status) VALUES (-1, 'Bitcoin Network', 'External');
 
