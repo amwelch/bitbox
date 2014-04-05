@@ -15,16 +15,17 @@
     <% } %>  
     <form class="form-signin" role="form" action="#" method="post">
         <br>
-        <div class="switch-toggle switch-candy" style="max-width: 20em;">
-            <input id="fbPost_enabled" name="post[op]" type="radio" value="true" <% if (facebookPost === true) { %>checked="true"<% } %>>
-            <label for="fbPost_enabled" onclick="">Share activity</label>        
-            <input id="fbPost_disabled" name="post[op]" type="radio" value="false" <% if (facebookPost === false) { %>checked="true"<% } %>>
-            <label for="fbPost_disabled" onclick="">Do not share</label>
-          <a></a>
-        </div>
+          <label>Share on Facebook Feed</label><br>
+          <div class="switch-toggle switch-candy" style="max-width: 20em;">
+              <input id="fbPost_enabled" name="post[op]" type="radio" value="true" <% if (facebookPost === true) { %>checked="true"<% } %>>
+              <label for="fbPost_enabled" onclick="">Share activity</label>        
+              <input id="fbPost_disabled" name="post[op]" type="radio" value="false" <% if (facebookPost === false) { %>checked="true"<% } %>>
+              <label for="fbPost_disabled" onclick="">Do not share</label>
+            <a></a>
+          </div>
         <br>
         <div style="inlne-block; float: left; padding-bottom: 10px;">
-          <label for="btc_amount">Display name</label><br>
+          <label for="displayname">Display name</label><br>
           <input id="inputDisplayName" type="text"  name="displayname" style="width: 20em; padding: 10px" placeholder="<%= name%>" value="<%= name%>">
         </div>
         <div style="clear: both; margin: 0px height: 0px">&nbsp;</div>
@@ -38,28 +39,29 @@
     $(document).ready(function(){
         //$('#save-button').on('click', function(){
         //});
-        $("#reset-button").click(function(e){
-            e.preventDefault();
-            if (window.user != undefined){
-               $('#displayname').val(window.user['displayname']);
-            }
-            $("#reset-button").blur();
-        });
-        $.ajax({
-            url: '/api/userInfo',
-            complete: function(info){
-                if (info.status != 200){
-                    console.log("Got non-200 ", info.status);
-                   //Do nothing
-                }
-                else{
-                    info = info.responseJSON;
-                    window.user = info;
-                    $('#displayname').val(info['displayname']);
-                }
-            }
+        $("#fbPost_enabled").on('click', function(){
+            var dialog = BootstrapDialog.show({
+                message: 'Activating this option means that all transfers will generate a post on your Facebook feed including the amount you sent and the recipient\'s Facebook name.\n\n If this is your first time activating this option you will be required to log out and log back in before the changes take place.\n\n Press confirm to continue.',
+                title: 'Warning!',
+                buttons: [{
+                    label: 'Confirm',
+                    cssClass: 'btn-success',
+                    action: function(){
+                        dialog.close();
+                    }
+                  },
+                  {
+                    label: 'Cancel',
+                    cssClass: 'btn-lrg',
+                    action: function(){
+                        $("#fbPost_disabled").click();
+                        dialog.close();
+                    }
+                  }]
+            });
         });
     });
+    
   </script>
 <% } else if (view == '2FA') { %>
   <h2> Two Factor Authentication Coming Soon! </h2>
