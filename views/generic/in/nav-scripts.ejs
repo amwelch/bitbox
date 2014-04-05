@@ -1,6 +1,6 @@
 <script>
     var setCurrency = function(name){
-        $.cookie('currency-display', name);
+        $.cookie('currency-display', name,{ path: '/', expires: 30});
     }
     $("#CA-select").click(function(e){
         e.preventDefault();
@@ -78,6 +78,8 @@
       //  parsing satoshis
       $(this).html((new Date($(this).html())).toDateString());
     });
+
+
     document.getElementById("main").style.display = 'block';
     //Convert all -1 to n/a
     /*$("#track-table").find("td:nth-child(7)").each(function () {

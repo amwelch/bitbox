@@ -1,7 +1,39 @@
+  
+<style>
+  .bold {
+    font-weight: bold;
+    padding-top: 10px;
+  }
+  div.history h5 {
+    text-align: left;
+  }
+
+</style>
+<div class="history">
+    <h5 class="bold">With</h5>
+    <h5><%= transaction.whom %></h5>
+    <h5 class="bold">Status</h5>
+    <h5><%= transaction.status %></h5>
+    <h5 class="bold">Gross</h5>
+    <h5><%= transaction.amount %></h5>
+    <h5 class="bold">Date</h5>
+    <h5><%= transaction.date %></h5>
+    <h5 class="bold">Memo</h5>
+    <h5><%= transaction.memo %></h5>
+    <h5 class="bold">Action</h5>
+    <h5><%= transaction.type %></h5>
 <% if (transaction.type == 'Payment') { %>
-PAYMENT
+<form name="change_me" method="post" action="/transfer/track/<%= transaction.uuid %>">
+  <p>
+    <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Approve"></input>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Or&nbsp;&nbsp;&nbsp;<a href="">Cancel</a>
+  </p>
+</form>
 <% } else if (transaction.type == 'Deposit') { %>
-DEPOSIT
+    <h5>Confirmations</h5>
+    <h5><%= transaction.confirmations %></h5>
 <% } else if (transaction.type == 'Withdrawal') { %>
-WITHDRAWAL
+    <h5>Confirmations</h5>
+    <h5><%= transaction.confirmations %></h5>
 <% } %>
+</div>

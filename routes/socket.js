@@ -8,11 +8,16 @@ exports.socket_connection = function(socket) {
 	// Adds the socket to the pool of connections using
 	// the user id. 		
 	socket.on('user', function(user) {
-		socket.set('user', user, function () {			
-			console.log('Inside user');
-			console.log(user);
+		socket.set('user', user, function () {						
 			connections[user.id] = socket;
-			socket.emit('ready');
+			socket.emit('ready');      
+      api.getNotifications({id: user.id}, function(err, notis, user_data) {
+        if (err) {
+          console.log("ERROR GETTING old_notifications");
+        } else {
+          socket.emit('old_notifications', notis);
+        }        
+      });      
 		});
 	});
 
@@ -26,49 +31,39 @@ exports.socket_connection = function(socket) {
 				connections[user.id] = undefined;				
 			}
 		});		
-	});  
-
-  // socket.on('msg', function (msg) {
-  //   socket.get('nickname', function (err, name) {
-  //     console.log('Chat message by ', name);
-
-  //     console.log(msg.data);
-  //     setInterval(function(){
-  //     	msg.data += counter++;
-  //     	socket.emit('msg', {nickname: name.nickname, data: msg.data});
-  //     }
-  //     	,1000);
-  //   });
-  // });
-
-  // socket.on('my other event', function (data) {
-  //   console.log(data);
-  // });	
+	});    
 };
 
 // Socket Notifications API functions
-exports.sendNotification = function(users, notification_msg) {
-  api.getUser({facebook_id: users.dst_fb_id}, function(err, dst_user) {
-    if(err != ec.USER_NOT_FOUND && connections[dst_user.id]) {
-      api.getUser({id: users.src_id}, function(err, src_user) {
+exports.sendNotification = function(data, notification_msg) {
+  api.getUser({facebook_id: data.dst_fb_id}, function(err, dst_user) {
+    if(err != ec.USER_NOT_FOUND) {
+      api.getUser({id: data.src_id}, function(err, src_user) {
         if (err) {
           console.log("ERROR GETTING USER in sendNotification");
         } else {
           notify_msg = src_user.nickname + notification_msg;
-	        // connections[src_id].emit('notification', {msg: notify_msg}); 
           console.log("----------------->>>>About to send connection to dst user");
-          if (connections[dst_user.id]) {          	
-            console.log("----------------->>>>Connection is open!");
-	          // Send the notification only if the socket to 
-	          // the dst user is open
-	          // This line is just for testing how the notifications would look. 
-          	connections[dst_user.id].emit('notification', {msg: notify_msg}); 
-          } else {
-          	// Add this notification to a dst_table with notifications
-
+          api.saveNotification({id: dst_user.id, msg: notify_msg, type: data.type, tx_uuid: data.tx_uuid});
+          if (connections[dst_user.id] != undefined) {            
+            // Send the notification only if the socket to the dst user is open            
+            connections[dst_user.id].emit('notification', {msg: notify_msg}); 
+            console.log("----------------->>>>Notification sent!");
           }
         }
       });
     }
   });
+}
+
+exports.oldNotifications = function(data, id) {
+  console.log(data);
+  if (connections[id] != undefined) {            
+    console.log("Sending old notifications");
+    //TODO: get this from the user information.         
+    connections[id].emit('old_notifications', {notify: true, notis: data}); 
+  }
+  else {
+    console.log("Error sending the old notifications");
+  }
 }

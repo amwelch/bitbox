@@ -109,7 +109,15 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
     /* Keep in mind that if a browser doesn't support CSS3, it's fine! They just won't have rounded borders and won't have a box shadow effect. */
     /* You can always use a background image to produce the same effect if you want to, and you can use both together so browsers without CSS3 still have the rounded/shadow look. */
     border-radius: 10px 10px 10px 10px;
-    box-shadow:1px 1px 1px 1px wheat;
+    /*box-shadow:1px 1px 1px 1px wheat;*/
+}
+
+.dropdown-notifications {	
+	color: black;
+}
+
+.notifications {
+	padding:0px 5px;
 }
 
 body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > a:active {
@@ -239,7 +247,7 @@ div.jumbotron {
 
 div p .btn {
 	background-color: #683919;
-	border: 3px solid #683919 !important;
+	border: 0px solid #683919 !important;
 	color: wheat !important;
 }
 
@@ -294,6 +302,6 @@ tr.linked td {
 	cursor: pointer;
 }
 
-tr.linked:hover {
-	font-weight: bold;
+tr.linked:hover > td {
+	text-decoration: underline;
 }

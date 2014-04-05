@@ -1,4 +1,5 @@
 var ec = require('./error-codes');
+var sio = require('../routes/socket');
 var pg = require('pg');
 var cfg = require('../config.js')(ENVIRONMENT);
 var poolModule = require('generic-pool');
@@ -538,7 +539,7 @@ exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
 });
 
 
-exports.transfer = pool.pooled(function(client, data, callback) {
+exports.transfer = pool.pooled(function(client, data, callback) {  
   //  START TXN
   _begin(client, function(err, result) {
     if (err) {
@@ -559,6 +560,13 @@ exports.transfer = pool.pooled(function(client, data, callback) {
               console.log("Error when getting dst account in transfer");
               _rollback(client, err, callback);
             } else {
+              var unique_id;
+              if(data.tx_uuid) {
+                unique_id = data.tx_uuid;
+              }
+              else {
+                unique_id = uuid.v4();
+              }
               //  TRANSFER FUNDS
               client.query("INSERT INTO transactions (source, destination, status, amount, memo, type, confirmations, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                 [
@@ -569,7 +577,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                   data.memo,
                   data.type,
                   -1,
-                  uuid.v4()
+                  unique_id
                 ], 
                 function(err, result) {
                   if (err) {
@@ -613,17 +621,20 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
     } else {
       if (result.rows.length == 1) {
         history = result.rows[0];
-        var whom;
-        var actionable = false;
+        var whom, facebook_id;
         if (history.source == data.user_id) {
           whom = history.destination_name;
+          facebook_id = history.destination_fbid;
         } else if (history.destination == data.user_id) {
           whom = history.source_name;
+          facebook_id = history.source_fbid;
         }
         rValue = {
-          date: history.submitted,
+          date: history.last_updated,
           type: history.type,
-          whom: whom,
+          source: history.source,
+          destination: history.destination,
+          facebook_id: facebook_id,
           status: history.status,
           amount: history.amount,
           confirmations: history.confirmations,
@@ -645,7 +656,7 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
     "LEFT OUTER JOIN users source ON transactions.source=source.id "+
     "LEFT OUTER JOIN users destination ON transactions.destination=destination.id "+
     "WHERE source=$1 OR destination=$1 "+
-    "ORDER BY transactions.submitted DESC", [id], function(err, result) {
+    "ORDER BY transactions.last_updated DESC", [id], function(err, result) {
     if (err) {
       console.log(err);
       callback(ec.QUERY_ERR, null);
@@ -655,9 +666,9 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
       for (var i = 0; i < history.length; ++i) {
         if (history[i].source == id) {
           rValue.push({
-            date: history[i].submitted,
+            date: history[i].last_updated,
             type: history[i].type,
-            whom: history[i].destination_name,
+            name: 'from ' + history[i].destination_name,
             status: history[i].status,
             amount: history[i].amount,
             confirmations: history[i].confirmations,
@@ -666,9 +677,9 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
           });
         } else if (history[i].destination == id) {
           rValue.push({
-            date: history[i].submitted,
+            date: history[i].last_updated,
             type: history[i].type,
-            whom: history[i].source_name,
+            name: 'to ' + history[i].source_name,
             status: history[i].status,
             amount: history[i].amount,
             confirmations: history[i].confirmations,
@@ -680,4 +691,29 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
       callback(null, rValue);
     }
   });
+});
+
+
+exports.getNotifications = pool.pooled(function(client, user, callback) {
+  console.log("----------------->>>>Inside get notifications");
+  client.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY id DESC LIMIT 5", [user.id], function(err, result) {  
+    if(err) {
+      console.log(err);
+    }
+    else {
+      sio.oldNotifications(result.rows, user.id);
+    }
+  });  
+});
+
+exports.saveNotification = pool.pooled(function(client, data, callback) {
+  console.log("----------------->>>>Saving notification");
+  client.query("INSERT INTO notifications (user_id, type, msg, tx_uuid) VALUES ($1,$2,$3,$4)", [data.id, data.type, data.msg, data.tx_uuid], function(err) {
+    if(err) {
+      console.log(err);
+    }
+    else {
+      console.log("Notification saved succesfully")
+    }
+  });  
 });
