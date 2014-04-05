@@ -623,7 +623,7 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
           facebook_id = history.source_fbid;
         }
         rValue = {
-          date: history.submitted,
+          date: history.last_updated,
           type: history.type,
           source: history.source,
           destination: history.destination,
@@ -649,7 +649,7 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
     "LEFT OUTER JOIN users source ON transactions.source=source.id "+
     "LEFT OUTER JOIN users destination ON transactions.destination=destination.id "+
     "WHERE source=$1 OR destination=$1 "+
-    "ORDER BY transactions.submitted DESC", [id], function(err, result) {
+    "ORDER BY transactions.last_updated DESC", [id], function(err, result) {
     if (err) {
       console.log(err);
       callback(ec.QUERY_ERR, null);
@@ -659,7 +659,7 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
       for (var i = 0; i < history.length; ++i) {
         if (history[i].source == id) {
           rValue.push({
-            date: history[i].submitted,
+            date: history[i].last_updated,
             type: history[i].type,
             name: 'from ' + history[i].destination_name,
             status: history[i].status,
@@ -670,7 +670,7 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
           });
         } else if (history[i].destination == id) {
           rValue.push({
-            date: history[i].submitted,
+            date: history[i].last_updated,
             type: history[i].type,
             name: 'to ' + history[i].source_name,
             status: history[i].status,

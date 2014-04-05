@@ -1,8 +1,10 @@
 DROP TRIGGER activate_account ON users;
 DROP TRIGGER update_user_balances ON transactions;
+DROP TRIGGER log_transaction_change ON transactions;
 
 DROP FUNCTION activate_balances();
 DROP FUNCTION update_balances();
+DROP FUNCTION log_transactions()
 
 DROP TABLE transaction_logs;
 DROP TABLE notifications;
@@ -50,7 +52,7 @@ CREATE TABLE transactions (
     memo VARCHAR(1024),
     confirmations INT DEFAULT 0,
     blockchain_id VARCHAR(100) DEFAULT NULL,
-    submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     uuid VARCHAR(36) UNIQUE DEFAULT NULL
 );  
 
@@ -64,14 +66,15 @@ CREATE TABLE notifications (
 
 CREATE TABLE transaction_logs (
     id SERIAL PRIMARY KEY,
-    transaction_id NOT NULL REFERENCES transactions(id),
-    status TXN_STATUS NOT NULL,
+    transaction_id INT NOT NULL REFERENCES transactions(id),
+    status TXN_STATUS NOT NULL, 
     generated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON users TO alexander;
 GRANT ALL PRIVILEGES ON transactions TO alexander;
 GRANT ALL PRIVILEGES ON notifications TO alexander;
+GRANT ALL PRIVILEGES ON transaction_logs TO alexander;
 
 GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
@@ -85,6 +88,12 @@ BEGIN
     IF (OLD.status = 'Inactive' AND (NEW.status = 'Admin' OR NEW.status = 'Active')) THEN
         UPDATE transactions SET status = 'Complete' WHERE status = 'Pending' AND type = 'Payment' AND destination = NEW.id;
     END IF;
+    RETURN NEW;
+END $wrapper$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION log_transactions() RETURNS TRIGGER AS $wrapper$
+BEGIN
+    INSERT INTO transaction_logs (transaction_id, status) VALUES (NEW.id, NEW.status);
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
 
@@ -104,10 +113,13 @@ BEGIN
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
+                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
             ELSEIF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source AND users.status != 'External');
+                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
             ELSEIF (OLD.status = 'Requested' AND NEW.status = 'Pending') THEN
                 UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
+                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
             END IF;
         END IF;
 
@@ -121,6 +133,7 @@ BEGIN
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
+                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
             END IF;
         END IF;
 
@@ -133,6 +146,7 @@ BEGIN
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source);
+                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
             END IF;
         END IF;
     END IF;
@@ -145,6 +159,12 @@ BEFORE INSERT OR UPDATE OR DELETE
 ON transactions
 FOR EACH ROW
 EXECUTE PROCEDURE update_balances();
+
+CREATE TRIGGER log_transaction_change
+AFTER INSERT OR UPDATE
+ON transactions
+FOR EACH ROW
+EXECUTE PROCEDURE log_transactions();
 
 CREATE TRIGGER activate_account
 AFTER UPDATE
