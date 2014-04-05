@@ -133,12 +133,19 @@ var postLater = function(req, res) {
 };
 
 //  Facebook Login. Loops back to ./callback
-app.get('/liftoff/login/facebook',
-  passport.authenticate('facebook', { 
-    scope: ['email'],
-    display: 'popup',
-    authType: 'reauthenticate'
-  })
+app.get('/liftoff/login/facebook', function(req, res, next){
+    var scope = ['email'];
+    for (var key in req.query){
+        if (key == "post" && req.query["post"] == "true"){
+            scope.push("publish_actions");
+        }
+    }   
+    passport.authenticate('facebook', { 
+      scope: ['email'],
+      display: 'popup',
+      authType: 'reauthenticate'
+    })(req, res, next);
+  }
 );
 
 //  Loopback from FB login. Attempts to get Access Token.

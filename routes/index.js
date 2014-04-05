@@ -549,10 +549,13 @@ exports.lobby = function(req, res) {
 exports.controlUser = function(req, res){
   console.log(req.user);
   if (req.user.valid) {
+    console.log("USER OBJECT");
+    console.log(req.user);
     var name = req.body.displayname;
     if (!name){
       name = req.user.nickname;
     }
+
     var data = {
       id: req.user.id,
       facebookPost: req.body.post.op,
@@ -560,9 +563,16 @@ exports.controlUser = function(req, res){
     }
     api.updateUser(data, function(err){
       if (err){
-        res.redirect('/accounts/user?success=false');
+         res.redirect('/accounts/user?success=false');
       } else {
-        res.redirect('/accounts/user?success=true');
+        console.log("THIS GUY");
+        console.log(req.user.facebookPost);
+        if (req.body.post.op == 'true' && req.user.facebookPost == false){
+            res.redirect('/liftoff/login/facebook?post=true');
+        }
+        else{
+            res.redirect('/accounts/user?success=true');
+        }
       }
     });
   } else {
