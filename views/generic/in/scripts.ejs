@@ -49,48 +49,48 @@
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "cad"){
-            var usd_to_cur = <%= bitbox_usd_to_ca %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_ca %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "eu"){
-            var usd_to_cur = <%= bitbox_usd_to_eu %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_eu %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "uk"){
-            var usd_to_cur = <%= bitbox_usd_to_uk %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_uk %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "au"){
-            var usd_to_cur = <%= bitbox_usd_to_au %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_au %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "mx"){
-            var usd_to_cur = <%= bitbox_usd_to_mx %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_mx %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "br"){
-            var usd_to_cur = <%= bitbox_usd_to_br %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_br %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "ar"){
-            var usd_to_cur = <%= bitbox_usd_to_ar %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_ar %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "jp"){
-            var usd_to_cur = <%= bitbox_usd_to_jp %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_jp %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "ch"){
-            var usd_to_cur = <%= bitbox_usd_to_ch %>
-            num_Amount = num_amount / usd_to_cur;
+            var usd_to_cur = <%= bitbox_usd_to_ch %>;
+            num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
         else if(currency == "bitcoin"){
@@ -172,23 +172,7 @@
         return outStr;
     }
 
-  $("body").find(".currency").each(function () {
-    //  parsing satoshis
-    var val = parseInt($(this).html());
-    val = currencyOutput(val);
-    $(this).html(val);
-    console.log("value: " + val);
-  });
-  $("body").find(".denomination").each(function () {
-    //  parsing satoshis
-    $(this).html(currencyName());
-  });
-  $("body").find(".date").each(function () {
-    //  parsing satoshis
-    $(this).html((new Date($(this).html())).toDateString());
-  });
-
-  document.getElementById("main").style.display = 'block';
+  // /document.getElementById("main").style.display = 'block';
   //Convert all -1 to n/a
   /*$("#track-table").find("td:nth-child(7)").each(function () {
     var val = parseInt($(this).html());

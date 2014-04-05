@@ -239,7 +239,7 @@ div.jumbotron {
 
 div p .btn {
 	background-color: #683919;
-	border: 3px solid #683919 !important;
+	border: 0px solid #683919 !important;
 	color: wheat !important;
 }
 
@@ -294,6 +294,6 @@ tr.linked td {
 	cursor: pointer;
 }
 
-tr.linked:hover {
-	font-weight: bold;
+tr.linked:hover > td {
+	text-decoration: underline;
 }

@@ -14,25 +14,23 @@
       <div class="alert alert-success"><strong>Success!</strong>  Information Updated!</div>
     <% } %>  
     <form class="form-signin" role="form" action="#" method="post">
-        <h2>User Configuration</h2>
         <br>
-        <h4>Display Name </h3>
-        <input id="inputDisplayName" type="text"  name="displayname" class="user-form form-control" placeholder="<%= name%>">
-        <br>
-        <h4>Allow Facebook Posts</h3>
-        <div class="switch-toggle switch-candy" style="max-width: 20em;float:none;margin:0 auto">
-            <input id="fbPost_enabled" name="post[op]" type="radio" value="true" checked="true">
-            <label for="fbPost_enabled" onclick="">Enabled</label>        
-            <input id="fbPost_disabled" name="post[op]" type="radio" value="false">
-            <label for="fbPost_disabled" onclick="">Disabled</label>
+        <div class="switch-toggle switch-candy" style="max-width: 20em;">
+            <input id="fbPost_enabled" name="post[op]" type="radio" value="true" <% if (facebookPost === true) { %>checked="true"<% } %>>
+            <label for="fbPost_enabled" onclick="">Share activity</label>        
+            <input id="fbPost_disabled" name="post[op]" type="radio" value="false" <% if (facebookPost === false) { %>checked="true"<% } %>>
+            <label for="fbPost_disabled" onclick="">Do not share</label>
           <a></a>
         </div>
         <br>
-        <br>
-        <div class="form-submit">
-          <button id="save-button" class="user-btn btn btn-lg" type="submit"> Save</button>
-          <button id="reset-button" class="user-btn btn btn-lg" type="submit"> Reset</button>
+        <div style="inlne-block; float: left; padding-bottom: 10px;">
+          <label for="btc_amount">Display name</label><br>
+          <input id="inputDisplayName" type="text"  name="displayname" style="width: 20em; padding: 10px" placeholder="<%= name%>" value="<%= name%>">
         </div>
+        <div style="clear: both; margin: 0px height: 0px">&nbsp;</div>
+        <p>
+          <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Update"></input>
+        </p>
     </form>
   </div>
   <script>

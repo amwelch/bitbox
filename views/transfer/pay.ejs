@@ -23,7 +23,6 @@
   <div style="inlne-block; float: left; padding-bottom: 10px; margin-right: 10px;">
     <label for="btc_amount">Amount</label><br>
     <input type="text" name="pay[amount]" id="btc_amount" style="width: 20em; padding: 10px" placeholder="Bits">
-    <span id="pay-currency" class="input_option">Bits</span>
   </div>
   <div style="inlne-block; float: left; padding-bottom: 10px;">
     <label for="memo">Memo</label><br>
@@ -44,11 +43,69 @@
         amount = currencyInput(amount);
         console.log("After: " + amount);
         $("#btc_amount").val(amount);
-        form.submit();
+        return false;
+        //form.submit();
     });
     var curName = currencyName();
     console.log("GOT CURRENCY AS ", curName);
-    $("#pay-currency").text(curName);
     $("#btc_amount").attr("placeholder", curName);
 </script>
+<script>
+var init = function() {
+  $('#fb-user').facebookAutocomplete({
+      showAvatars: true,
+      onpick: function(friend) { 
+        console.log(friend);
+        document.getElementById("friend_fbid").value = friend.id;
+        document.getElementById("fb-user").disabled = "disabled";
+        document.getElementById("fb-user").value = friend.name;
+        document.getElementById("fb_name").value = friend.name;
+        document.getElementById("btc_amount").focus();
+        document.getElementById("fb_user_clear").innerHTML = "Clear";
+        /*
+        FB.ui({
+          method: 'send',
+          display: 'iframe',
+          to: friend.id,
+          link: 'http://inbitbox.com',
+        });*/
+
+        $("#fb_user_clear").click(function() {
+          document.getElementById("fb-user").value = "";
+          document.getElementById("fb_name").value = "";
+          document.getElementById("fb-user").disabled = "";
+          document.getElementById("friend_fbid").value = friend.id;
+          document.getElementById("fb_user_clear").innerHTML = "&nbsp;";
+          window.location.reload();
+        });
+      }
+  });
+};
+window.fbAsyncInit = function() {
+  FB.init({
+    appId: '<%- fb_app_id %>'
+  });
+
+  FB.Event.subscribe('auth.authResponseChange', function(response) {
+    if (response.status === 'connected') {
+      console.log('FOOD');
+      init();
+
+    } else {
+      window.location.replace("/logout");
+    }
+  });
+};
+
+
+// Load the SDK asynchronously
+(function(d){
+ var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+ if (d.getElementById(id)) {return;}
+ js = d.createElement('script'); js.id = id; js.async = true;
+ js.src = "//connect.facebook.net/en_US/all.js";
+ ref.parentNode.insertBefore(js, ref);
+}(document));
+</script>
+
 

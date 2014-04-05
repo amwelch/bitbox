@@ -467,6 +467,7 @@ exports.user = function(req, res){
       view: 'user',
       title: 'My Account',
       name: req.user.nickname,
+      facebookPost: req.user.facebookPost,
       authenticated: true
     });
   } else {
@@ -534,6 +535,7 @@ exports.lobby = function(req, res) {
 }
 /*{ displayname: 'Test123', pay: { op: 'true' } }*/
 exports.controlUser = function(req, res){
+  console.log(req.user);
   if (req.user.valid) {
     var name = req.body.displayname;
     if (!name){

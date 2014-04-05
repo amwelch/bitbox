@@ -613,17 +613,20 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
     } else {
       if (result.rows.length == 1) {
         history = result.rows[0];
-        var whom;
-        var actionable = false;
+        var whom, facebook_id;
         if (history.source == data.user_id) {
           whom = history.destination_name;
+          facebook_id = history.destination_fbid;
         } else if (history.destination == data.user_id) {
           whom = history.source_name;
+          facebook_id = history.source_fbid;
         }
         rValue = {
           date: history.submitted,
           type: history.type,
-          whom: whom,
+          source: history.source,
+          destination: history.destination,
+          facebook_id: facebook_id,
           status: history.status,
           amount: history.amount,
           confirmations: history.confirmations,
@@ -657,7 +660,7 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
           rValue.push({
             date: history[i].submitted,
             type: history[i].type,
-            whom: history[i].destination_name,
+            name: 'from ' + history[i].destination_name,
             status: history[i].status,
             amount: history[i].amount,
             confirmations: history[i].confirmations,
@@ -668,7 +671,7 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
           rValue.push({
             date: history[i].submitted,
             type: history[i].type,
-            whom: history[i].source_name,
+            name: 'to ' + history[i].source_name,
             status: history[i].status,
             amount: history[i].amount,
             confirmations: history[i].confirmations,

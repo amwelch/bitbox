@@ -9,11 +9,16 @@
           <li <% if (view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw">Withdraw</a></li>
         </ul>
       </div>
-    <%- include balance.ejs %>
-    <%- include mobilenav.ejs %>
+    <ul class="nav nav-sidebar mobile">
+      <li <% if (view == "pay") {%>class="active"<% } %>><a href="/transfer/pay#action">Pay</a></li>
+      <li <% if (view == "track") {%>class="active"<% } %>><a href="/transfer/track#action">Track</a></li>
+      <li <% if (view == "deposit") {%>class="active"<% } %>><a href="/transfer/deposit#action">Deposit</a></li>
+      <li <% if (view == "withdraw") {%>class="active"<% } %>><a href="/transfer/withdraw#action">Withdraw</a></li>
+    </ul>
+  <hr id="action" class="mobile" style="padding-top: 50px;">
+  <h2 id="track-balance" style="text-align: left">Balance: <span class="currency"><%= balance %></span> <span class="denomination">Satoshi</span></h2>
     <% if (view == 'pay') { %>
       <%- include pay.ejs %>
-      <%- include autocomplete.ejs %>
     <% } else if (view == 'track') { %>
       <%- include track/index.ejs %>
     <% } else if (view == 'withdraw') { %>
