@@ -1,3 +1,6 @@
+.modal-header {background-color:#683919 !important;}
+.bootstrap-dialog-title {color: wheat !important;}
+
 body {
   font-family: Ubuntu, serif !important;
   margin: 0;
