@@ -650,7 +650,6 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
 });
 
 exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
-  id = parseInt(id);
   client.query("SELECT transactions.*, source.nickname AS source_name, destination.nickname AS destination_name "+
     "FROM transactions "+
     "LEFT OUTER JOIN users source ON transactions.source=source.id "+
@@ -664,35 +663,48 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
       var rValue = [];
       var history = result.rows;
       for (var i = 0; i < history.length; ++i) {
-        if (history[i].source == id) {
-          rValue.push({
-            date: history[i].last_updated,
-            type: history[i].type,
-            name: 'from ' + history[i].destination_name,
-            status: history[i].status,
-            amount: history[i].amount,
-            confirmations: history[i].confirmations,
-            memo: history[i].memo,
-            uuid: history[i].uuid
-          });
-        } else if (history[i].destination == id) {
-          rValue.push({
-            date: history[i].last_updated,
-            type: history[i].type,
-            name: 'to ' + history[i].source_name,
-            status: history[i].status,
-            amount: history[i].amount,
-            confirmations: history[i].confirmations,
-            memo: history[i].memo,
-            uuid: history[i].uuid
-          });
-        }
+        rValue.push({
+          date: history[i].last_updated,
+          type: history[i].type,
+          source_id: history[i].source,
+          source_name: history[i].source_name,
+          destination_id: history[i].destination,
+          destination_name: history[i].destination_name,
+          status: history[i].status,
+          amount: history[i].amount,
+          confirmations: history[i].confirmations,
+          memo: history[i].memo,
+          uuid: history[i].uuid
+        });
       }
       callback(null, rValue);
     }
   });
 });
 
+exports.approveTransaction = pool.pooled(function(client, data, callback) {
+  client.query("UPDATE transactions SET status = 'Complete' WHERE status = 'Requested' AND source.id = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+    callback(err, result);
+  });
+});
+
+exports.declineTransaction = pool.pooled(function(client, data, callback) {
+  client.query("UPDATE transactions SET status = 'Declined' WHERE status = 'Complete' AND transaction.source = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+    callback(err, result);
+  });
+});
+
+exports.refundTransaction = pool.pooled(function(client, data, callback) {
+  client.query("UPDATE transactions SET status = 'Refunded' WHERE status = 'Complete' AND transaction.destination = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+    callback(err, result);
+  });
+});
+
+exports.cancelTransaction = pool.pooled(function(client, data, callback) {
+  client.query("UPDATE transactions SET status = 'Canceled' WHERE status = 'Requested' AND transaction.destination = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+    callback(err, result);
+  });
+});
 
 exports.getNotifications = pool.pooled(function(client, user, callback) {
   console.log("----------------->>>>Inside get notifications");

@@ -39,7 +39,8 @@ function render(req, res, content) {
           bitbox_usd_to_ar :conversion_other["bitbox_usd_to_ar"],
           bitbox_usd_to_jp :conversion_other["bitbox_usd_to_jp"],
           bitbox_usd_to_ch :conversion_other["bitbox_usd_to_ch"],
-          fb_app_id: FB_APP_ID
+          fb_app_id: FB_APP_ID,
+          user_id: req.user.id
         };
        
         for (var key in content) {
