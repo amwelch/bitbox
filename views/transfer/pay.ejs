@@ -43,8 +43,7 @@
         amount = currencyInput(amount);
         console.log("After: " + amount);
         $("#btc_amount").val(amount);
-        return false;
-        //form.submit();
+        form.submit();
     });
     var curName = currencyName();
     console.log("GOT CURRENCY AS ", curName);
