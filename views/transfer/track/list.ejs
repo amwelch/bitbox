@@ -2,8 +2,8 @@
   <table class="table">
     <tr style="background-color: #f9f9f9;">
       <th>Amount</th>
-      <th>Where</th>
       <th>Status</th>
+      <th>Where</th>
       <th>Date</th>
       <!--th>Memo</th>
       <th>Action</th>
@@ -12,8 +12,14 @@
     <% for (var i = 0; i < history.length; i++) { %>
       <tr class="linked" onclick="location.href='/transfer/track/<%= history[i].uuid %>';">
         <td><span class="currency"><%= history[i].amount %></span> <span class="denomination">BTC</span></td>
-        <td><%= history[i].name %></td>
         <td><%= history[i].status %></td>
+        <% if (user_id == history[i].source_id) { %>
+          <td>to <%= history[i].name %></td>
+        <% } else if (user_id == history[i].destination_id) { %>
+          <td>from <%= history[i].destination_name %></td>
+        <% } else { %>
+          <td>&nbsp;</td>
+        <% } %>
         <td><span class="date"><%= history[i].date %></span></td>
         <!--td><%= history[i].memo %></td>
         <td><%= history[i].type %></td>

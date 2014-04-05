@@ -4,7 +4,7 @@ DROP TRIGGER log_transaction_change ON transactions;
 
 DROP FUNCTION activate_balances();
 DROP FUNCTION update_balances();
-DROP FUNCTION log_transactions()
+DROP FUNCTION log_transactions();
 
 DROP TABLE transaction_logs;
 DROP TABLE notifications;
@@ -22,7 +22,7 @@ DROP USER alexander;
 CREATE USER alexander WITH PASSWORD 'testing123';
 GRANT ALL PRIVILEGES ON DATABASE bitbox TO alexander;
 
-CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete', 'Requested', 'Refunded');
+CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete', 'Requested', 'Refunded', 'Declined');
 CREATE TYPE TXN_TYPE AS ENUM ('Payment', 'Deposit', 'Withdrawal', 'send', 'ask');
 CREATE TYPE ACCOUNT_STATE AS ENUM ('External','Admin', 'Active', 'Disabled', 'Inactive');
 
@@ -108,20 +108,30 @@ BEGIN
     IF (NEW.type = 'Payment') THEN
         
         IF (TG_OP = 'INSERT') THEN
+            --  If dest acct is not active
             IF (NEW.status = 'Pending') THEN
                 UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
+
+            --  If dest acct is active
+            ELSEIF (NEW.status = 'Complete') THEN
+                UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
         
         ELSEIF (TG_OP = 'UPDATE') THEN
+            --  Dest account activation
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
-                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
-            ELSEIF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
-                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source AND users.status != 'External');
-                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
-            ELSEIF (OLD.status = 'Requested' AND NEW.status = 'Pending') THEN
+
+            --  Dest account performs refund
+            ELSEIF (OLD.status = 'Complete' AND NEW.status = 'Refunded') THEN
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source); 
+                UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.destination);
+
+            --  Src account approves request
+            ELSEIF (OLD.status = 'Requested' AND NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance - NEW.amount) WHERE (users.id = NEW.source); 
-                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
+                UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
             END IF;
         END IF;
 
@@ -135,7 +145,6 @@ BEGIN
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Complete') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.destination);
-                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
             END IF;
         END IF;
 
@@ -148,11 +157,12 @@ BEGIN
         ELSEIF (TG_OP = 'UPDATE') THEN
             IF (OLD.status = 'Pending' AND NEW.status = 'Canceled') THEN
                 UPDATE users SET balance = (balance + NEW.amount) WHERE (users.id = NEW.source);
-                UPDATE transactions SET last_updated = CURRENT_TIMESTAMP WHERE (id = NEW.id);
             END IF;
         END IF;
     END IF;
 
+    NEW.last_updated = CURRENT_TIMESTAMP;
+    
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
 

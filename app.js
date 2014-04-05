@@ -56,7 +56,8 @@ app.configure(function() {
       api.getUser(req.user, function(err, user) {
         if (err) {
           req.user = {
-            valid: false
+            valid: false,
+            id: -1
           };
         } else {
           req.user = user;
@@ -66,7 +67,8 @@ app.configure(function() {
       });
     } else {
       req.user = {
-        valid: false
+        valid: false,
+        id: -1
       };
       next();
     }
