@@ -3,8 +3,6 @@
 // $.cookie.json = true;
 // var socket = $.cookie('socket');
 
-console.log(socket);
-
 // if(socket == undefined) {
 console.log("Initializing Socket");
 var socket = io.connect('http://localhost');
@@ -28,7 +26,7 @@ socket.on('notification', function(data) {
 });
 
 socket.on('old_notifications', function(data) {
-	
+	console.log(data[0]);
 });
 
 socket.on('alert', function(msg) {

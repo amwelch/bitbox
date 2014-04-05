@@ -1,4 +1,5 @@
 var ec = require('./error-codes');
+var sio = require('../routes/socket');
 var pg = require('pg');
 var cfg = require('../config.js')(ENVIRONMENT);
 var poolModule = require('generic-pool');
@@ -680,4 +681,29 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
       callback(null, rValue);
     }
   });
+});
+
+
+exports.getNotifications = pool.pooled(function(client, user, callback) {
+  console.log("----------------->>>>Inside get notifications");
+  client.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY id DESC LIMIT 5", [user.id], function(err, result) {  
+    if(err) {
+      console.log(err);
+    }
+    else {
+      sio.oldNotifications(result.rows, user.id);
+    }
+  });  
+});
+
+exports.saveNotification = pool.pooled(function(client, data, callback) {
+  console.log("----------------->>>>Saving notification");
+  client.query("INSERT INTO notifications (user_id, type, memo) VALUES ($1,$2,$3)", [data.id, data.type, data.msg], function(err) {
+    if(err) {
+      console.log(err);
+    }
+    else {
+      console.log("Notification saved succesfully")
+    }
+  });  
 });

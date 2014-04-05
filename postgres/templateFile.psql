@@ -15,7 +15,7 @@ CREATE USER alexander WITH PASSWORD 'testing123';
 GRANT ALL PRIVILEGES ON DATABASE bitbox TO alexander;
 
 CREATE TYPE TXN_STATUS AS ENUM ('Canceled', 'Pending', 'Complete', 'Requested');
-CREATE TYPE TXN_TYPE AS ENUM ('Payment', 'Deposit', 'Withdrawal');
+CREATE TYPE TXN_TYPE AS ENUM ('Payment', 'Deposit', 'Withdrawal', 'send', 'ask');
 CREATE TYPE ACCOUNT_STATE AS ENUM ('External','Admin', 'Active', 'Disabled', 'Inactive');
 
 CREATE TABLE users (
@@ -48,19 +48,20 @@ CREATE TABLE transactions (
 );  
 
 CREATE TABLE notifications (
-    id SERIAL PRIMARY KEY (id),
-    user_id SERIAL,
-    transaction_id VARCHAR(36), 
-    type TXN_TYPE NOT NULL,
-    FOREIGN KEY (transaction_id) REFERENCES transactions(uuid),
+    id SERIAL PRIMARY KEY,
+    user_id SERIAL,    
+    type TXN_TYPE NOT NULL,    
+    memo VARCHAR(1024),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 GRANT ALL PRIVILEGES ON users TO alexander;
 GRANT ALL PRIVILEGES ON transactions TO alexander;
+GRANT ALL PRIVILEGES ON notifications TO alexander;
 
 GRANT USAGE, SELECT ON SEQUENCE transactions_id_seq TO alexander;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO alexander;
+GRANT USAGE, SELECT ON SEQUENCE notifications_id_seq TO alexander;
 
 INSERT INTO users (id, nickname, status) VALUES (-1, 'Bitcoin Network', 'External');
 
