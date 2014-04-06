@@ -483,52 +483,52 @@ exports.createOrUpdateDeposit = pool.pooled(function(client, data, callback) {
               _rollback(client, err, callback);
             } else {
               client.query("SELECT * FROM transactions where blockchain_id =$1", [data.depositId], function(err, result){
-                  if (err || result.rows.length == 0) {
-                      console.log("CREATING TRANSACTION");
-                      console.log(err);
-                     client.query("INSERT INTO transactions (source, destination, amount, memo, type, blockchain_id, confirmations, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
-                       [
-                         source.id,
-                         destination.id,
-                         data.amount,
-                         data.memo,
-                         data.type,
-                         data.depositId,
-                         data.confirmations,
-                         uuid.v4()
-                       ], 
-                       function(err, result) {
-                         if (err) {
-                           console.log(err);
-                           _rollback(client, ec.TRANSFER_ERR, callback);
-                         } else {
-                           //  END TXN
-                           _commit(client, callback);
-                         }
-                       }
-                     );
-                  }
-                  else if (result.rows.length != 1){
-                      console.log("ERROR THIS SHOULD NEVER HAPPEN DUPE DEPOSITS");
-                      console.log(result.rows);
-                      _rollback(client, ec.TRANSFER_ERR, callback);
-                  }
-                  else {
-                      res = result.rows[0];
-                      if (res.confirmations != data.confirmations){
-                         client.query("UPDATE transactions set confirmations=$1 where blockchain_id=$2", [data.confirmations, data.depositId], function(err, result){
-                     
-                             if (err){
-                                 console.log(err);
-                                 _rollback(client, ec.TRANSFER_ERR, callback);
-                             }
-                             else{
-                                 _commit(client, callback);
-                                 console.log("Updated # of confirmations");
-                             }
-                         });
+                if (err || result.rows.length == 0) {
+                  console.log("CREATING TRANSACTION");
+                  console.log(err);
+                  client.query("INSERT INTO transactions (source, destination, amount, memo, type, blockchain_id, confirmations, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
+                  [
+                    source.id,
+                    destination.id,
+                    data.amount,
+                    data.memo,
+                    data.type,
+                    data.depositId,
+                    data.confirmations,
+                    uuid.v4()
+                  ], 
+                  function(err, result) {
+                    if (err) {
+                     console.log(err);
+                     _rollback(client, ec.TRANSFER_ERR, callback);
+                    } else {
+                     //  END TXN
+                     _commit(client, callback);
+                    }
+                  });
+                } else if (result.rows.length != 1) {
+                  console.log("ERROR THIS SHOULD NEVER HAPPEN DUPE DEPOSITS");
+                  console.log(result.rows);
+                  _rollback(client, ec.TRANSFER_ERR, callback);
+                } else {
+                  res = result.rows[0];
+                  if (res.confirmations != data.confirmations){
+                    client.query("UPDATE transactions set confirmations=$1 where blockchain_id=$2", 
+                    [
+                      data.confirmations, 
+                      data.depositId
+                    ], 
+                    function(err, result) {
+                      if (err) {
+                        console.log(err);
+                        _rollback(client, ec.TRANSFER_ERR, callback);
+                      } else {
+                        _commit(client, callback);
+                        console.log("Updated # of confirmations");
                       }
+                    });
                   }
+                }
               });
             }
           });
@@ -584,17 +584,26 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     console.log(err);
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
+                    //  TODO: move these blocks to their respective callbacks 
                     if (data.type == "Withdrawal" && ENVIRONMENT != 'dev'){
-                        exports.withdrawBlockChain(data.address, data.amount, function(err){
-                            if (err){
-                                _rollback(client, ec.TRANSFER_ERR, callback);
-                            }
-                            else{
-                                _commit(client, callback);
-                            }
-                        });  
-                    }
-                    else{
+                      exports.withdrawBlockChain(data.address, data.amount, function(err){
+                        if (err){
+                          _rollback(client, ec.TRANSFER_ERR, callback);
+                        } else {
+                          _commit(client, callback);
+                        }
+                      });  
+                    } else if (data.type == "Payment" && 
+                      (source.status == "Active" || source.status == "Admin") && 
+                      (destination.status == "Active" || destination.status == "Admin")) {
+                      client.query("UPDATE transactions SET status = 'Complete' WHERE uuid = $1", [unique_id], function(err) {
+                        if (err){
+                          _rollback(client, ec.TRANSFER_ERR, callback);
+                        } else {
+                          _commit(client, callback);
+                        }
+                      });
+                    } else{
                         //  END TXN
                         _commit(client, callback);
                     }
@@ -640,7 +649,7 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
         client.query("SELECT transaction_logs.generated, transaction_logs.status "+
           "FROM transaction_logs, transactions "+
           "WHERE transactions.uuid=$1 AND transactions.id=transaction_logs.transaction_id "+
-          "ORDER BY transaction_logs.generated DESC", [data.transaction_uuid], function(err, result) {
+          "ORDER BY transaction_logs.id ASC", [data.transaction_uuid], function(err, result) {
             if (err) {
               callback(err, null);
             } else {
@@ -731,21 +740,24 @@ exports.cancelTransaction = pool.pooled(function(client, data, callback) {
 
 exports.getNotifications = pool.pooled(function(client, user, callback) {
   console.log("----------------->>>>Inside get notifications");
-  client.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY id DESC LIMIT 5", [user.id], 
-    function(err, result) {  
-    callback(err, result);
+  client.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY id DESC LIMIT 5", [user.id], function(err, result) {  
+    if(err) {
+      console.log(err);
+    }
+    else {
+      sio.oldNotifications(result.rows, user.id);
+    }
   });  
 });
 
 exports.saveNotification = pool.pooled(function(client, data, callback) {
   console.log("----------------->>>>Saving notification");
-  client.query("INSERT INTO notifications (user_id, type, msg, tx_uuid) VALUES ($1,$2,$3,$4)", 
-    [
-      data.id, 
-      data.type, 
-      data.msg, 
-      data.tx_uuid
-    ], function(err) {
-      callback(err, null);    
+  client.query("INSERT INTO notifications (user_id, type, msg, tx_uuid) VALUES ($1,$2,$3,$4)", [data.id, data.type, data.msg, data.tx_uuid], function(err) {
+    if(err) {
+      console.log(err);
+    }
+    else {
+      console.log("Notification saved succesfully")
+    }
   });  
 });

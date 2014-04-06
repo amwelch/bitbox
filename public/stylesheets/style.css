@@ -17,12 +17,14 @@ a.paginate_button {
 }
 
 body div .btn-cancel {
+    background-color: #fff !important;
+    color: #333 !important;
+    border-color: #ccc !important;
+}
+body div .btn.btn-cancel:hover {
     background-color: #ebebeb !important;
     color: #333 !important;
     border-color: #adadad!important;
-}
-body div .btn-cancel:hover {
-    color: wheat;
 }
 
 a.paginate_active {
@@ -329,4 +331,8 @@ tr.linked td {
 
 tr.linked:hover > td {
 	text-decoration: underline;
+}
+
+input.invalid-input {
+	border: 2px solid red;
 }
