@@ -16,6 +16,15 @@ a.paginate_button {
 	padding-right: 5px;
 }
 
+body div .btn-cancel {
+    background-color: #ebebeb !important;
+    color: #333 !important;
+    border-color: #adadad!important;
+}
+body div .btn-cancel:hover {
+    color: wheat;
+}
+
 a.paginate_active {
     padding-right: 5px;
 }
@@ -140,6 +149,12 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	}
 }
 
+@media (max-width: 767px) {
+	.navbar-nav .open .dropdown-menu>li>a {
+		color: wheat;
+	}
+}
+
 div.main ul.nav.nav-sidebar.mobile {
 	display: block;
 }
@@ -252,14 +267,14 @@ div.jumbotron {
 	text-align: center;
 }
 
-div p .btn {
-	background-color: #683919;
-	border: 0px solid #683919 !important;
+div .btn {
+	background-color: #683919 !important;
+	border: 0px solid #683919;
 	color: wheat !important;
 }
 
-body div p .btn:hover {
-	background-color: #783919;
+body div .btn:hover {
+	background-color: #783919 !important;
 }
 .row .sidebar {
 	background-color: #f7f6f2;
