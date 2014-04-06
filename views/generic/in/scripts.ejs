@@ -1,9 +1,9 @@
 <script>
     var disableInput = function(name){
-      $("#" + name).css('border-color', 'red');
+      $("#" + name).addClass('invalid-input');
     }
     var enableInput = function(name){
-      $("#" + name).css('border-color', '');
+      $("#" + name).removeClass('invalid-input');
     }
     var currencyName = function(){
         var currency = $.cookie('currency-display');
