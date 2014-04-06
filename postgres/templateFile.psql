@@ -38,8 +38,7 @@ CREATE TABLE users (
     status ACCOUNT_STATE NOT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     facebook_id NUMERIC(20) UNIQUE DEFAULT NULL,
-    balance BIGINT NOT NULL DEFAULT 0 CONSTRAINT non_negative_balance CHECK (balance >= 0),
-    new_notis INT DEFAULT 0
+    balance BIGINT NOT NULL DEFAULT 0 CONSTRAINT non_negative_balance CHECK (balance >= 0)
 );
 
 CREATE TABLE transactions (

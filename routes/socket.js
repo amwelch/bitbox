@@ -18,7 +18,7 @@ exports.socket_connection = function(socket) {
           if (connections[user.id] != undefined) {            
             console.log("Sending old notifications");
             //TODO: get notify from the user information.         
-            connections[user.id].emit('old_notifications', {notify: true, notis: result.rows}); 
+            connections[user.id].emit('old_notifications', {notis: result.rows}); 
           }
           else {
             console.log("Error with socket when sending the old notifications");
@@ -60,8 +60,8 @@ exports.sendNotification = function(data, notification_msg) {
             }
           });
           if (connections[dst_user.id] != undefined) {            
-            // Send the notification only if the socket to the dst user is open            
-            connections[dst_user.id].emit('notification', {msg: notify_msg}); 
+            // Send the notification only if the socket to the dst user is open
+            connections[dst_user.id].emit('notification', {msg: notify_msg, tx_uuid: data.tx_uuid, seen: false}); 
           }
         }
       });

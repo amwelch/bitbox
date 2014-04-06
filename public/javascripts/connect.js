@@ -1,54 +1,64 @@
-// var socket;
 
-// $.cookie.json = true;
-// var socket = $.cookie('socket');
-
-// if(socket == undefined) {
 console.log("Initializing Socket");
 var socket = io.connect('http://localhost');
-	// var string_sio = JSON.stringify(socket);
-	// console.log(socket);
-	// $.cookie('socket', socket, { secure: true } );
+	
 startSocketConnection();
-// }
 
 socket.on('ready', function() {
 	console.log("Ready");
 });	
 
+var count = 0;
+
+function insert_notification(notifications_el, data) {
+	var divider = document.createElement('li');
+	divider.className = "divider";
+
+	var item = document.createElement('li');
+	// item.className += "notifications"
+
+	var link = document.createElement('a');
+	var url = '/transfer/track/' + data.tx_uuid;
+	link.href = url;
+	link.innerHTML = data.msg;
+
+	if(!data.seen)
+		count++;
+
+	item.appendChild(link);
+
+	notifications_el.insertBefore(divider, notifications_el.firstChild);
+	notifications_el.insertBefore(item, notifications_el.firstChild);
+};
+
 socket.on('notification', function(data) {
 	console.log("Inside Notification");
 	// document.getElementById("notification_icon").className = "glyphicon glyphicon-asterisk red";
 	var bubble = document.getElementById("noti_bubble");
-	bubble.innerHTML = '1';
-	alert(data.msg);
-	// console.log(data);
+	insert_notification(document.getElementById("notis"), data);
+	bubble.innerHTML = count;
+
 });
 
 socket.on('old_notifications', function(data) {
-	notifications = document.getElementById("notis");
-	if(data.notis.length) {
+	var notifications = document.getElementById("notis");
 	console.log(data.notis);
-		if(data.notify)
-			document.getElementById("noti_bubble").innerHTML = data.notis.length;		
-		for (var i = 0; i < data.notis.length; i++) {
-			var divider = document.createElement('li');
-			divider.className = "divider";
-
-			var item = document.createElement('li');
-			item.className += "notifications"
-
-			var link = document.createElement('a');
-			var url = '/transfer/track/' + data.notis[i].tx_uuid;
-			link.href = url;
-			link.innerHTML = data.notis[i].msg;
-
-			item.appendChild(link);
-
-			// item.innerHTML = data.notis[i].msg;
-			notifications.appendChild(item);
-			notifications.appendChild(divider);
+	if(data.notis.length) {		
+		for (var i = data.notis.length - 1; i >= 0; i--) {
+			insert_notification(notifications, data.notis[i]);
 		};
+
+		document.getElementById("noti_bubble").innerHTML = count;		
+
+		var item = document.createElement('li');
+		item.className += "notifications"
+
+		var link = document.createElement('a');
+		var url = '#';
+		link.href = url;
+		link.innerHTML = "See All";
+		item.appendChild(link);
+		notifications.appendChild(item);
 	}
 	else {
 		// Create the list item:
@@ -56,7 +66,7 @@ socket.on('old_notifications', function(data) {
 		item.className += "notifications"
 
 		// Set its contents:
-		item.innerHTML = 'No notifications';
+		item.innerHTML = 'No new notifications';
 
 		// Add it to the list:
 		notifications.appendChild(item);
