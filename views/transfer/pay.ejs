@@ -35,22 +35,17 @@
   </p>
 </form>
 <script>
-    var disableInput = function(name){
-      $("#" + name).css('border-color', 'red');
-    }
-    var enableInput = function(name){
-      $("#" + name).css('border-color', '');
-    }
     $("#form-pay").submit(function(e){
         badFlag = false;
-        enableInput('btc_amount');
         enableInput('fb-user');
+        enableInput('btc_amount');
         e.preventDefault();
         if( $("#fb_name").val() == ""){
             disableInput('fb-user');
             badFlag= true;
         }
-        if (isNaN(parseFloat($("#btc_amount").val()))){
+        var displayAmount = $("#btc_amount").val();
+        if (displayAmount == "" || isNaN(displayAmount)){
             disableInput('btc_amount');
             badFlag = true;
         }
@@ -58,7 +53,6 @@
             return;
         }
         var form = this;
-        var displayAmount = $("#btc_amount").val();
         var amount = currencyInput(displayAmount);
         var message ='';
         if($('#op_send').is(':checked')){

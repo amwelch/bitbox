@@ -16,13 +16,46 @@
 </form>
 <script>
     $("#withdraw-form").submit(function(e){
-        console.log("In form");
         e.preventDefault();
         var form = this;
-        var amount = $("#btc_amount").val();
-        amount = currencyInput(amount);
-        $("#btc_amount").val(amount);
-        form.submit();
+
+        badFlag = false;
+        enableInput('btc_amount');
+        var displayAmount = $("#btc_amount").val();
+        if (displayAmount == "" || isNaN(displayAmount)){
+            disableInput('btc_amount');
+            badFlag = true;
+        }
+        if (badFlag){
+            return;
+        }
+        var form = this;
+        var amount = currencyInput(displayAmount);
+        var message= 'Are you sure you want to withdraw ' + displayAmount + ' ' +currencyName()+' to '+ $('#btc_address').val() + '?\n\nNOTE: Please DOUBLE check your wallet address followed by TRIPLE checking it. As is the nature of bitcoin once the withdrawal has been sent it is irreversable.\n\nWithdrawals are subject to a 12-24 hour holding period. If you make a mistake contact us IMMEDIATELY at info@bit-box.org';
+        var dialog = BootstrapDialog.show({
+            message: message,
+            title: "Confirmation",
+            buttons: [{
+                label: 'Confirm',
+                cssClass: 'btn btn-lg btn-success',
+                action: function(){
+                    dialog.close();
+                    $("#btc_amount").val(amount);
+                    form.submit();
+                }
+              },
+              {
+                label: 'Cancel',
+                cssClass: 'btn btn-lg btn-danger',
+                action: function(){
+                    dialog.close();
+                }
+              }]
+            
+        });
+
+
+
     });
     var curName = currencyName();
     console.log("GOT CURRENCY AS ", curName);

@@ -1,4 +1,10 @@
 <script>
+    var disableInput = function(name){
+      $("#" + name).css('border-color', 'red');
+    }
+    var enableInput = function(name){
+      $("#" + name).css('border-color', '');
+    }
     var currencyName = function(){
         var currency = $.cookie('currency-display');
         if (currency == "ca"){

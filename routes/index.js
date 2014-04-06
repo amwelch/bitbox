@@ -161,9 +161,9 @@ exports.viewTransferList = function(req, res) {
     if (ENVIRONMENT != 'dev') {
       api.queryBlockChain(req.user.deposit_address, req.user.id);
     }
+    
     api.getTransactionsByUserId(req.user.id, function(err, history) {
       if (err) {
-        console.log("Unable to get user");
         res.redirect("/");
       } else {
         console.log(history);
@@ -549,8 +549,6 @@ exports.lobby = function(req, res) {
 exports.controlUser = function(req, res){
   console.log(req.user);
   if (req.user.valid) {
-    console.log("USER OBJECT");
-    console.log(req.user);
     var name = req.body.displayname;
     if (!name){
       name = req.user.nickname;
