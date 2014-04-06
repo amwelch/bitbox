@@ -61,6 +61,7 @@ CREATE TABLE notifications (
     user_id SERIAL,    
     type TXN_TYPE NOT NULL,    
     msg VARCHAR(1024),
+    seen boolean DEFAULT false,
     tx_uuid VARCHAR(36) UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (tx_uuid) REFERENCES transactions(uuid)
