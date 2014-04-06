@@ -53,6 +53,7 @@ socket.on('old_notifications', function(data) {
 	else {
 		// Create the list item:
 		var item = document.createElement('li');
+		item.className += "notifications"
 
 		// Set its contents:
 		item.innerHTML = 'No notifications';
@@ -62,11 +63,8 @@ socket.on('old_notifications', function(data) {
 	}
 });
 
-socket.on('alert', function(msg) {
-	alert(msg.data);
-});
-
 function startSocketConnection() {	
+	console.log(socket);
 	// jQuery AJAX call for JSON
 	$.get( '/api/userInfo', function( data ) {
 		socket.emit('user', data);	
