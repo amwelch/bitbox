@@ -55,6 +55,11 @@
         });
     });
     var curName = currencyName();
-    console.log("GOT CURRENCY AS ", curName);
     $("#btc_amount").attr("placeholder", curName);
+    $("#withdraw-view").on("click", function(e){
+        e.preventDefault();
+        var addr = $('#btc_address').val();
+        var url = "https://blockchain.info/address/" + addr;
+        window.open(url);
+    });
 </script>
