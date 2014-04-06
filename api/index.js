@@ -585,16 +585,24 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
                     if (data.type == "Withdrawal" && ENVIRONMENT != 'dev'){
-                        exports.withdrawBlockChain(data.address, data.amount, function(err){
-                            if (err){
-                                _rollback(client, ec.TRANSFER_ERR, callback);
-                            }
-                            else{
-                                _commit(client, callback);
-                            }
-                        });  
-                    }
-                    else{
+                      exports.withdrawBlockChain(data.address, data.amount, function(err){
+                        if (err){
+                          _rollback(client, ec.TRANSFER_ERR, callback);
+                        } else {
+                          _commit(client, callback);
+                        }
+                      });  
+                    } else if (data.type == "Payment" && 
+                      (source.status == "Active" || source.status == "Admin") && 
+                      (destination.status == "Active" || destination.status == "Admin")) {
+                      client.query("UPDATE transactions SET status = 'Complete' WHERE uuid = $1", [unique_id], function(err) {
+                        if (err){
+                          _rollback(client, ec.TRANSFER_ERR, callback);
+                        } else {
+                          _commit(client, callback);
+                        }
+                      });
+                    } else{
                         //  END TXN
                         _commit(client, callback);
                     }
