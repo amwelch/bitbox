@@ -56,7 +56,7 @@
         var amount = currencyInput(displayAmount);
         var message ='';
         if($('#op_send').is(':checked')){
-            message= 'Are you sure you want to send ' + displayAmount + ' '+ +currencyName()+' to '+ $('#fb_name').val() + '?';
+            message= 'Are you sure you want to send ' + displayAmount + ' '+ currencyName()+' to '+ $('#fb_name').val() + '?';
         }
         else{
             message= 'Are you sure you want to request ' + displayAmount + ' ' +currencyName()+' from '+ $('#fb_name').val() + '?';
