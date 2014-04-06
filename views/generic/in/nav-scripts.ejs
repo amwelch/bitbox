@@ -95,6 +95,10 @@
       //  parsing satoshis
       $(this).html((new Date($(this).html())).toDateString());
     });
+    $("body").find(".time").each(function () {
+      //  parsing satoshis
+      $(this).html((new Date($(this).html())).toLocaleString());
+    });
     
 
     document.getElementById("main").style.display = 'block';

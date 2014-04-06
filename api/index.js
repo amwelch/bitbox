@@ -619,29 +619,35 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
       console.log(err);
       callback(err, null);
     } else {
+      console.log(result.rows);
       if (result.rows.length == 1) {
         history = result.rows[0];
-        var whom, facebook_id;
-        if (history.source == data.user_id) {
-          whom = history.destination_name;
-          facebook_id = history.destination_fbid;
-        } else if (history.destination == data.user_id) {
-          whom = history.source_name;
-          facebook_id = history.source_fbid;
-        }
+
         rValue = {
           date: history.last_updated,
           type: history.type,
-          source: history.source,
-          destination: history.destination,
-          facebook_id: facebook_id,
+          source_id: history.source,
+          source_name: history.source_name,
+          destination_id: history.destination,
+          destination_name: history.destination_name,
           status: history.status,
           amount: history.amount,
           confirmations: history.confirmations,
           memo: history.memo,
           uuid: history.uuid
         };
-        callback(null, rValue);
+
+        client.query("SELECT transaction_logs.generated, transaction_logs.status "+
+          "FROM transaction_logs, transactions "+
+          "WHERE transactions.uuid=$1 AND transactions.id=transaction_logs.transaction_id "+
+          "ORDER BY transaction_logs.generated DESC", [data.transaction_uuid], function(err, result) {
+            if (err) {
+              callback(err, null);
+            } else {
+              rValue.history = result.rows;
+              callback(null, rValue);
+            }
+        });
       } else {
         callback("INVALID ROW LENGTH", null);
       }
@@ -662,6 +668,7 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
     } else { 
       var rValue = [];
       var history = result.rows;
+      console.log(history);
       for (var i = 0; i < history.length; ++i) {
         rValue.push({
           date: history[i].last_updated,
@@ -683,25 +690,41 @@ exports.getTransactionsByUserId = pool.pooled(function(client, id, callback) {
 });
 
 exports.approveTransaction = pool.pooled(function(client, data, callback) {
-  client.query("UPDATE transactions SET status = 'Complete' WHERE status = 'Requested' AND source.id = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+  client.query("UPDATE transactions SET status = 'Complete' WHERE status = 'Requested' AND transactions.source = $1 AND transactions.uuid=$2", 
+  [
+    data.user_id, 
+    data.transaction_uuid
+  ], function(err, result) {
     callback(err, result);
   });
 });
 
 exports.declineTransaction = pool.pooled(function(client, data, callback) {
-  client.query("UPDATE transactions SET status = 'Declined' WHERE status = 'Complete' AND transaction.source = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+  client.query("UPDATE transactions SET status = 'Declined' WHERE status = 'Requested' AND transactions.source = $1 AND transactions.uuid=$2", 
+  [
+    data.user_id, 
+    data.transaction_uuid
+  ], function(err, result) {
     callback(err, result);
   });
 });
 
 exports.refundTransaction = pool.pooled(function(client, data, callback) {
-  client.query("UPDATE transactions SET status = 'Refunded' WHERE status = 'Complete' AND transaction.destination = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+  client.query("UPDATE transactions SET status = 'Refunded' WHERE status = 'Complete' AND transactions.destination = $1 AND transactions.uuid=$2", 
+  [
+    data.user_id, 
+    data.transaction_uuid
+  ], function(err, result) {
     callback(err, result);
   });
 });
 
 exports.cancelTransaction = pool.pooled(function(client, data, callback) {
-  client.query("UPDATE transactions SET status = 'Canceled' WHERE status = 'Requested' AND transaction.destination = $1 AND transaction.uuid=$2", [data.id], function(err, result) {
+  client.query("UPDATE transactions SET status = 'Canceled' WHERE status = 'Requested' AND transactions.destination = $1 AND transactions.uuid=$2", 
+  [
+    data.user_id, 
+    data.transaction_uuid
+  ], function(err, result) {
     callback(err, result);
   });
 });

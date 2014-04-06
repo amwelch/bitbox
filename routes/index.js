@@ -130,6 +130,7 @@ exports.controlTransferSingle = function(req, res) {
 
 exports.viewTransferSingle = function(req, res) {
   var transaction_uuid = req.params.id;
+  console.log("HERE");
   if (req.user.valid) {
     api.getTransactionByUuid({
       user_id: req.user.id, 
@@ -147,7 +148,8 @@ exports.viewTransferSingle = function(req, res) {
           title: 'View Transaction',
           balance: req.user.balance,
           name: req.user.nickname,
-          transaction: transaction
+          transaction: transaction,
+          is_source: (req.user.id == transaction.source_id)
         });
       }
     });
@@ -226,11 +228,7 @@ exports.controlPay = function(req, res) {
 
     if (req.body.pay.op == "ask") {
       
-      source = {
-        facebook_id: req.body.pay.facebook_id,
-        nickname: req.user.nickname
-      };
-      
+      source = { facebook_id: req.body.pay.facebook_id };
       destination = { id: req.user.id };
       
       status = 'Requested';
@@ -239,11 +237,7 @@ exports.controlPay = function(req, res) {
     } else if (req.body.pay.op == "send") {
       
       source = { id: req.user.id };
-      
-      destination = {
-        facebook_id: req.body.pay.facebook_id,
-        nickname: req.user.nickname
-      };
+      destination = { facebook_id: req.body.pay.facebook_id };
 
       status = 'Pending';
       type = 'sent';
@@ -254,6 +248,13 @@ exports.controlPay = function(req, res) {
     }
 
     getFacebookName(req.body.pay.facebook_id, function(err, nickname) {
+      if (req.body.pay.op == "ask") {
+        source.nickname = nickname;
+      } else if (req.body.pay.op == "send") {
+        destination.nickname = nickname;
+      }
+      console.log(source);
+
       var unique_id = uuid.v4();
       if (err) {
         res.redirect('/transfer/pay?success=false');
@@ -577,3 +578,65 @@ exports.controlUser = function(req, res){
     require_login(res);
   }
 };
+
+exports.transactionCancel = function(req, res) {
+  var transaction_uuid = req.params.id;
+  api.cancelTransaction({
+    user_id: req.user.id,
+    transaction_uuid: transaction_uuid
+  },
+  function(err, user) {
+    if (err) {
+      console.log(err);
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=false');
+    } else {
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=true');
+    }
+  });
+}
+
+exports.transactionApprove = function(req, res) {
+  var transaction_uuid = req.params.id;
+  api.approveTransaction({
+    user_id: req.user.id,
+    transaction_uuid: transaction_uuid
+  },
+  function(err, user) {
+    if (err) {
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=false');
+    } else {
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=true');
+    }
+  });
+}
+
+exports.transactionDecline = function(req, res) {
+  var transaction_uuid = req.params.id;
+  api.declineTransaction({
+    user_id: req.user.id,
+    transaction_uuid: transaction_uuid
+  },
+  function(err, user) {
+    if (err) {
+      console.log(err);
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=false');
+    } else {
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=true');
+    }
+  });
+}
+
+exports.transactionRefund = function(req, res) {
+  var transaction_uuid = req.params.id;
+  api.refundTransaction({
+    user_id: req.user.id,
+    transaction_uuid: transaction_uuid
+  },
+  function(err, user) {
+    if (err) {
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=false');
+    } else {
+      res.redirect('/transfer/track/'+transaction_uuid+'?success=true');
+    }
+  });
+}

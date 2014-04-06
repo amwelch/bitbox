@@ -68,7 +68,7 @@ CREATE TABLE notifications (
 
 CREATE TABLE transaction_logs (
     id SERIAL PRIMARY KEY,
-    transaction_id INT NOT NULL REFERENCES transactions(id),
+    transaction_id VARCHAR(36) NOT NULL REFERENCES transactions(id),
     status TXN_STATUS NOT NULL, 
     generated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

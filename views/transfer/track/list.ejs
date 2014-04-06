@@ -14,9 +14,9 @@
         <td><span class="currency"><%= history[i].amount %></span> <span class="denomination">BTC</span></td>
         <td><%= history[i].status %></td>
         <% if (user_id == history[i].source_id) { %>
-          <td>to <%= history[i].name %></td>
+          <td>to <%= history[i].destination_name %></td>
         <% } else if (user_id == history[i].destination_id) { %>
-          <td>from <%= history[i].destination_name %></td>
+          <td>from <%= history[i].source_name %></td>
         <% } else { %>
           <td>&nbsp;</td>
         <% } %>

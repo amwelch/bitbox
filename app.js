@@ -172,6 +172,11 @@ app.post('/transfer/track', postLater);
 app.post('/transfer/deposit', routes.controlDeposit);
 app.post('/transfer/withdraw', routes.controlWithdraw);
 
+app.post('/transfer/track/:id/cancel', routes.transactionCancel);
+app.post('/transfer/track/:id/refund', routes.transactionRefund);
+app.post('/transfer/track/:id/decline', routes.transactionDecline);
+app.post('/transfer/track/:id/approve', routes.transactionApprove);
+
 app.get('/deposit/blockchain', routes.blockChainIn);
 
 app.get('/transfer', routes.transfer);
