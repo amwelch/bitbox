@@ -1,6 +1,11 @@
 .modal-header {background-color:#683919 !important;}
 .bootstrap-dialog-title {color: wheat !important;}
 
+.nav .open>a {
+  background-color: #683919;
+}
+
+
 body {
   font-family: Ubuntu, serif !important;
   margin: 0;
@@ -60,7 +65,6 @@ div.navbar-fixed-top {
 button .icon-bar {
 	background-color: wheat;		
 }
-
 .navbar-fixed-top .navbar-header .navbar-brand, .navbar-fixed-top .navbar-header .navbar-brand:hover {
 	color: wheat;
 }
