@@ -731,24 +731,21 @@ exports.cancelTransaction = pool.pooled(function(client, data, callback) {
 
 exports.getNotifications = pool.pooled(function(client, user, callback) {
   console.log("----------------->>>>Inside get notifications");
-  client.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY id DESC LIMIT 5", [user.id], function(err, result) {  
-    if(err) {
-      console.log(err);
-    }
-    else {
-      sio.oldNotifications(result.rows, user.id);
-    }
+  client.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY id DESC LIMIT 5", [user.id], 
+    function(err, result) {  
+    callback(err, result);
   });  
 });
 
 exports.saveNotification = pool.pooled(function(client, data, callback) {
   console.log("----------------->>>>Saving notification");
-  client.query("INSERT INTO notifications (user_id, type, msg, tx_uuid) VALUES ($1,$2,$3,$4)", [data.id, data.type, data.msg, data.tx_uuid], function(err) {
-    if(err) {
-      console.log(err);
-    }
-    else {
-      console.log("Notification saved succesfully")
-    }
+  client.query("INSERT INTO notifications (user_id, type, msg, tx_uuid) VALUES ($1,$2,$3,$4)", 
+    [
+      data.id, 
+      data.type, 
+      data.msg, 
+      data.tx_uuid
+    ], function(err) {
+      callback(err, null);    
   });  
 });

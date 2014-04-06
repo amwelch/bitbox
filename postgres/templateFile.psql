@@ -61,6 +61,7 @@ CREATE TABLE notifications (
     user_id SERIAL,    
     type TXN_TYPE NOT NULL,    
     msg VARCHAR(1024),
+    seen boolean DEFAULT false,
     tx_uuid VARCHAR(36) UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (tx_uuid) REFERENCES transactions(uuid)
@@ -68,7 +69,7 @@ CREATE TABLE notifications (
 
 CREATE TABLE transaction_logs (
     id SERIAL PRIMARY KEY,
-    transaction_id VARCHAR(36) NOT NULL REFERENCES transactions(id),
+    transaction_id INT NOT NULL REFERENCES transactions(id),
     status TXN_STATUS NOT NULL, 
     generated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
