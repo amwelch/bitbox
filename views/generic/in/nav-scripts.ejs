@@ -1,56 +1,74 @@
 <script>
+    var showWarning = function(){
+        console.log("Showing warning");
+        var message = "<b>NOTE:</b> Currency conversions are provided as a convenience. Rates are updated every hour at the latest, but should not be taken as an exact representation.\n\nWe recommend using BTC or Satoshis as that is the true representation of the value.";
+        var dialog = BootstrapDialog.show({
+            message: message,
+            title: "Note",
+            buttons: [{
+                label: 'Confirm',
+                cssClass: 'btn btn-lg btn-success',
+                action: function(){
+                    dialog.close();
+                    location.reload();
+                }
+            }]
+        });
+    }
     var setCurrency = function(name){
+        console.log("SHOWING WARNING");
         $.cookie('currency-display', name,{ path: '/', expires: 30});
     }
     $("#CA-select").click(function(e){
         e.preventDefault();
         setCurrency("ca");
-        location.reload();
+        showWarning();
     });
     $("#EU-select").click(function(e){
+        console.log("SETTNIG EU");
         e.preventDefault();
         setCurrency("eu");
-        location.reload();
+        showWarning();
     });
     $("#UK-select").click(function(e){
         e.preventDefault();
         setCurrency("uk");
-        location.reload();
+        showWarning();
     });
     $("#AU-select").click(function(e){
         e.preventDefault();
         setCurrency("au");
-        location.reload();
+        showWarning();
     });
     $("#MX-select").click(function(e){
         e.preventDefault();
         setCurrency("mx");
-        location.reload();
+        showWarning();
     });
     $("#BR-select").click(function(e){
         e.preventDefault();
         setCurrency("br");
-        location.reload();
+        showWarning();
     });
     $("#AR-select").click(function(e){
         e.preventDefault();
         setCurrency("ar");
-        location.reload();
+        showWarning();
     });
     $("#JP-select").click(function(e){
         e.preventDefault();
         setCurrency("jp");
-        location.reload();
+        showWarning();
     });
     $("#CH-select").click(function(e){
         e.preventDefault();
         setCurrency("ch");
-        location.reload();
+        showWarning();
     });
     $("#USD-select").click(function(e){
         e.preventDefault();
         setCurrency("usd");
-        location.reload();
+        showWarning();
     });
     $("#BTC-select").click(function(e){
         e.preventDefault();
@@ -68,7 +86,6 @@
       var val = parseInt($(this).html());
       val = currencyOutput(val);
       $(this).html(val);
-      console.log("value: " + val);
     });
     $("body").find(".denomination").each(function () {
       //  parsing satoshis
@@ -78,7 +95,7 @@
       //  parsing satoshis
       $(this).html((new Date($(this).html())).toDateString());
     });
-
+    
 
     document.getElementById("main").style.display = 'block';
     //Convert all -1 to n/a
