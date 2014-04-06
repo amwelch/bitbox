@@ -329,3 +329,9 @@ tr.linked td {
 tr.linked:hover > td {
 	text-decoration: underline;
 }
+
+input.invalid_input {
+	border-style: solid;
+	border-color: red;
+	border: 2px;
+}
