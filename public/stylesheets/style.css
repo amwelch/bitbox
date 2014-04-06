@@ -144,6 +144,7 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	.navbar-nav .open .dropdown-menu>li>a {
 		color: wheat;
 	}
+}
 
 div.main ul.nav.nav-sidebar.mobile {
 	display: block;
