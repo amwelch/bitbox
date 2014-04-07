@@ -12,7 +12,7 @@
 <div class="history"> 
   <h4 style="text-align: left;"><%= transaction.source_name %> to <%= transaction.destination_name %>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span></h4>
   <% if (transaction.memo.length > 0) { %><h5 style="text-align: left;"><i>"<%= transaction.memo %>"</i></h5><% } %>
-  <BR>
+  <br>
   <div class="table-responsive">
     <table class="table" style="max-width: 480px;">
       <tr style="background-color: #f9f9f9;">
@@ -31,29 +31,26 @@
   <% if (transaction.status == 'Canceled') { %>
   <% } else if (transaction.status == 'Pending') { %>
   <% } else if (transaction.status == 'Complete' && !is_source) { %>    
-    <form name="approve" action="/transfer/track/<%= transaction.uuid %>/refund" method="POST">
-      <p>
-        <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Refund"></input>
-      </p>
-    </form>
-  <% } else if (transaction.status == 'Requested' && is_source) { %>
-    <form name="approve" action="/transfer/track/<%= transaction.uuid %>/approve" method="POST">
-      <p>
-        <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Approve"></input>
-      </p>
-    </form>
-    <br>
-    <form name="decline" action="/transfer/track/<%= transaction.uuid %>/decline" method="POST">
     <p>
-        <input type="submit" class="btn btn-lg" role="button" name="form-submit" value="Decline"></input>
+      <form name="approve" action="/transfer/track/<%= transaction.uuid %>/refund" method="POST" style="display: inline;">
+        <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Refund"></input>
+      </form>
     </p>
-    </form>
+  <% } else if (transaction.status == 'Requested' && is_source) { %>
+    <p>
+      <form name="approve" action="/transfer/track/<%= transaction.uuid %>/approve" method="POST" style="display: inline;">
+        <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Approve"></input>
+      </form>
+      <form name="decline" action="/transfer/track/<%= transaction.uuid %>/decline" method="POST" style="display: inline;">
+        <input type="submit" class="btn btn-lg btn-cancel" role="button" name="form-submit" value="Decline"></input>
+      </form>
+    </p>
   <% } else if (transaction.status == 'Requested' && !is_source) { %>
-    <form name="approve" action="/transfer/track/<%= transaction.uuid %>/cancel" method="POST">
-      <p>
+    <p>
+      <form name="approve" action="/transfer/track/<%= transaction.uuid %>/cancel" method="POST" style="display: inline;">
         <input type="submit" class="btn btn-lg" role="button" name="form-submit" value="Cancel"></input>
-      </p>
-    </form>
+      </form>
+    </p>
   <% } else if (transaction.status == 'Refunded') { %>
   <% } else if (transaction.status == 'Declined') { %>
   <% } %>

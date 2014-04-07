@@ -21,7 +21,11 @@
             type: 'get',
             success: function(response, textStatus, jqXHR){
                 if (response == "ok"){
+                    console.log("ok")
                     $("#withdraw-submit").prop('disabled', false);
+                }
+                else{
+                    console.log("not ok");
                 }
             },
             error: function(jqXHR, textStatus, errorThrown){
@@ -29,7 +33,11 @@
             }
         });
     }
-    $("#btc_address").on('change', function(e){
+    //$("#btc_address").on('change', function(e){
+    //    $("#withdraw-submit").prop('disabled', true);
+    //    validateAddress($("#btc_address").val());
+    //});
+    $("#btc_address").keypress(function(e){
         $("#withdraw-submit").prop('disabled', true);
         validateAddress($("#btc_address").val());
     });
