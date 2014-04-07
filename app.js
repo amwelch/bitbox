@@ -191,6 +191,7 @@ app.get('/beta', routes.betaSignUp);
 app.post('/beta', routes.betaEmail);
 
 app.get('/api/userInfo', routes.userInfo);
+app.get('/api/validateAddress', routes.validateAddress);
 app.get('/accounts/identity', routes.identity);
 app.post('/accounts/identity', postLater);
 
