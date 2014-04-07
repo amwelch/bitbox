@@ -62,6 +62,7 @@ socket.on('old_notifications', function(data) {
 	}
 	else {
 		// Create the list item:
+		document.getElementById("noti_bubble").innerHTML = "";
 		var item = document.createElement('li');
 		item.className += "notifications"
 

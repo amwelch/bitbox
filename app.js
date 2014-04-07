@@ -231,4 +231,4 @@ httpServer.listen(port, ip, function() {
 // TODO: we need to use https for the sockets as well
 var io = require('socket.io').listen(httpServer);
 
-//io.sockets.on('connection', sio.socket_connection);
+io.sockets.on('connection', sio.socket_connection);
