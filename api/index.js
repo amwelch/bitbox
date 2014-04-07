@@ -144,6 +144,7 @@ exports.withdrawBlockChain = function(addr, amount, cb){
     });
     
 }
+
 exports.queryBlockChain = function(addr, uid){
     url = "http://blockchain.info/address/" + addr + "?format=json";
     var options = {

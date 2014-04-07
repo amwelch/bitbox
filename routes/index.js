@@ -1,5 +1,6 @@
 
 var http = require('http');
+var https = require('https');
 var api = require('../api/');
 var sio = require('./socket');
 var uuid = require('node-uuid');
@@ -641,3 +642,27 @@ exports.transactionRefund = function(req, res) {
     }
   });
 }
+
+exports.validateAddress = function(req, res){
+    var addr = req.params.addr;
+    var options = {
+        host: 'blockchain.info',
+        port: '443',
+        path: '/q/addressbalance/'+addr
+    }
+    console.log(options);
+    https.get(options, function(resp){
+        resp.on('data', function(chunk){
+          console.log("Got data " + chunk);
+          res.writeHead(200, {'Content-Type': 'text/plain'});
+          res.write('ok');
+          res.end();
+        });
+    }).on("error", function(e){
+        console.log("Got error: " + e.message);
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.write('no');
+        res.end();
+    });
+}
+
