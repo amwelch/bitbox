@@ -294,12 +294,19 @@ div.fbac-suggestion-list {
 	left: inherit !important;
 }
 
-.input_option {
-	width: 0px;
+.input-option {
+	width: 4em;
 	height: 24px;
-	margin-left: -4em;
 	display: inline-block;
 	cursor: pointer;
+	background-color: white; 
+	margin: 0px; 
+	margin-left: -5em; 
+	text-align: center;
+}
+
+.input-option-hidden {
+	display: none;
 }
 
 div.switch-toggle label {
