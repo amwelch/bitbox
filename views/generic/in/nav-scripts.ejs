@@ -1,4 +1,26 @@
 <script>
+    var setImage = function(){
+        var currency = $.cookie('currency-display');
+        if (currency == "usd"){
+            $("#Currency-Dropdown-Image").attr("src", "/assets/flags/us.png");
+        }  
+        else if (currency == "eu"){
+            $("#Currency-Dropdown-Image").attr("src", "/assets/flags/eu.png");
+        }  
+        else if (currency == "uk"){
+            $("#Currency-Dropdown-Image").attr("src", "/assets/flags/uk.png");
+        }  
+        else if (currency == "jp"){
+            $("#Currency-Dropdown-Image").attr("src", "/assets/flags/jp.png");
+        }  
+        else if (currency == "ch"){
+            $("#Currency-Dropdown-Image").attr("src", "/assets/flags/cn.png");
+        }  
+        else{
+            $("#Currency-Dropdown-Image").attr("src", "/assets/flags/single-poker-chip.png");
+        }
+    }
+    setImage();
     var showWarning = function(){
         console.log("Showing warning");
         var message = "<b>NOTE:</b> Currency conversions are provided as a convenience. Rates are updated every hour at the latest, but should not be taken as an exact representation.\n\nWe recommend using BTC or Satoshis as that is the true representation of the value.";
