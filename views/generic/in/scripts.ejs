@@ -37,11 +37,8 @@
         else if (currency == "ch"){
             return "Yuan"
         }
-        else if (currency == "bitcoin"){
-            return "BTC"
-        }
         else{
-            return "Satoshi"
+            return "BTC"
         }
     }
     //Takes input in currency entered and converts it to Satoshis
@@ -99,12 +96,8 @@
             num_amount = num_amount / usd_to_cur;
             satoshis = parseInt( (num_amount / btc_to_usd) / satoshi_to_btc);
         }
-        else if(currency == "bitcoin"){
-            satoshis = parseInt(num_amount / satoshi_to_btc);
-        }
         else {
-            //If its in satoshis we don't have to do anything
-            satoshis = parseInt(num_amount);
+            satoshis = parseInt(num_amount / satoshi_to_btc);
         }
         console.log("Returning: " + satoshis);
         return satoshis;
