@@ -1,17 +1,4 @@
 <script>
-    var validateAddress = function(addr){
-        $.ajax({
-            url: '/api/validateAddress?addr=' + addr, 
-            type: 'get',
-            success: function(response, textStatus, jqXHR){
-               alert("GOT STUFF");
-               alert(response);
-            },
-            error: function(jqXHR, textStatus, errorThrown){
-                alert("ERROR WITH GETTING STUFF");
-            }
-        });
-    }
     var disableInput = function(name){
       $("#" + name).addClass('invalid-input');
     }

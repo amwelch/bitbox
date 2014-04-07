@@ -644,7 +644,8 @@ exports.transactionRefund = function(req, res) {
 }
 
 exports.validateAddress = function(req, res){
-    var addr = req.params.addr;
+    console.log(req.query);
+    var addr = req.query.addr;
     var options = {
         host: 'blockchain.info',
         port: '443',
@@ -654,9 +655,16 @@ exports.validateAddress = function(req, res){
     https.get(options, function(resp){
         resp.on('data', function(chunk){
           console.log("Got data " + chunk);
-          res.writeHead(200, {'Content-Type': 'text/plain'});
-          res.write('ok');
-          res.end();
+          if (!isNaN(parseInt(chunk))){
+              res.writeHead(200, {'Content-Type': 'text/plain'});
+              res.write('ok');
+              res.end();
+          }
+          else{
+              res.writeHead(200, {'Content-Type': 'text/plain'});
+              res.write('no');
+              res.end();
+          }
         });
     }).on("error", function(e){
         console.log("Got error: " + e.message);

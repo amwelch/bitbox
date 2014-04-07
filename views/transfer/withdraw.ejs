@@ -11,10 +11,28 @@
   <div style="clear: both; margin: 0px; height: 0px">&nbsp;</div>
   <br>
   <p>
-    <input type="submit" class="btn btn-lg btn-success" role="button" name="submit-button" value="Submit"></input>
+    <input id="withdraw-submit" disabled=true type="submit" class="btn btn-lg btn-success" role="button" name="submit-button" value="Submit"></input>
   </p>
 </form>
 <script>
+    var validateAddress = function(addr){
+        $.ajax({
+            url: '/api/validateAddress?addr=' + addr, 
+            type: 'get',
+            success: function(response, textStatus, jqXHR){
+                if (response == "ok"){
+                    $("#withdraw-submit").prop('disabled', false);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                console.log("err");
+            }
+        });
+    }
+    $("#btc_address").on('change', function(e){
+        $("#withdraw-submit").prop('disabled', true);
+        validateAddress($("#btc_address").val());
+    });
     $("#withdraw-form").submit(function(e){
         e.preventDefault();
         var form = this;
