@@ -15,9 +15,9 @@
   <br>
   <div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
     <label for="fb-user">Who</label><br>
-    <input type="text" id="fb-user" style="width: 20em; padding: 10px" autocomplete="off" placeholder="friend name" value="" />
+    <input type="text" id="fb-user" style="width: 20em; padding: 10px; padding-right: 5em;" autocomplete="off" placeholder="friend name" value="" />
     <input type="hidden" name="pay[nickname]" id="fb_name" value="" />
-    <span class="input_option" id="fb_user_clear">&nbsp;</span>
+    <span class="input-option-hidden" id="fb_user_clear">&nbsp;</span>
   </div>
   <div style="inlne-block; float: left; padding-bottom: 10px; margin-right: 10px;">
     <label for="btc_amount">Amount</label><br>
@@ -99,6 +99,7 @@ var init = function() {
         document.getElementById("fb_name").value = friend.name;
         document.getElementById("btc_amount").focus();
         document.getElementById("fb_user_clear").innerHTML = "Clear";
+        document.getElementById("fb_user_clear").className = "input-option";
         /*
         FB.ui({
           method: 'send',
@@ -113,6 +114,7 @@ var init = function() {
           document.getElementById("fb-user").disabled = "";
           document.getElementById("friend_fbid").value = friend.id;
           document.getElementById("fb_user_clear").innerHTML = "&nbsp;";
+          document.getElementById("fb_user_clear").className = "input-option-hidden";
           window.location.reload();
         });
       }

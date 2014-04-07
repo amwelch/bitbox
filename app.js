@@ -156,8 +156,6 @@ app.get('/liftoff/login/facebook/callback',
   })
 );
 
-app.get('/api/userInfo', routes.userInfo);
-
 app.get('/logout', routes.logout);
 
 app.get('/transfer/pay', routes.viewPay);
