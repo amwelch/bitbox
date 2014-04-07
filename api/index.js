@@ -594,7 +594,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                           _commit(client, callback);
                         }
                       });  
-                    } else if (data.type == "Payment" && 
+                    } else if (data.type == "Payment" && data.status == "Pending" && 
                       (source.status == "Active" || source.status == "Admin") && 
                       (destination.status == "Active" || destination.status == "Admin")) {
                       client.query("UPDATE transactions SET status = 'Complete' WHERE uuid = $1", [unique_id], function(err) {
