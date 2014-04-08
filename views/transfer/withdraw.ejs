@@ -11,10 +11,11 @@
   <div style="clear: both; margin: 0px; height: 0px">&nbsp;</div>
   <br>
   <p>
-    <input id="withdraw-submit" disabled=true type="submit" class="btn btn-lg btn-success" role="button" name="submit-button" value="Submit"></input>
+    <button type="submit" id="withdraw-submit" disabled=true class="btn btn-lg btn-success ladda-button" data-style="zoom-in" role="button" name="submit-button"><span class="ladda-label">Submit</span></input>
   </p>
 </form>
 <script>
+    var l = Ladda.create(document.querySelector('.ladda-button'));
     var validateAddress = function(addr){
         $.ajax({
             url: '/api/validateAddress?addr=' + addr, 
@@ -22,18 +23,22 @@
             success: function(response, textStatus, jqXHR){
                 if (response == "ok"){
                     console.log("ok")
+                    l.stop();
                     $("#withdraw-submit").prop('disabled', false);
                 }
                 else{
                     console.log("not ok");
+                    l.stop();
+                    $("#withdraw-submit").prop('disabled', true);
                 }
             },
             error: function(jqXHR, textStatus, errorThrown){
                 console.log("err");
-            }
+            },
         });
     }
     $("#btc_address").keyup(function(e){
+        l.start();
         $("#withdraw-submit").prop('disabled', true);
         validateAddress($("#btc_address").val());
     });
