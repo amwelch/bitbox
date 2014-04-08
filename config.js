@@ -41,9 +41,9 @@ module.exports = function(environment) {
 
     rObject.app = {
       protocol: 'http',
-      hostname: '54.200.103.29',
+      hostname: '54.243.54.43',
       ip: '127.0.0.1',
-      internal_ip: '172.31.9.227',
+      internal_ip: '10.209.134.189',
       port: '443',
     };
 
