@@ -673,4 +673,19 @@ exports.validateAddress = function(req, res){
         res.end();
     });
 }
+exports.redeem = function(req, res){
+  if (req.user.valid) {
+    render(req, res, {
+      base: 'transfer',
+      view: 'redeem',
+      title: 'redeem',
+      name: req.user.nickname,
+      balance: req.user.balance,
+      authenticated: true
+    });
+  }
+  else{
+    require_login(res);
+  }
+}
 
