@@ -16,6 +16,7 @@
     <meta content="utf-8" http-equiv="encoding">
     <title>BitBox - <%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/bootstrap/carousel.css' />
     <link rel='stylesheet' href='/stylesheets/toggle-switch.css' />
     <link rel='stylesheet' href='/bootstrap/bootstrap-dialog.min.css' />
     <link rel='stylesheet' href='/ladda/ladda-themeless.min.css' />
@@ -76,28 +77,6 @@
     </div>
     <div id="main" style="display: none">
     <% if (base == 'index') { %>
-      <% if (view == 'index') { %>
-        <div class="jumbotron">
-          <h1>Bitcoin. Gone social.</h1>
-          <p class="lead">Welcome to BitBox, a revolutionary peer-to-peer payment platform.</p>
-          <p><a class="btn btn-lg btn-success" href="/liftoff/login/facebook" role="button">Request Early Access</a></p>
-        </div>
-      <% } else if (view == 'lobby') { %>
-        <div class="jumbotron">
-          <h1>We'll be in touch.</h1>
-          <p class="lead">Thank you for your interest in BitBox.</p>
-          <div>
-            <label for="fb-user">Got Friends?</label><br>
-            <div id="wrapapa">
-              <input type="text" id="fb-user" style="width: 20em; padding: 10px" autocomplete="off" placeholder="friend name"/>
-            </div>
-          </div>
-          <input type="hidden" name="facebook_id" id="friend_fbid" value="" />
-          <div style="clear: both;">
-          </div>
-          <%- include lobby/autocomplete.ejs %>
-        </div>
-      <% } %>
       <%- include liftoff/index.ejs %>
     <% } else if (base == 'transfer') { %>      
       <%- include transfer/index.ejs %>
