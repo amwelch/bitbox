@@ -163,6 +163,7 @@ app.get('/transfer/track/:id', routes.viewTransferSingle);
 app.get('/transfer/track', routes.viewTransferList);
 app.get('/transfer/deposit', routes.viewDeposit);
 app.get('/transfer/withdraw', routes.viewWithdraw);
+app.get('/transfer/redeem', routes.redeem);
 
 app.post('/transfer/pay', routes.controlPay);
 app.post('/transfer/track/:id', routes.controlTransferSingle);
