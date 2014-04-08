@@ -33,11 +33,7 @@
             }
         });
     }
-    //$("#btc_address").on('change', function(e){
-    //    $("#withdraw-submit").prop('disabled', true);
-    //    validateAddress($("#btc_address").val());
-    //});
-    $("#btc_address").keypress(function(e){
+    $("#btc_address").keyup(function(e){
         $("#withdraw-submit").prop('disabled', true);
         validateAddress($("#btc_address").val());
     });
