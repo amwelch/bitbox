@@ -695,8 +695,11 @@ exports.controlRedeem = function(req, res){
   if (req.user.valid){
     if (!req.user.redeemedCode){
       if (req.params.code == cfg.code){
-        //Redeem in 
-        api.redeem(req.user.id);
+        data = {
+          id: req.user.id,
+          balance: req.user.balance
+        };
+        api.redeem(data);
         res.redirect('/transfer/redeem?success=true');
       }
     }  

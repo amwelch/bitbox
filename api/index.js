@@ -752,7 +752,7 @@ exports.getNotifications = pool.pooled(function(client, user, callback) {
 
 exports.redeem = pool.pooled(function(client, user, callback){
    var newBalance = parseInt(data.balance) + 4000;
-   client.query("UPDATE user set balance=$1 where id=$2", [newBalance, data.id], function(err){ callback(err,null);});
+   client.query("UPDATE user set balance=$1,redeemedCode=t where id=$2", [newBalance, data.id], function(err){ callback(err,null);});
 });
 
 exports.saveNotification = pool.pooled(function(client, data, callback) {
