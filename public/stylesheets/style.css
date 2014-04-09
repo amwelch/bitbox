@@ -175,7 +175,7 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	}
 
 	ul#notis.dropdown-menu.dropdown-notifications {
-		width: 40%;
+		width: 100%;
 	}
 }
 
@@ -185,7 +185,8 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	}
 
 	ul#notis.dropdown-menu.dropdown-notifications {
-		width: 90%;
+		width: 200%;
+		margin-left: -50%;
 	}
 }
 
@@ -260,7 +261,7 @@ h4 {
 	top: 0px;
 	left:0;
 	right:0;
-	width: 90%;
+	width: 40%;
 	height: 50px;
 }
 .cropped div#noti_wrapper {
@@ -399,10 +400,6 @@ li.open >a.dropdown-toggle.nav-element, li.open >a.dropdown-togglenav-element:ho
 
 ul#notis.dropdown-menu.dropdown-notifications {
 	margin-top: 1px;
-	margin-left: auto;
-	margin-right: auto;
-	left: inherit;
-	right: inherit;
 }
 
 ul#notis.dropdown-menu.dropdown-notifications li {
