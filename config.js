@@ -41,7 +41,7 @@ module.exports = function(environment) {
 
     rObject.app = {
       protocol: 'https',
-      hostname: '54.243.54.43',
+      hostname: 'bit-box.org',
       ip: '127.0.0.1',
       internal_ip: '10.209.134.189',
       port: '443',
