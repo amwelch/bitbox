@@ -110,13 +110,30 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
     position:relative;     /* This is crucial for the absolutely positioned element */
     /*border:1px solid blue; /* This is just to show you where the container ends */
     width:16px;
-    height:16px;
+    height:20px;
 }
+
 .noti_bubble {
+    position:absolute;    /* This breaks the div from the normal HTML document. */
+    right: 10px;
+    top: 20px;
+    padding:2px 2px 2px 2px;
+    background-color:transparent; /* you could use a background image if you'd like as well */
+    color:wheat;
+    font-weight:bold;
+    font-size:0.75em;
+    line-height: 0.95em;
+    font-family: Ubuntu;
+    text-align: left;
+    margin-right: -10em;
+    width: 10em;
+}
+
+.noti_bubble_hidden {
     position:absolute;    /* This breaks the div from the normal HTML document. */
     top: -6px;
     right:-3px;
-    padding:2px 2px 2px 2px;
+    padding:0px 2px 0px 2px;
     background-color:red; /* you could use a background image if you'd like as well */
     color:white;
     font-weight:bold;
@@ -134,11 +151,15 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
 
 .dropdown-notifications {	
 	color: black;
-	padding:0px 3px;
+	padding:0px 0px;
 }
 
 .notifications {
 	text-align: center;
+}
+
+.dropdown-notifications a:hover {
+	background-color: white;
 }
 
 body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > a:active {
@@ -152,11 +173,20 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	body .mobile {
 		display: none;
 	}
+
+	ul#notis.dropdown-menu.dropdown-notifications {
+		width: 100%;
+	}
 }
 
 @media (max-width: 767px) {
 	.navbar-nav .open .dropdown-menu>li>a {
 		color: wheat;
+	}
+
+	ul#notis.dropdown-menu.dropdown-notifications {
+		width: 200%;
+		margin-left: -50%;
 	}
 }
 
@@ -196,39 +226,52 @@ h4 {
 	-webkit-border-radius: 15px;
 	-moz-border-radius: 15px;
 	border-radius: 15px;
-	position: absolute;
     margin-left: auto;
     margin-right: auto;
     width: 20px;
     height: 20px;
-    top: 15px;
     left: 0;
     right: 0;
     bottom: 0;
 }
 
-.affix .navbar-header div.glow {
+.cropped div#noti_wrapper div.glow {
 	display: block;
+	position: absolute;
+	top: 15px;
 }
 	
-.affix-top .navbar-header div.glow {
+.cropped.open div#noti_wrapper div.glow {
 	display: none;
 }
-.navbar-header img {
-	height: 40px;
-	float: left;
-	cursor: pointer;
-}
-.cropped {
-    position: absolute;
-    margin-left: auto;
-    margin-right: auto;
-    top: 5px;
-    left: 0;
-    right: 0;
-    bottom: 0;
+
+.cropped.open div#noti_wrapper #noti_bubble {
+	display: none;
 }
 
+.navbar-header img {
+	height: 40px;
+	cursor: pointer;
+	position: relative;
+}
+.cropped {
+	position: absolute;
+	margin-left: auto;
+	margin-right: auto;
+	top: 0px;
+	left:0;
+	right:0;
+	width: 40%;
+	height: 50px;
+}
+.cropped div#noti_wrapper {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    width:60px;
+    text-align: center;
+    padding-top: 5px;
+}
 
 a {
 	color: #542b14;
@@ -343,4 +386,26 @@ tr.linked:hover > td {
 
 input.invalid-input {
 	border: 2px solid red;
+}
+
+.dropdown.nav-element img {
+	height: 1.6em;
+	width: 1.6em;
+	margin-right: 5px;
+}
+
+li.open >a.dropdown-toggle.nav-element, li.open >a.dropdown-togglenav-element:hover, li.open >a.dropdown-toggle.nav-element:focus {
+	background-color: #783919;
+}
+
+ul#notis.dropdown-menu.dropdown-notifications {
+	margin-top: 1px;
+}
+
+ul#notis.dropdown-menu.dropdown-notifications li {
+	overflow: hidden;
+}
+
+ul.dropdown-menu {
+	min-width: inherit;
 }

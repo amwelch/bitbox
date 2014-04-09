@@ -129,6 +129,10 @@ exports.controlTransferSingle = function(req, res) {
   res.redirect('/transfer/track');
 };
 
+exports.controlRedeem = function(req, res) {
+  // TODO: what goes here??
+}
+
 exports.viewTransferSingle = function(req, res) {
   var transaction_uuid = req.params.id;
   console.log("HERE");
@@ -140,8 +144,7 @@ exports.viewTransferSingle = function(req, res) {
       if (err) {
         console.log("Unable find txn");
         res.redirect("/");
-      } else {
-        // TODO: mark the txn as seen here!
+      } else {        
         render(req, res, {
           base: 'transfer',
           view: 'track',
