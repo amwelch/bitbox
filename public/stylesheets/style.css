@@ -110,13 +110,28 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
     position:relative;     /* This is crucial for the absolutely positioned element */
     /*border:1px solid blue; /* This is just to show you where the container ends */
     width:16px;
-    height:16px;
+    height:20px;
 }
+
 .noti_bubble {
     position:absolute;    /* This breaks the div from the normal HTML document. */
     top: -6px;
     right:-3px;
     padding:2px 2px 2px 2px;
+    background-color:red; /* you could use a background image if you'd like as well */
+    color:white;
+    font-weight:bold;
+    font-size:0.75em;
+    line-height: 0.95em;
+    font-family: Ubuntu;
+    text-align: center;
+}
+
+.noti_bubble_hidden {
+    position:absolute;    /* This breaks the div from the normal HTML document. */
+    top: -6px;
+    right:-3px;
+    padding:0px 2px 0px 2px;
     background-color:red; /* you could use a background image if you'd like as well */
     color:white;
     font-weight:bold;
@@ -134,11 +149,15 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
 
 .dropdown-notifications {	
 	color: black;
-	padding:0px 3px;
+	padding:0px 0px;
 }
 
 .notifications {
 	text-align: center;
+}
+
+.dropdown-notifications a:hover {
+	background-color: white;
 }
 
 body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > a:active {

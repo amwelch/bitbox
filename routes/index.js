@@ -144,8 +144,7 @@ exports.viewTransferSingle = function(req, res) {
       if (err) {
         console.log("Unable find txn");
         res.redirect("/");
-      } else {
-        // TODO: mark the txn as seen here!
+      } else {        
         render(req, res, {
           base: 'transfer',
           view: 'track',

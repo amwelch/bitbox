@@ -22,8 +22,10 @@ function insert_notification(notifications_el, data) {
 	link.href = url;
 	link.innerHTML = data.msg;
 
-	if(!data.seen)
+	if(!data.seen) {
 		count++;
+		// item.className = 
+	}
 
 	item.appendChild(link);
 
@@ -31,24 +33,35 @@ function insert_notification(notifications_el, data) {
 	notifications_el.insertBefore(item, notifications_el.firstChild);
 };
 
+function update_bubble() {
+	var bubble = document.getElementById("noti_bubble");
+	if(count) {
+		bubble.innerHTML = count;
+		bubble.className = "noti_bubble";
+	}
+}
+
+function insert_last_option() {
+
+}
+
 socket.on('notification', function(data) {
 	console.log("Inside Notification");
 	// document.getElementById("notification_icon").className = "glyphicon glyphicon-asterisk red";
-	var bubble = document.getElementById("noti_bubble");
 	insert_notification(document.getElementById("notis"), data);
-	bubble.innerHTML = count;
+	update_bubble();
 
 });
 
 socket.on('old_notifications', function(data) {
 	var notifications = document.getElementById("notis");
-	console.log(data.notis);
+	console.log(notifications);
 	if(data.notis.length) {		
 		for (var i = data.notis.length - 1; i >= 0; i--) {
 			insert_notification(notifications, data.notis[i]);
 		};
 
-		document.getElementById("noti_bubble").innerHTML = count;		
+		update_bubble();
 
 		var item = document.createElement('li');
 		item.className += "notifications"
