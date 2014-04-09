@@ -129,6 +129,10 @@ exports.controlTransferSingle = function(req, res) {
   res.redirect('/transfer/track');
 };
 
+exports.controlRedeem = function(req, res) {
+  // TODO: what goes here??
+}
+
 exports.viewTransferSingle = function(req, res) {
   var transaction_uuid = req.params.id;
   console.log("HERE");

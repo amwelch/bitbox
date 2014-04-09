@@ -92,7 +92,7 @@ console.log("USING");
 console.log();
 
 var callbackURL = "";
-if (ENVIRONMENT = 'prod'){
+if (ENVIRONMENT == 'prod'){
   callbackURL = sprintf('%s://%s/liftoff/login/facebook/callback', cfg.app.protocol, cfg.app.hostname);
 } else{
   callbackURL = sprintf('%s://%s:%s/liftoff/login/facebook/callback', cfg.app.protocol, cfg.app.hostname, cfg.app.port);
@@ -216,7 +216,7 @@ var ip = process.env.IP || cfg.app.internal_ip;
 
 
 
-if (ENVIRONMENT = 'prod'){
+if (ENVIRONMENT == 'prod'){
   function requireHTTPS(req, res, next) {
     if (!req.secure){
         return res.redirect('https://' + req.get('host') + req.url);
