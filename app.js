@@ -88,11 +88,21 @@ passport.deserializeUser(function(serialized_user, done) {
   done(null, JSON.parse(serialized_user));
 });
 
+console.log("USING");
+console.log();
+
+var callbackURL = "";
+if (ENVIRONMENT = 'prod'){
+  callbackURL = sprintf('%s://%s/liftoff/login/facebook/callback', cfg.app.protocol, cfg.app.hostname);
+} else{
+  callbackURL = sprintf('%s://%s:%s/liftoff/login/facebook/callback', cfg.app.protocol, cfg.app.hostname, cfg.app.port);
+}
+
 passport.use( 
   new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID || cfg.fb.app_id,
     clientSecret: process.env.FACEBOOK_SECRET || cfg.fb.app_secret,
-    callbackURL: sprintf('%s://%s:%s/liftoff/login/facebook/callback', cfg.app.protocol, cfg.app.hostname, cfg.app.port),
+    callbackURL: callbackURL,
     passReqToCallback: true,
   },
   function(req, accessToken, refreshToken, profile, done) {
@@ -164,6 +174,7 @@ app.get('/transfer/track', routes.viewTransferList);
 app.get('/transfer/deposit', routes.viewDeposit);
 app.get('/transfer/withdraw', routes.viewWithdraw);
 app.get('/transfer/redeem', routes.redeem);
+app.post('/transfer/redeem', routes.controlRedeem);
 
 app.post('/transfer/pay', routes.controlPay);
 app.post('/transfer/track/:id', routes.controlTransferSingle);
@@ -202,34 +213,35 @@ app.get('/', routes.index);
 
 var port = process.env.PORT || cfg.app.port;
 var ip = process.env.IP || cfg.app.internal_ip;
-/*
-https
 
-function requireHTTPS(req, res, next) {
+
+
+if (ENVIRONMENT = 'prod'){
+  function requireHTTPS(req, res, next) {
     if (!req.secure){
         return res.redirect('https://' + req.get('host') + req.url);
     }
     next();
-
+  }
+  app.use(requireHTTPS);
+  var options = {
+    key: fs.readFileSync('/ssl/ssl.key'),
+    cert: fs.readFileSync('/ssl/2b3af6623f609d.crt')
+  };
+  https.createServer(options, app).listen(port, ip, function(){
+    console.log('Production BitBox server listening on port ' + port);
+  });
 }
-app.use(requireHTTPS);
+else{
+  var httpServer = http.createServer(app);
+  httpServer.listen(port, ip, function() {
+    console.log('BitBox server listening on port ' + port);
+  });
+}
 
-var options = {
-    key: fs.readFileSync('/keykeeper.pem'),
-    cert: fs.readFileSync('/bbcsr.pem')
-};
-https.createServer(options, app).listen(443);
-*/
-
-var httpServer = http.createServer(app);
-
-httpServer.listen(port, ip, function() {
-  console.log('BitBox server listening on port ' + port);
-});
 
 //  ------- Sockets Configuration -------
 // Sockets used for notifications
 // TODO: we need to use https for the sockets as well
 var io = require('socket.io').listen(httpServer);
-
 io.sockets.on('connection', sio.socket_connection);
