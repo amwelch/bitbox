@@ -40,7 +40,7 @@ module.exports = function(environment) {
     var hidden = require('./routes/cfg.js');
 
     rObject.app = {
-      protocol: 'http',
+      protocol: 'https',
       hostname: '54.243.54.43',
       ip: '127.0.0.1',
       internal_ip: '10.209.134.189',
