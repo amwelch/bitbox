@@ -1,14 +1,23 @@
-<div class="container">
-  <h1> Instructions </h1>
-  <div class="container">
-    <p>
-      Hello! Welcome to bitbox! This section explains how to automatically deposit BTC into bitbox. The following address and corresponding QR code are tied to your account and your account only. Simply deposit any balance into this address at any time and your transaction should appear as pending within 10-15 minutes. We wait for 6 confirmations before validating the balance so around an hour after the balance first appeared as pending it should complete and you are free to send BTC!
-    </p>
-  </div>
-  <h1> Deposit Information </h1>
-  <div class="container">
-    <h3>   Address:  <%= address %></h2> 
-    <h3>   QR Code: </h2>
-    <img src="http://chart.apis.google.com/chart?cht=qr&chld=Q%7C2&chs=200&chl=<%=address%>" />
-  </div>
+<script >
+    function selectText(containerid) {
+      console.log("called");
+        if (document.selection) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(document.getElementById(containerid));
+            range.select();
+        } else if (window.getSelection) {
+            var range = document.createRange();
+            range.selectNode(document.getElementById(containerid));
+            window.getSelection().addRange(range);
+        }
+    }
+</script>
+<div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px;">
+  <img src="http://chart.apis.google.com/chart?cht=qr&chld=Q%7C2&chs=200&chl=<%=address%>" />
+</div>
+<div style="inlne-block; float: left; padding-right: 0px; padding-bottom: 10px; margin-right: 10px; width: 50%; min-width: 320px">
+  <label for="">Instructions</label><br>
+  <p style="text-align: justify;">The following Bitcoin address is tied to your account. Any Bitcoin you send to this address will be credited to your account after 6 network confimations.</p>
+  <label>Address</label><br>
+  <div id="btc_address" onclick="selectText('btc_address');"><%= address %></div>
 </div>
