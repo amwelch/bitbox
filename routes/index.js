@@ -688,4 +688,13 @@ exports.redeem = function(req, res){
     require_login(res);
   }
 }
+exports.controlRedeem = function(req, res){
+  if (req.user.valid){
+    
+
+  }
+  else{
+    require_login(res);
+  }
+}
 
