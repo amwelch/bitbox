@@ -1,7 +1,12 @@
 
 console.log("Initializing Socket");
-var socketAddr = 'https://www.bit-box.org:443'
-var socket = io.connect(socketAddr, {'flash policy port':443});
+var socket;
+if (document.domain == "localhost") {
+	socket = io.connect('http://localhost');
+} else {
+	var socketAddr = 'https://www.bit-box.org:443';
+	socket = io.connect(socketAddr, {'flash policy port':443});
+}
 	
 startSocketConnection();
 
