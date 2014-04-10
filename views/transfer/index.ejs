@@ -20,16 +20,21 @@
   <hr id="action" class="mobile" style="padding-top: 50px;">
   <h2 id="track-balance" style="text-align: left">Balance: <span class="currency"><%= balance %></span> <span class="denomination">Satoshi</span></h2>
   <br>
+  <% if (success === false) { %>  
+    <div class="alert alert-danger"><strong>Sorry!</strong> Your request could not be completed.</div>
+  <% } else if (success === true) { %>  
+    <div class="alert alert-success"><strong>Success!</strong> Your request completed!</div>
+  <% } %>  
     <% if (view == 'pay') { %>
-      <%- include pay.ejs %>
+      <% include pay.ejs %>
     <% } else if (view == 'track') { %>
-      <%- include track/index.ejs %>
+      <% include track/index.ejs %>
     <% } else if (view == 'withdraw') { %>
-      <%- include withdraw.ejs %>
+      <% include withdraw.ejs %>
     <% } else if (view =='redeem') { %>
-      <%- include redeem.ejs %>
+      <% include redeem.ejs %>
     <% } else if (view == 'deposit') { %>
-      <%- include deposit.ejs %>
+      <% include deposit.ejs %>
     <% } %> 
     </div>
   </div>

@@ -148,6 +148,18 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
     /*border-radius: 10px 10px 10px 10px;*/
     /*box-shadow:1px 1px 1px 1px wheat;*/
 }
+/*
+#myCarousel {
+	height: 90%;
+}
+#main {
+	height: 100%;
+	position: absolute;
+	width: 100%;
+}
+.carousel-inner {
+	height: 100%;
+}*/
 
 .dropdown-notifications {	
 	color: black;
