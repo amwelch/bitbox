@@ -39,8 +39,14 @@
     }
     $("#btc_address").keyup(function(e){
         l.start();
+        var addrText = $("#btc_address").val();
+        if (addrText == ""){
+            l.stop();
+            $("#withdraw-submit").prop('disabled', true);
+            return;
+        }
         $("#withdraw-submit").prop('disabled', true);
-        validateAddress($("#btc_address").val());
+        validateAddress(addrText);
     });
     $("#withdraw-form").submit(function(e){
         e.preventDefault();

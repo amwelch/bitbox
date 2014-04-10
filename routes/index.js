@@ -691,4 +691,22 @@ exports.redeem = function(req, res){
     require_login(res);
   }
 }
+exports.controlRedeem = function(req, res){
+  if (req.user.valid){
+    if (!req.user.redeemedCode){
+      if (req.params.code == cfg.code){
+        data = {
+          id: req.user.id,
+          balance: req.user.balance
+        };
+        api.redeem(data);
+        res.redirect('/transfer/redeem?success=true');
+      }
+    }  
+    res.redirect('/transfer/redeem?success=false');
+  }
+  else{
+    require_login(res);
+  }
+}
 

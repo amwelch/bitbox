@@ -228,20 +228,28 @@ if (ENVIRONMENT == 'prod'){
     key: fs.readFileSync('/ssl/ssl.key'),
     cert: fs.readFileSync('/ssl/2b3af6623f609d.crt')
   };
-  https.createServer(options, app).listen(port, ip, function(){
+  var httpsServer = https.createServer(options, app);
+  httpsServer.listen(port, ip, function(){
     console.log('Production BitBox server listening on port ' + port);
   });
+  io = require('socket.io').listen(httpsServer);
 }
 else{
   var httpServer = http.createServer(app);
   httpServer.listen(port, ip, function() {
     console.log('BitBox server listening on port ' + port);
   });
+
+  io = require('socket.io').listen(httpServer);
 }
 
 
-//  ------- Sockets Configuration -------
+ //  ------- Sockets Configuration -------
 // Sockets used for notifications
-// TODO: we need to use https for the sockets as well
-var io = require('socket.io').listen(httpServer);
+io.enable('browser client minification');  // send minified client
+io.enable('browser client etag');          // apply etag caching logic based on version number
+io.enable('browser client gzip');          // gzip the file
+io.set('log level', 1);                              // reduce logging
+io.set('flash policy port', port);       //override policy port  
+
 io.sockets.on('connection', sio.socket_connection);
