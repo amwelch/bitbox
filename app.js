@@ -180,8 +180,8 @@ app.get('/liftoff/login/facebook/callback',
 app.get('/logout', routes.logout);
 
 app.get('/transfer/pay', routes.viewPay);
+app.get('/transfer/notifications', routes.viewNotificationsList);
 app.get('/transfer/track/:id', routes.viewTransferSingle);
-app.get('/transfer/track/notifications', routes.viewNotificationsList);
 app.get('/transfer/track', routes.viewTransferList);
 app.get('/transfer/deposit', routes.viewDeposit);
 app.get('/transfer/withdraw', routes.viewWithdraw);
@@ -190,8 +190,8 @@ app.post('/transfer/redeem', routes.controlRedeem);
 
 
 app.post('/transfer/pay', routes.controlPay);
-app.post('/transfer/track/:id', routes.controlTransferSingle);
 app.post('/transfer/track/notifications', postLater);
+app.post('/transfer/track/:id', routes.controlTransferSingle);
 app.post('/transfer/track', postLater);
 app.post('/transfer/deposit', routes.controlDeposit);
 app.post('/transfer/withdraw', routes.controlWithdraw);

@@ -159,10 +159,10 @@
             var total = (conversion*bits*satoshi_to_btc*parseFloat(btc_to_usd)).toFixed(2);
             outStr = total;
         }
-        else if (currency == "satoshi"){
-            console.log("Converting to Satoshi");
-            outStr = bits;
-        }
+//        else if (currency == "satoshi"){
+//            console.log("Converting to Satoshi");
+//            outStr = bits;
+//        }
         else {
             console.log("Defaulting to BTC");
             outStr = (bits*satoshi_to_btc).toFixed(8);
