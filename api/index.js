@@ -653,7 +653,7 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
           client.query("SELECT transaction_logs.generated, transaction_logs.status "+
             "FROM transaction_logs, transactions "+
             "WHERE transactions.uuid=$1 AND transactions.id=transaction_logs.transaction_id "+
-            "ORDER BY transaction_logs.id ASC", [data.transaction_uuid], function(err, result) {
+            "ORDER BY transaction_logs.id DESC", [data.transaction_uuid], function(err, result) {
               if (err) {
                 callback(err, null);
               } else {

@@ -84,7 +84,7 @@ socket.on('old_notifications', function(data) {
 	item.className += "notifications"
 
 	var link = document.createElement('a');
-	var url = '/transfer/track/notifications';
+	var url = '/transfer/notifications';
 	link.href = url;
 	link.innerHTML = "See All";
 	item.appendChild(link);
