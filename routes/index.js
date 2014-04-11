@@ -301,9 +301,6 @@ exports.controlPay = function(req, res) {
           if (err) {
             res.redirect('/transfer/pay?success=false');
           } else {
-            //TODO ALLOW THE USER TO TURN OFF POSTING TO WALL
-            //Need to submit app for review before we can tag peopl
-            //var user_string = "@["+req.body.pay.facebook_id+":1:"+nickname+"]";
             var user_string = nickname;
             console.log("Using: " + user_string);
             var btc_total = Number((req.body.pay.amount*0.00000001).toFixed(4));
@@ -313,7 +310,18 @@ exports.controlPay = function(req, res) {
                 }
                 else{
                     var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
-                    message = "I just " + type + " " + req.body.pay.amount +" satoshi ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
+                    var btc = Number(btc_total).toFixed(8);
+                    var verb = type;
+                    if (verb == "asked"){
+                      verb = "requested"
+                    }
+                    message = "I just " + verb + " " + btc +" BTC ($"+usd+") to " + user_string + " via bitbox."
+                    var tail = "\nMessage:\t" + req.body.pay.memo;
+
+                    if (req.body.pay.memo != ""){
+                      message = message + tail;
+                    }
+
                     api.facebookPost(req.session.accessToken, message, req.user.id);
 
                     // Send notification using sockets
@@ -740,6 +748,7 @@ exports.controlRedeem = function(req, res){
               return;
             }
         });
+        return;
       }
       else{
         console.log("Incorrect Code");  
