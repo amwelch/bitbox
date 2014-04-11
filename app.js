@@ -162,7 +162,7 @@ app.get('/liftoff/login/facebook', function(req, res, next){
         }
     }   
     passport.authenticate('facebook', { 
-      scope: ['email'],
+      scope: scope,
       display: 'popup',
       authType: 'reauthenticate'
     })(req, res, next);
