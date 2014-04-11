@@ -29,7 +29,7 @@
     <script src="/ladda/spin.min.js"></script>
     <script src="/ladda/ladda.min.js"></script>
     <% if (authenticated) { %>
-        <%- include generic/in/scripts.ejs %>
+        <% include generic/in/scripts.ejs %>
     <% } %>
     <link rel="stylesheet" href="/fb-autocomplete/facebook-friend-autocomplete.css">
     <meta charset="utf-8">
@@ -76,9 +76,9 @@
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
             <% if (authenticated) { %>
-              <%- include generic/in/header.ejs %>
+              <% include generic/in/header.ejs %>
             <% } else { %>
-              <%- include generic/out/header.ejs %>
+              <% include generic/out/header.ejs %>
             <% } %>
           </ul>
         </div>
@@ -86,18 +86,18 @@
     </div>
     <div id="main" style="display: none">
     <% if (base == 'index') { %>
-      <%- include liftoff/index.ejs %>
+      <% include liftoff/index.ejs %>
     <% } else if (base == 'transfer') { %>      
-      <%- include transfer/index.ejs %>
+      <% include transfer/index.ejs %>
     <% } else if (base == 'beta') { %>
-      <%- include beta/signUp.ejs %>
+      <% include beta/signUp.ejs %>
     <% } else if (base == 'accounts') { %>      
-      <%- include accounts/index.ejs %>
+      <% include accounts/index.ejs %>
     <% } %> 
     </div>   
     <script>$("#BitBox").click(function() {$("body").scrollTop(0);});</script>
     <% if (authenticated) { %>
-      <%- include generic/in/nav-scripts.ejs %>
+      <% include generic/in/nav-scripts.ejs %>
       <!--%- include generic/in/notification-scripts.ejs %-->
       <script src='/javascripts/connect.js'></script>
     <% } %>

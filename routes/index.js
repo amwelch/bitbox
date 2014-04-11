@@ -188,6 +188,31 @@ exports.viewTransferList = function(req, res) {
   }
 };
 
+exports.viewNotificationsList = function(req, res) {
+  console.log("||||||||||||||||||GETTING Notifications");
+  if (req.user.valid) {
+    api.getNotifications({id: req.user.id}, function(err, notifications) {
+      if (err) {
+        console.log(err);
+        res.redirect("/");
+      } else {
+        console.log(notifications);
+        render(req, res, {
+          base: 'transfer',
+          view: 'notifications',
+          authenticated: true,
+          title: 'Notifications',
+          balance: req.user.balance,
+          name: req.user.nickname,
+          history: notifications
+        });
+      }
+    });
+  } else {
+    require_login(res);
+  }
+};
+
 exports.viewDeposit = function(req, res) {
   if (req.user.valid) {
     render(req, res, {
