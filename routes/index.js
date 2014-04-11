@@ -469,7 +469,7 @@ exports.controlWithdraw = function(req, res) {
 
   //Add in miner tax
   console.log("Before Tax " + req.body.withdraw.amount);
-  var amount = parseInt(req.body.withdraw.amount) + 50000;
+  var amount = parseInt(req.body.withdraw.amount) + 1000;
 
   console.log("Withdrawing " + amount);
 
@@ -727,11 +727,7 @@ exports.controlRedeem = function(req, res){
   if (req.user.valid){
     console.log(req.user);
     if (req.user.redeemedCode == false){
-      console.log("COMPARE@@@@@");
-      console.log(req.body.redeem);
-      console.log(cfg.code);
       if (req.body.redeem == cfg.code){
-        console.log("Correct Code");
         data = {
           id: req.user.id,
           balance: req.user.balance

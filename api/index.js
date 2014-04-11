@@ -85,6 +85,7 @@ _rollback = function(client, error_code, callback) {
 };
 
 exports.facebookPost = function(accessToken,body,uid ){
+   console.log("Got access " + accessToken);
    fb.setAccessToken(accessToken);
    exports.getUser({id:uid}, function(err, user) {
        if (err){
@@ -92,7 +93,7 @@ exports.facebookPost = function(accessToken,body,uid ){
        }
        else{
            console.log("Facebook permission: " + user.facebookPost);
-           if (user.facebookPost != "true"){
+           if (user.facebookPost != true){
                console.log("No Post Permission for this user");
            }
            else{
@@ -587,7 +588,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
                     //  TODO: move these blocks to their respective callbacks 
-                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev'){
+                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev' && source.status == "admin" ){
                       exports.withdrawBlockChain(data.address, data.amount, function(err){
                         if (err){
                           _rollback(client, ec.TRANSFER_ERR, callback);
