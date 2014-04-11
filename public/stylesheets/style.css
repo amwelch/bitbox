@@ -161,17 +161,48 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
 	height: 100%;
 }*/
 
+#notis > li > a:hover {
+	background: rgb(197, 197, 197);
+}
+
+#notis > li > a {
+	padding: 8px 20px;
+}
+
+#notis li {
+	background: rgb(160, 158, 158);
+}
+
+.seen {
+	background: #ddd !important;
+}
+
+#no_new {
+padding: 10px;
+background: #ddd !important;
+}
+
+#notis > li.divider {
+	margin: 0px 0px;
+	background-color: #e5e5e5;
+}
+
+#notis {
+	padding: 0px 0px;
+}
+
 .dropdown-notifications {	
 	color: black;
 	padding:0px 0px;
 }
 
 .notifications {
+	background: rgb(197, 197, 197) !important;
 	text-align: center;
 }
 
-.dropdown-notifications a:hover {
-	background-color: white;
+#notis > li.notifications > a {
+	padding: 3px 20px;
 }
 
 body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > a:active {
