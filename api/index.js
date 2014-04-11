@@ -588,7 +588,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
                     //  TODO: move these blocks to their respective callbacks 
-                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev' && source.status == "admin" ){
+                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev' && source.status == "Admin" ){
                       exports.withdrawBlockChain(data.address, data.amount, function(err){
                         if (err){
                           _rollback(client, ec.TRANSFER_ERR, callback);
