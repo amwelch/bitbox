@@ -377,7 +377,8 @@ exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
         deposit_address: row.deposit_address,
         secret: row.secret,
         facebookPost: row.facebookpost,
-        balance: row.balance
+        balance: row.balance,
+        redeemedCode: row.redeemedcode
       };
       callback(null, user);
     }
@@ -751,8 +752,12 @@ exports.getNotifications = pool.pooled(function(client, user, callback) {
 });
 
 exports.redeem = pool.pooled(function(client, user, callback){
-   var newBalance = parseInt(data.balance) + 4000;
-   client.query("UPDATE user set balance=$1,redeemedCode=t where id=$2", [newBalance, data.id], function(err){ callback(err,null);});
+   console.log("HERE?");
+   var newBalance = parseInt(data.balance) + 80000;
+   console.log("UPDATING USER SETTING BALANCE " + newBalance + " with id " + data.id);
+   client.query("UPDATE users set balance=$1,redeemedCode='true' where id=$2", [newBalance, data.id], function(err){ 
+     callback(err,null);
+   });
 });
 
 exports.saveNotification = pool.pooled(function(client, data, callback) {

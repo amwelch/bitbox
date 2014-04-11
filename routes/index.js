@@ -4,6 +4,7 @@ var https = require('https');
 var api = require('../api/');
 var sio = require('./socket');
 var uuid = require('node-uuid');
+var cfg = require('./cfg.js');
 
 function require_login(res) {
   res.redirect('/liftoff/login');
@@ -128,10 +129,6 @@ exports.controlTransferSingle = function(req, res) {
   console.log(req.params.id);
   res.redirect('/transfer/track');
 };
-
-exports.controlRedeem = function(req, res) {
-  // TODO: what goes here??
-}
 
 exports.viewTransferSingle = function(req, res) {
   var transaction_uuid = req.params.id;
@@ -693,17 +690,40 @@ exports.redeem = function(req, res){
 }
 exports.controlRedeem = function(req, res){
   if (req.user.valid){
-    if (!req.user.redeemedCode){
-      if (req.params.code == cfg.code){
+    console.log(req.user);
+    if (req.user.redeemedCode == false){
+      console.log("COMPARE@@@@@");
+      console.log(req.body.redeem);
+      console.log(cfg.code);
+      if (req.body.redeem == cfg.code){
+        console.log("Correct Code");
         data = {
           id: req.user.id,
           balance: req.user.balance
         };
-        api.redeem(data);
+        api.redeem(data, function(err, result){
+            if(err){
+              console.log("Could not update");
+              console.log(err);
+              res.redirect('/transfer/redeem?success=false');
+              return;
+            }
+            else{
+              res.redirect('transfer/redeem?success=true');
+              return;
+            }
+        });
         res.redirect('/transfer/redeem?success=true');
+        return;
       }
-    }  
+      else{
+        console.log("Incorrect Code");  
+      }
+    }
+    console.log("Already redeemed");
+    console.log("user code " + req.user.redeemedCode);
     res.redirect('/transfer/redeem?success=false');
+    return;
   }
   else{
     require_login(res);
