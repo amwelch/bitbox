@@ -2,36 +2,36 @@
     ================================================== -->
     <div id="myCarousel" class="carousel slide" data-ride="carousel">
       <!-- Indicators -->
-      <ol class="carousel-indicators">
+      <!--ol class="carousel-indicators">
         <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
         <li data-target="#myCarousel" data-slide-to="1"></li>
         <li data-target="#myCarousel" data-slide-to="2"></li>
-      </ol>
+      </ol-->
+      <div id="callout" style="position: absolute; text-align: center; z-index: 10; width: 100%;">
+        <h1 style="margin-left: auto; margin-right: auto; display: block; margin-top: 0px;">Simple, Social Bitcoin</h1>
+        <form name="approve" action="/liftoff/login/facebook" method="GET" style="display: inline;">
+          <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Send money now"></input>
+        </form>
+      </div>
       <div class="carousel-inner">
-        <div class="item active">
-          <img src="assets/girl_computer.png">
+        <div class="item active" id="carousel-one">
           <div class="container">
             <div class="carousel-caption">
-              <h1>Easy</h1>
-              <p>Just log in with your Facebook account. We take care of the rest of the setup.</p>
+              <h2>Sending money has never been easier</h2> 
             </div>
           </div>
         </div>
-        <div class="item">
-          <img src="assets/friends_cafe_istock.png">
+        <div class="item" id="carousel-two">
           <div class="container">
             <div class="carousel-caption">
-              <h1>Social</h1>
-              <p>Your account is seamlessly tied to your Facebook profile. Send bitcoins to friends is as easy as sending a message.</p>
+              <h2>Sending money has never been faster</h2> 
             </div>
           </div>
         </div>
-        <div class="item">
-          <img src="assets/speed-of-light.png">
+        <div class="item" id="carousel-three">
           <div class="container">
             <div class="carousel-caption">
-              <h1>Fast</h1>
-              <p>Sending bitcoins to Friends is instant. Transfering to an outside wallet takes hours, not days.</p>
+              <h2>Sending money has never been more natural</h2> 
             </div>
           </div>
         </div>
@@ -49,32 +49,53 @@
     <div class="container marketing">
 
       <!-- Three columns of text below the carousel -->
-      <div class="row">
+      <div id="focii" class="row">
+        <div>
+          <img height="144" width="144" src="assets/brown-world-globe.png">
+          <h2>Global</h2>
+          <p>Send money to anyone! All you need is an internet connection, a Facebook account, and some Bitcoin. Don't have any Bitcoin yet? Don't worry. We'll give you a small amount just to prove how amazing it is! For the legal standing of Bitcoin in your country, <a href="http://en.wikipedia.org/wiki/Legality_of_Bitcoins_by_country" target="_blank">click here</a>.</p>
+          <!--p><a class="btn btn-default" href="#" role="button">View details »</a></p-->
+        </div>
+        <div>
+          <img height="144" width="144" src="assets/FB-f-Logo__blue_144.png">
+          <h2>Instant</h2>
+          <p>Send money in seconds! By connecting BitBox with your Facebook account, sending money becomes as easy as sending a Facebook message. No more wasting time with credit card numbers or email addresses. And of course, we will never post anything to you profile unless you choose to do so.</p>
+          <!--p><a class="btn btn-default" href="#" role="button">View details »</a></p-->
+       </div>
+        <div>
+          <img height="144" width="144" src="assets/Bitcoin_Logo.png">
+          <h2>Free</h2>
+          <p>Send money for free! Once upon a time, consumers were nickel and dimed every time they wanted to send money. With Bitcoin, that is no longer the case. Bitcoin is an amazing technology that enables people to create and transmit value like never before. To learn more about Bitcoin, <a href="https://en.bitcoin.it/wiki/Introduction">click here</a>.</p>
+          <!--p><a class="btn btn-default" href="#" role="button">View details »</a></p-->
+        </div>
+      </div>
+      <!--div class="row">
         <div class="col-lg-4">
-          <img  height="140" width="140" class = "img-circle" src="assets/Bitcoin.png">
-          <h2>Educational</h2>
-          <p>Through Bitbox we strive to eliminate the steep learning curve associated with bitcoin.</p>
-          <p><a class="btn btn-default" href="https://en.bitcoin.it/wiki/Introduction" target="_blank" role="button">Introduction to bitcoin &raquo;</a></p>
-        </div><!-- /.col-lg-4 -->
+          <img height="140" width="140" src="assets/FB-f-Logo__blue_144.png">
+          <h2>Simple</h2>
+          <p style="width: 30%; min-width: 320px;">Through Bitbox we strive to eliminate the steep learning curve associated with bitcoin.</p>
+        </div>
         <div class="col-lg-4">
           <img height="140" width="140" class = "img-circle" src="assets/BC_wallet_128c.png">
-          <h2>Practical</h2>
-          <p>We provide an entrance ramp to using bitcoin.  Sending bitcoins to friends is only the tip of the iceburg!</p>
+          <h2>Fast</h2>
+          <p style="width: 30%; min-width: 320px;">We provide an entrance ramp to using bitcoin.  Sending bitcoins to friends is only the tip of the iceburg!</p>
           <p><a class="btn btn-default" href="https://spendbitcoins.com/places/" target="_blank" role="button">What can bitcoin do? &raquo;</a></p>
-        </div><!-- /.col-lg-4 -->
+        </div>
         <div class="col-lg-4">
           <img height="140" width="140" class = "img-circle" src="assets/we_love_bitcoin.png">
-          <h2>Motivation</h2>
-          <p>Bitcoin is an incredibly cool technology. We want to expose people to the bitcoin protocols through familiar channels such as social media.</p>
-          <p><a class="btn btn-default" href="/liftoff/login/facebook" target="_blank" role="button">Try BitBox Now! &raquo;</a></p>
-        </div><!-- /.col-lg-4 -->
-      </div><!-- /.row -->
+          <h2>Free</h2>
+          <p style="width: 30%; min-width: 320px;">Bitcoin is a revolutionary technology, and we want to be its messengers. Want to learn more about it?</p>
+          <a href="https://en.bitcoin.it/wiki/Introduction" target="_blank">
+            <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Learn more"></input>
+          </a>
+        </div>
+      </div-->
 
 
       <!-- FOOTER -->
       <footer>
         <p class="pull-right"><a href="#">Back to top</a></p>
-        <p>&copy; 2014 Bitbox &middot;</p>
+        <p>&copy; 2014 BitBox &middot;</p>
       </footer>
 
     </div><!-- /.container -->
