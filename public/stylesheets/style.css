@@ -102,6 +102,7 @@ ul.nav.nav-sidebar li > a, ul.nav.nav-sidebar li > a:hover, ul.nav.nav-sidebar l
 *{
     margin:0;
     padding:0;
+    text-shadow: none;
 }
 
 /* Above, the asterisk selects all elements in the HTML document and rests the margin and padding. This ensures that any of the annoying "default" margin and paddings a browser might have will be reset to zero. */
@@ -220,6 +221,17 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	ul#notis.dropdown-menu.dropdown-notifications {
 		width: 100%;
 	}
+
+	div#focii > div {
+		text-align: center;
+		width: 33%;
+		display: block;
+		float: left;
+	}
+
+	.withdraw-instructions {
+		width: 50%;
+	}
 }
 
 @media (max-width: 767px) {
@@ -230,6 +242,16 @@ body div.main ul.nav.nav-sidebar li > a:hover, body div ul.nav.nav-sidebar li > 
 	ul#notis.dropdown-menu.dropdown-notifications {
 		width: 200%;
 		margin-left: -50%;
+	}
+
+	div#focii > div {
+		text-align: center;
+		width: 100%;
+		display: block;
+		float: none;
+	}
+	.withdraw-instructions {
+		width: 100%;
 	}
 }
 
@@ -452,3 +474,43 @@ ul#notis.dropdown-menu.dropdown-notifications li {
 ul.dropdown-menu {
 	min-width: inherit;
 }
+
+.carousel-inner div.item{
+
+	background-repeat: no-repeat;
+	/*background-attachment: fixed;*/
+	background-position: center; 
+	background-size: cover;
+}
+
+#carousel-one {
+	background-image: url('/assets/girl_computer.png');
+}
+
+#carousel-two {
+	background-image: url('/assets/speed-of-light.png');
+}
+
+#carousel-three {
+	background-image: url('/assets/friends_cafe_istock.png');
+}
+div#callout, div.carousel-caption {
+	background-color: rgba(245,222,179,0.5);
+	padding: 20px;
+}
+
+div#focii > div > p {
+	padding: 20px;
+	text-align: left;
+}
+
+div#focii div h2 {
+	margin-top: 30px;
+}
+div.carousel-caption {
+	bottom: 0px;
+	width: 100%;
+	margin-left: 0px;
+	margin-right: 0px;
+	left:0px;
+	right:0px;
