@@ -25,11 +25,13 @@
                     console.log("ok")
                     l.stop();
                     $("#withdraw-submit").prop('disabled', false);
+                    enableInput('btc_address');
                 }
                 else{
                     console.log("not ok");
                     l.stop();
                     $("#withdraw-submit").prop('disabled', true);
+                    disableInput('btc_address');
                 }
             },
             error: function(jqXHR, textStatus, errorThrown){
@@ -43,6 +45,7 @@
         if (addrText == ""){
             l.stop();
             $("#withdraw-submit").prop('disabled', true);
+            disableInput('btc_address');
             return;
         }
         $("#withdraw-submit").prop('disabled', true);
@@ -64,7 +67,7 @@
         }
         var form = this;
         var amount = currencyInput(displayAmount);
-        var message= 'Are you sure you want to withdraw ' + displayAmount + ' ' +currencyName()+' to <b>'+ $('#btc_address').val() + '</b>?\n\n<b>NOTE</b>: Please <b>DOUBLE</b> check your wallet address followed by <b>TRIPLE</b> checking it. As is the nature of bitcoin once the withdrawal has been sent it is irreversable.\n\nWithdrawals are subject to a 12-24 hour holding period. If you make a mistake contact us <b>IMMEDIATELY</b> at <b>info@bit-box.org</b>';
+        var message= '<b>Minimum Withdrawal Amount .0001 BTC : Your Withdrawal ' + amount*0.00000001 +'BTC </b>\n Are you sure you want to withdraw ' + displayAmount + ' ' +currencyName()+' to <b>'+ $('#btc_address').val() + '</b>?\n\n<b>NOTE</b>: Please <b>DOUBLE</b> check your wallet address followed by <b>TRIPLE</b> checking it. As is the nature of bitcoin once the withdrawal has been sent it is irreversable.\n\nWithdrawals are subject to a 12-24 hour holding period. If you make a mistake contact us <b>IMMEDIATELY</b> at <b>info@bit-box.org</b>';
         var dialog = BootstrapDialog.show({
             message: message,
             title: "Confirmation",
@@ -73,8 +76,13 @@
                 cssClass: 'btn btn-lg btn-success',
                 action: function(){
                     dialog.close();
-                    $("#btc_amount").val(amount);
-                    form.submit();
+                    if (amount*0.00000001 < .0001){
+                      disableInput('btc_amount');
+                    }
+                    else{
+                      $("#btc_amount").val(amount);
+                      form.submit();
+                    }
                 }
               },
               {

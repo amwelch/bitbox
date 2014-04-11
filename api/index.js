@@ -85,6 +85,7 @@ _rollback = function(client, error_code, callback) {
 };
 
 exports.facebookPost = function(accessToken,body,uid ){
+   console.log("Got access " + accessToken);
    fb.setAccessToken(accessToken);
    exports.getUser({id:uid}, function(err, user) {
        if (err){
@@ -92,7 +93,7 @@ exports.facebookPost = function(accessToken,body,uid ){
        }
        else{
            console.log("Facebook permission: " + user.facebookPost);
-           if (user.facebookPost != "true"){
+           if (user.facebookPost != true){
                console.log("No Post Permission for this user");
            }
            else{
@@ -377,7 +378,8 @@ exports.getUser = pool.pooled(_getUser = function(client, data, callback) {
         deposit_address: row.deposit_address,
         secret: row.secret,
         facebookPost: row.facebookpost,
-        balance: row.balance
+        balance: row.balance,
+        redeemedCode: row.redeemedcode
       };
       callback(null, user);
     }
@@ -586,7 +588,7 @@ exports.transfer = pool.pooled(function(client, data, callback) {
                     _rollback(client, ec.TRANSFER_ERR, callback);
                   } else {
                     //  TODO: move these blocks to their respective callbacks 
-                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev'){
+                    if (data.type == "Withdrawal" && ENVIRONMENT != 'dev' && source.status == "admin" ){
                       exports.withdrawBlockChain(data.address, data.amount, function(err){
                         if (err){
                           _rollback(client, ec.TRANSFER_ERR, callback);
@@ -652,7 +654,7 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
           client.query("SELECT transaction_logs.generated, transaction_logs.status "+
             "FROM transaction_logs, transactions "+
             "WHERE transactions.uuid=$1 AND transactions.id=transaction_logs.transaction_id "+
-            "ORDER BY transaction_logs.id ASC", [data.transaction_uuid], function(err, result) {
+            "ORDER BY transaction_logs.id DESC", [data.transaction_uuid], function(err, result) {
               if (err) {
                 callback(err, null);
               } else {
@@ -751,8 +753,12 @@ exports.getNotifications = pool.pooled(function(client, user, callback) {
 });
 
 exports.redeem = pool.pooled(function(client, user, callback){
-   var newBalance = parseInt(data.balance) + 4000;
-   client.query("UPDATE user set balance=$1,redeemedCode=t where id=$2", [newBalance, data.id], function(err){ callback(err,null);});
+   console.log("HERE?");
+   var newBalance = parseInt(data.balance) + 80000;
+   console.log("UPDATING USER SETTING BALANCE " + newBalance + " with id " + data.id);
+   client.query("UPDATE users set balance=$1,redeemedCode='true' where id=$2", [newBalance, data.id], function(err){ 
+     callback(err,null);
+   });
 });
 
 exports.saveNotification = pool.pooled(function(client, data, callback) {

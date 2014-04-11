@@ -34,6 +34,17 @@ var api = require('./api');
 
 //  ------- Server Configuration -------
 var app = express();  
+
+if (ENVIRONMENT == 'prod'){
+  function requireHTTPS(req, res, next) {
+    if (!req.secure){
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+  }
+  app.use(requireHTTPS);
+}
+
 app.configure(function() {
   app.use(express.favicon());
   app.set('views', __dirname + '/views');
@@ -155,7 +166,7 @@ app.get('/liftoff/login/facebook', function(req, res, next){
         }
     }   
     passport.authenticate('facebook', { 
-      scope: ['email'],
+      scope: scope,
       display: 'popup',
       authType: 'reauthenticate'
     })(req, res, next);
@@ -173,6 +184,7 @@ app.get('/liftoff/login/facebook/callback',
 app.get('/logout', routes.logout);
 
 app.get('/transfer/pay', routes.viewPay);
+app.get('/transfer/notifications', routes.viewNotificationsList);
 app.get('/transfer/track/:id', routes.viewTransferSingle);
 app.get('/transfer/track', routes.viewTransferList);
 app.get('/transfer/deposit', routes.viewDeposit);
@@ -180,7 +192,9 @@ app.get('/transfer/withdraw', routes.viewWithdraw);
 app.get('/transfer/redeem', routes.redeem);
 app.post('/transfer/redeem', routes.controlRedeem);
 
+
 app.post('/transfer/pay', routes.controlPay);
+app.post('/transfer/track/notifications', postLater);
 app.post('/transfer/track/:id', routes.controlTransferSingle);
 app.post('/transfer/track', postLater);
 app.post('/transfer/deposit', routes.controlDeposit);
@@ -221,13 +235,6 @@ var ip = process.env.IP || cfg.app.internal_ip;
 
 
 if (ENVIRONMENT == 'prod'){
-  function requireHTTPS(req, res, next) {
-    if (!req.secure){
-        return res.redirect('https://' + req.get('host') + req.url);
-    }
-    next();
-  }
-  app.use(requireHTTPS);
   var options = {
     key: fs.readFileSync('/ssl/ssl.key'),
     cert: fs.readFileSync('/ssl/2b3af6623f609d.crt')

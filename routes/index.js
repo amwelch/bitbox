@@ -4,6 +4,7 @@ var https = require('https');
 var api = require('../api/');
 var sio = require('./socket');
 var uuid = require('node-uuid');
+var cfg = require('./cfg.js');
 
 function require_login(res) {
   res.redirect('/liftoff/login');
@@ -129,10 +130,6 @@ exports.controlTransferSingle = function(req, res) {
   res.redirect('/transfer/track');
 };
 
-exports.controlRedeem = function(req, res) {
-  // TODO: what goes here??
-}
-
 exports.viewTransferSingle = function(req, res) {
   var transaction_uuid = req.params.id;
   console.log("HERE");
@@ -183,6 +180,33 @@ exports.viewTransferList = function(req, res) {
           balance: req.user.balance,
           name: req.user.nickname,
           history: history
+        });
+      }
+    });
+  } else {
+    require_login(res);
+  }
+};
+
+exports.viewNotificationsList = function(req, res) {
+  console.log("||||||||||||||||||GETTING Notifications");
+  if (req.user.valid) {
+    api.getNotifications({id: req.user.id}, function(err, result) {
+      if (err) {
+        console.log("||||||||||||||||||EROOR");
+        console.log(err);
+        res.redirect("/");
+      } else {
+        console.log("||||||||||||||||||Notifications");
+        console.log(result.rows);
+        render(req, res, {
+          base: 'transfer',
+          view: 'notifications',
+          authenticated: true,
+          title: 'Notifications',
+          balance: req.user.balance,
+          name: req.user.nickname,
+          history: result.rows
         });
       }
     });
@@ -277,9 +301,6 @@ exports.controlPay = function(req, res) {
           if (err) {
             res.redirect('/transfer/pay?success=false');
           } else {
-            //TODO ALLOW THE USER TO TURN OFF POSTING TO WALL
-            //Need to submit app for review before we can tag peopl
-            //var user_string = "@["+req.body.pay.facebook_id+":1:"+nickname+"]";
             var user_string = nickname;
             console.log("Using: " + user_string);
             var btc_total = Number((req.body.pay.amount*0.00000001).toFixed(4));
@@ -289,7 +310,18 @@ exports.controlPay = function(req, res) {
                 }
                 else{
                     var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
-                    message = "I just " + type + " " + req.body.pay.amount +" satoshi ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
+                    var btc = Number(btc_total).toFixed(8);
+                    var verb = type;
+                    if (verb == "asked"){
+                      verb = "requested"
+                    }
+                    message = "I just " + verb + " " + btc +" BTC ($"+usd+") to " + user_string + " via bitbox."
+                    var tail = "\nMessage:\t" + req.body.pay.memo;
+
+                    if (req.body.pay.memo != ""){
+                      message = message + tail;
+                    }
+
                     api.facebookPost(req.session.accessToken, message, req.user.id);
 
                     // Send notification using sockets
@@ -437,7 +469,7 @@ exports.controlWithdraw = function(req, res) {
 
   //Add in miner tax
   console.log("Before Tax " + req.body.withdraw.amount);
-  var amount = parseInt(req.body.withdraw.amount) + 50000;
+  var amount = parseInt(req.body.withdraw.amount) + 1000;
 
   console.log("Withdrawing " + amount);
 
@@ -693,17 +725,35 @@ exports.redeem = function(req, res){
 }
 exports.controlRedeem = function(req, res){
   if (req.user.valid){
-    if (!req.user.redeemedCode){
-      if (req.params.code == cfg.code){
+    console.log(req.user);
+    if (req.user.redeemedCode == false){
+      if (req.body.redeem == cfg.code){
         data = {
           id: req.user.id,
           balance: req.user.balance
         };
-        api.redeem(data);
-        res.redirect('/transfer/redeem?success=true');
+        api.redeem(data, function(err, result){
+            if(err){
+              console.log("Could not update");
+              console.log(err);
+              res.redirect('/transfer/redeem?success=false');
+              return;
+            }
+            else{
+              res.redirect('transfer/redeem?success=true');
+              return;
+            }
+        });
+        return;
       }
-    }  
+      else{
+        console.log("Incorrect Code");  
+      }
+    }
+    console.log("Already redeemed");
+    console.log("user code " + req.user.redeemedCode);
     res.redirect('/transfer/redeem?success=false');
+    return;
   }
   else{
     require_login(res);
