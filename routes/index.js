@@ -738,8 +738,6 @@ exports.controlRedeem = function(req, res){
               return;
             }
         });
-        res.redirect('/transfer/redeem?success=true');
-        return;
       }
       else{
         console.log("Incorrect Code");  
