@@ -191,12 +191,14 @@ exports.viewTransferList = function(req, res) {
 exports.viewNotificationsList = function(req, res) {
   console.log("||||||||||||||||||GETTING Notifications");
   if (req.user.valid) {
-    api.getNotifications({id: req.user.id}, function(err, notifications) {
+    api.getNotifications({id: req.user.id}, function(err, result) {
       if (err) {
+        console.log("||||||||||||||||||EROOR");
         console.log(err);
         res.redirect("/");
       } else {
-        console.log(notifications);
+        console.log("||||||||||||||||||Notifications");
+        console.log(result.rows);
         render(req, res, {
           base: 'transfer',
           view: 'notifications',
@@ -204,7 +206,7 @@ exports.viewNotificationsList = function(req, res) {
           title: 'Notifications',
           balance: req.user.balance,
           name: req.user.nickname,
-          history: notifications
+          history: result.rows
         });
       }
     });

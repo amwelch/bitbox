@@ -9,7 +9,7 @@ module.exports = function(environment) {
       host: 'localhost',
       username: 'alexander',
       password: 'testing123',
-      port: '5433'
+      port: '5432'
     };
 
     rObject.app = {
