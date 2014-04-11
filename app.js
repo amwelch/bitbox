@@ -34,6 +34,17 @@ var api = require('./api');
 
 //  ------- Server Configuration -------
 var app = express();  
+
+if (ENVIRONMENT == 'prod'){
+  function requireHTTPS(req, res, next) {
+    if (!req.secure){
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+  }
+  app.use(requireHTTPS);
+}
+
 app.configure(function() {
   app.use(express.favicon());
   app.set('views', __dirname + '/views');
@@ -220,13 +231,6 @@ var ip = process.env.IP || cfg.app.internal_ip;
 
 
 if (ENVIRONMENT == 'prod'){
-  function requireHTTPS(req, res, next) {
-    if (!req.secure){
-        return res.redirect('https://' + req.get('host') + req.url);
-    }
-    next();
-  }
-  app.use(requireHTTPS);
   var options = {
     key: fs.readFileSync('/ssl/ssl.key'),
     cert: fs.readFileSync('/ssl/2b3af6623f609d.crt')
