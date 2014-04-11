@@ -1,0 +1,14 @@
+<div class="table-responsive">
+  <table class="table">
+    <tr style="background-color: #f9f9f9;">
+      <th>Notification</th>      
+      <!--th>Date</th-->
+    </tr>
+    <% for (var i = 0; i < history.length; i++) { %>
+      <tr class="linked" onclick="location.href='/transfer/track/<%= history[i].tx_uuid %>';">
+        <td><%= history[i].msg %></td>
+        <!--td><span class="date"><%= history[i].date %></span></td-->
+      </tr>
+    <% } %>
+  </table>
+</div>
