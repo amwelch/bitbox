@@ -79,7 +79,6 @@
         });
     });
     var curName = currencyName();
-    console.log("GOT CURRENCY AS ", curName);
     $("#btc_amount").attr("placeholder", curName);
 </script>
 <script>
@@ -87,7 +86,6 @@ var init = function() {
   $('#fb-user').facebookAutocomplete({
       showAvatars: true,
       onpick: function(friend) { 
-        console.log(friend);
         document.getElementById("friend_fbid").value = friend.id;
         document.getElementById("fb-user").disabled = "disabled";
         document.getElementById("fb-user").value = friend.name;
@@ -122,7 +120,6 @@ window.fbAsyncInit = function() {
 
   FB.Event.subscribe('auth.authResponseChange', function(response) {
     if (response.status === 'connected') {
-      console.log('FOOD');
       init();
 
     } else {

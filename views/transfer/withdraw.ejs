@@ -22,13 +22,11 @@
             type: 'get',
             success: function(response, textStatus, jqXHR){
                 if (response == "ok"){
-                    console.log("ok")
                     l.stop();
                     $("#withdraw-submit").prop('disabled', false);
                     enableInput('btc_address');
                 }
                 else{
-                    console.log("not ok");
                     l.stop();
                     $("#withdraw-submit").prop('disabled', true);
                     disableInput('btc_address');
