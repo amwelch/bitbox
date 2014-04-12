@@ -82,7 +82,7 @@
     $("#btc_amount").attr("placeholder", curName);
 </script>
 <script>
-var init = function() {
+APP_FB_INIT = function() {
   $('#fb-user').facebookAutocomplete({
       showAvatars: true,
       onpick: function(friend) { 
@@ -93,13 +93,6 @@ var init = function() {
         document.getElementById("btc_amount").focus();
         document.getElementById("fb_user_clear").innerHTML = "Clear";
         document.getElementById("fb_user_clear").className = "input-option";
-        /*
-        FB.ui({
-          method: 'send',
-          display: 'iframe',
-          to: friend.id,
-          link: 'http://inbitbox.com',
-        });*/
 
         $("#fb_user_clear").click(function() {
           document.getElementById("fb-user").value = "";
@@ -113,30 +106,4 @@ var init = function() {
       }
   });
 };
-window.fbAsyncInit = function() {
-  FB.init({
-    appId: '<%= fb_app_id %>'
-  });
-
-  FB.Event.subscribe('auth.authResponseChange', function(response) {
-    if (response.status === 'connected') {
-      init();
-
-    } else {
-      window.location.replace("/logout");
-    }
-  });
-};
-
-
-// Load the SDK asynchronously
-(function(d){
- var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
- if (d.getElementById(id)) {return;}
- js = d.createElement('script'); js.id = id; js.async = true;
- js.src = "//connect.facebook.net/en_US/all.js";
- ref.parentNode.insertBefore(js, ref);
-}(document));
 </script>
-
-
