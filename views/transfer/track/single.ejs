@@ -38,7 +38,7 @@
   <br>
   <% if (transaction.status == 'Canceled') { %>
   <% } else if (transaction.status == 'Pending') { %>
-  <% } else if (transaction.status == 'Complete' && !is_source) { %>    
+  <% } else if (transaction.status == 'Complete' && !is_source && transaction.type == 'Payment') { %>    
     <form name="approve" action="/transfer/track/<%= transaction.uuid %>/refund" method="POST" style="display: inline;">
       <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Refund"></input>
     </form>

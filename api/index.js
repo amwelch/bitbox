@@ -146,7 +146,7 @@ exports.withdrawBlockChain = function(addr, amount, cb){
     
 }
 
-exports.queryBlockChain = function(addr, uid){
+exports.queryBlockChain = function(addr, uid, cb){
     url = "http://blockchain.info/address/" + addr + "?format=json";
     var options = {
         host: 'blockchain.info',
@@ -161,16 +161,16 @@ exports.queryBlockChain = function(addr, uid){
             cb(err);
         }
         else{
-            console.log("GOT STUFF");
-            console.log(result);
  
             /*First check the balance if its 0 then we can end right here*/
             var total = parseInt(result.final_balance);
+            cb(total);
+            return;
+            /*
             if (total == 0){
                 console.log("0 balance");
                 return;
             }
-
 
             //TXNS will be a list
             var txns = result.txs;
@@ -185,12 +185,27 @@ exports.queryBlockChain = function(addr, uid){
                 var time = parseInt(tx.time);
 
                 if (netResult == 0){
-                  continue;
+                  for (var j = 0; j < tx.inputs.length; j++){
+                    if (tx.inputs[j].prev_out.addr == addr){
+                       console.log("HIT THIS Before ", netResult);
+                       netResult -= parseInt(tx.inputs[j].prev_out.value);
+                       console.log("HIT THIS After ", netResult);
+                    }   
+                  }
+                  for (var j = 0; j < tx.out.length; j++){
+                    if (tx.out[j].addr == addr){
+                      console.log("HIT THIS Before ", netResult);
+                      netResult += parseInt(tx.out[j].value);
+                       console.log("HIT THIS After ", netResult);
+                    }
+                  }
+                  console.log("NETRESULT FOR 0 ", netResult);
                 }
-                else if(netResult > 0){
+
+                if(netResult > 0){
                   unmatched_in.push([id, netResult, time]);
                 }
-                else{
+                else if (netResult < 0){
                   unmatched_out.push([id, netResult, time]);
                 }
             }
@@ -246,7 +261,7 @@ exports.queryBlockChain = function(addr, uid){
                     if (err) console.log("ERROR NEW DEPOSIT");
                     else console.log("NO ERROR WITH NEW DEPOSIT");
                 });
-            }
+            }*/
         }
     });
 }
@@ -774,7 +789,7 @@ exports.getNotifications = pool.pooled(function(client, user, callback) {
 
 exports.redeem = pool.pooled(function(client, user, callback){
    console.log("HERE?");
-   var newBalance = parseInt(data.balance) + 80000;
+   var newBalance = parseInt(data.balance) + 10000;
    console.log("UPDATING USER SETTING BALANCE " + newBalance + " with id " + data.id);
    client.query("UPDATE users set balance=$1,redeemedCode='true' where id=$2", [newBalance, data.id], function(err){ 
      callback(err,null);
