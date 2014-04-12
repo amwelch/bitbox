@@ -35,7 +35,9 @@
       <% include redeem.ejs %>
     <% } else if (view == 'deposit') { %>
       <% include deposit.ejs %>
-    <% } %> 
+    <% } else if (view == 'notifications') { %> 
+      <% include notifications.ejs %>
+    <% } %>  
     </div>
   </div>
 </div>
