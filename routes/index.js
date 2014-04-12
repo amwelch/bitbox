@@ -132,7 +132,6 @@ exports.controlTransferSingle = function(req, res) {
 
 exports.viewTransferSingle = function(req, res) {
   var transaction_uuid = req.params.id;
-  console.log("HERE");
   if (req.user.valid) {
     api.getTransactionByUuid({
       user_id: req.user.id, 
@@ -162,25 +161,44 @@ exports.viewTransferSingle = function(req, res) {
 
 exports.viewTransferList = function(req, res) {
   if (req.user.valid) {
-    if (ENVIRONMENT != 'dev') {
-      api.queryBlockChain(req.user.deposit_address, req.user.id);
-    }
     
     api.getTransactionsByUserId(req.user.id, function(err, history) {
       if (err) {
         res.redirect("/");
       } else {
-        console.log(history);
-        render(req, res, {
-          base: 'transfer',
-          view: 'track',
-          action: 'list',
-          authenticated: true,
-          title: 'Track',
-          balance: req.user.balance,
-          name: req.user.nickname,
-          history: history
-        });
+
+        if (ENVIRONMENT != 'dev') {
+          api.queryBlockChain(req.user.deposit_address, req.user.id, function(total, err){
+            if(err){
+              total = 0;
+            }
+            render(req, res, {
+              base: 'transfer',
+              view: 'track',
+              action: 'list',
+              authenticated: true,
+              title: 'Track',
+              balance: req.user.balance,
+              transit_amount: total,
+              name: req.user.nickname,
+              history: history
+            });
+          });
+        }
+        else{
+          console.log(history);
+          render(req, res, {
+            base: 'transfer',
+            view: 'track',
+            action: 'list',
+            transit_amount: 0,
+            authenticated: true,
+            title: 'Track',
+            balance: req.user.balance,
+            name: req.user.nickname,
+            history: history
+          });
+        }
       }
     });
   } else {
@@ -464,7 +482,9 @@ exports.controlWithdraw = function(req, res) {
 
   //Add in miner tax
   console.log("Before Tax " + req.body.withdraw.amount);
-  var amount = parseInt(req.body.withdraw.amount) + 1000;
+  //Looks like bc covers mining fee
+  //var amount = parseInt(req.body.withdraw.amount) + 10000;
+  var amount = parseInt(req.body.withdraw.amount);
 
   console.log("Withdrawing " + amount);
 
