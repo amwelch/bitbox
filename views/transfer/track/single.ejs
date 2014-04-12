@@ -68,14 +68,20 @@
 </div>
 <script>
 APP_FB_INIT = function() {
-  document.getElementsByClassName('external')[0].addEventListener('click', function(event) {
-    var friend = event.target.id;
-    FB.ui({
-      method: 'send',
-      display: 'popup',
-      to: friend,
-      link: 'https://bit-box.org/transfer/track/<%= transaction.uuid %>',
+  var name =  <%= transaction.destination_name %>;
+  if (name == "Bitcoin Network"){
+    $("<%= transaction.destination_fbid %>").removeAttr('href');
+  }
+  else{
+    document.getElementsByClassName('external')[0].addEventListener('click', function(event) {
+      var friend = event.target.id;
+      FB.ui({
+        method: 'send',
+        display: 'popup',
+        to: friend,
+        link: 'https://bit-box.org/transfer/track/<%= transaction.uuid %>',
+      });
     });
-  });
+  }
 }
 </script>
