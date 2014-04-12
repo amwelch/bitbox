@@ -206,10 +206,18 @@ exports.queryBlockChain = function(addr, uid){
                     removed+=1;
                 }
             }
-            console.log(unmatched_out);
-            console.log(unmatched_in);
-            console.log(removed);
+            console.log("unmatched out: ", unmatched_out);
+            console.log("unmatched in: ",unmatched_in);
+            console.log("removed: ", removed);
             if (removed != unmatched_out.length){
+                console.log("Inputs");
+                for (var i = 0; i < tx.inputs.length; i++){
+                    console.log(tx.inputs[i]);
+                }
+                console.log("Outputs");
+                for (var i = 0; i < tx.out.length; i++){
+                    console.log(tx.out[i]);
+                }
                 console.log("SOMETHING WRONG, SOME JUNK IN ADDRESS");
                 return;
             }
@@ -439,7 +447,7 @@ exports.completeDeposit = pool.pooled(function(client, data, callback) {
      if (err) {
        _rollback(client, err, callback);
      } else {
-       client.query("UPDATE transactions set status='complete' where blockchain_id=$1", [data.depositId], function(err, result){
+       client.query("UPDATE transactions set status='Complete' where blockchain_id=$1", [data.depositId], function(err, result){
          if (err){
            _rollback(client, err, callback);
          } else {
