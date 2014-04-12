@@ -333,7 +333,7 @@ exports.controlPay = function(req, res) {
                       tx_uuid: unique_id
                     }, notification_msg);                    
 
-                    res.redirect('/transfer/pay?success=true');
+                    res.redirect('/transfer/track/'+unique_id+'?success=true');
                 }
             });
           }

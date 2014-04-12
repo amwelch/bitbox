@@ -622,7 +622,8 @@ exports.transfer = pool.pooled(function(client, data, callback) {
 });
 
 exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
-  client.query("SELECT transactions.*, source.nickname AS source_name, destination.nickname AS destination_name "+
+  client.query("SELECT transactions.*, source.nickname AS source_name, destination.nickname AS destination_name, "+
+    "source.facebook_id AS source_fbid, destination.facebook_id AS destination_fbid "+
     "FROM transactions "+
     "LEFT OUTER JOIN users source ON transactions.source=source.id "+
     "LEFT OUTER JOIN users destination ON transactions.destination=destination.id "+
@@ -642,8 +643,10 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
             type: history.type,
             source_id: history.source,
             source_name: history.source_name,
+            source_fbid: history.source_fbid,
             destination_id: history.destination,
             destination_name: history.destination_name,
+            destination_fbid: history.destination_fbid,
             status: history.status,
             amount: history.amount,
             confirmations: history.confirmations,
