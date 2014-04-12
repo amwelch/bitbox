@@ -68,40 +68,28 @@ socket.on('old_notifications', function(data) {
 		item.className += "notifications"
 		
 		item.setAttribute("id", "no_new");
-		item.innerHTML = "No new notifications";
+		item.innerHTML = "No new notifications :(";
 
 		var divider = document.createElement('li');
 		divider.setAttribute("id", "no_new_divider");
 		divider.className = "divider";
-
-		no_new = true;
 
 		// Add it to the list:
 		notifications.appendChild(item);
 		notifications.appendChild(divider);
 	}
 
-	var item = document.createElement('li');
-	item.className += "notifications"
-
-	var link = document.createElement('a');
-	var url = '/transfer/notifications';
-	link.href = url;
-	link.innerHTML = "See All";
-	item.appendChild(link);
-	notifications.appendChild(item);
 });
 
 socket.on('notification', function(data) {
 	// console.log("Inside Notification");
 	var notifications = document.getElementById("notis");
 
-	if(no_new) {
-		// console.log("DELETING NO NEW NOTIFICATIONS")
-		var li = document.getElementById("no_new");
+	var li = document.getElementById("no_new");
+	if(li) {
 		var di = document.getElementById("no_new_divider");
 		notifications.removeChild(li);
-		notifications.removeChild(di);
+		notifications.removeChild(di);			
 	}
 
 	insert_notification(notifications, data);
