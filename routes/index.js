@@ -368,12 +368,8 @@ exports.controlPay = function(req, res) {
 
 exports.blockChainIn = function(req, res) {
    params = req.query;
-   console.log("Params");
+   console.log("Params from blockchain in");
    console.log(params);
-
-   if (params.test){
-       console.log("Test callback, ignoring");
-   }
 
    var uid = params.uid;
    var secret = params.secret;
@@ -395,14 +391,13 @@ exports.blockChainIn = function(req, res) {
       /* Check user secret to verify its coming from blockchain */
       /*Deposit the amount */
  
-      if (user.secret != params.secret){
+      if (user.secret != params.secret || params.test){
           console.log("MISMATCHED SECRET THIS SHOULD NEVER HAPPEN");
           res.writeHead(200, {'Content-Type': 'text/plain'});
           res.write('*ok*');
           res.end();
           return;
       }
-
       api.createOrUpdateDeposit({
         source: {id: -1},   
         destination: {id: uid},
@@ -420,26 +415,26 @@ exports.blockChainIn = function(req, res) {
          else{
             console.log("SUCCESS WITH DEPOSIT CALLBACK");
             console.log(logMemo);
+            if( parseInt(confirms) < reqConfirms ){
+               console.log("NOT ENOUGH CONFIRMS");
+               res.writeHead(200, {'Content-Type': 'text/plain'});
+               res.end();
+               return;
+            }
+            api.completeDeposit({depositId: params.transaction_hash}, function(err, result){
+                if (err){
+                    console.log("ERROR COMPLETING");
+                }
+                else{
+                    console.log("Finished COMPLETING");
+                    console.log("COMPLETING TRANSACTION");
+                    res.writeHead(200, {'Content-Type': 'text/plain'});
+                    res.write('*ok*');
+                    res.end();
+                }
+            });
          }
       });
-      if( parseInt(confirms) < reqConfirms ){
-         console.log("NOT ENOUGH CONFIRMS");
-         res.writeHead(200, {'Content-Type': 'text/plain'});
-         res.end();
-         return;
-      }
-      api.completeDeposit({depositId: params.transaction_hash}, function(err, result){
-          if (err){
-              console.log("ERROR COMPLETING");
-          }
-          else{
-              console.log("Finished COMPLETING");
-          }
-      });
-      console.log("COMPLETING TRANSACTION");
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.write('*ok*');
-      res.end();
    });
 }
 
