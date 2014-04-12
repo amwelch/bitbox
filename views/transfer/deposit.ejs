@@ -1,6 +1,5 @@
 <script >
     function selectText(containerid) {
-      console.log("called");
         if (document.selection) {
             var range = document.body.createTextRange();
             range.moveToElementText(document.getElementById(containerid));

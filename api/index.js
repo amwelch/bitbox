@@ -171,51 +171,68 @@ exports.queryBlockChain = function(addr, uid){
                 return;
             }
 
+
             //TXNS will be a list
             var txns = result.txs;
             var unmatched_in = [];
             var totals = [];
             var unmatched_out = [];
-            //We now pair up transactions in and transactions out. If we find one in without a corresponding transaction out
-            //We know the target address so we just check inputs and outputs. If we see this address in one of the two categories we know which type of transaction this is. (Caveat: its valid to include an address as an input and output but we hopefully won't see this)
             for (var i = 0; i < txns.length; i++)
             {        
                 var tx = txns[i];
                 var id = tx.hash;
-                for (var j = 0; j < tx.inputs.length; j++){
-                    if (tx.inputs[j].prev_out.addr == addr){
-                        unmatched_out.push(id);
-                        break;
-                    }
+                var netResult = parseInt(tx.result);
+                var time = parseInt(tx.time);
+
+                if (netResult == 0){
+                  continue;
                 }
-                for (var j = 0; j < tx.out.length; j++){
-                    if (tx.out[j].addr == addr){
-                        unmatched_in.push(id);
-                        totals.push(parseInt(tx.out[j].value));
-                        break;
-                    }
+                else if(netResult > 0){
+                  unmatched_in.push([id, netResult, time]);
+                }
+                else{
+                  unmatched_out.push([id, netResult, time]);
                 }
             }
-            //Remove hashes that appear in inputs and outputs
+            var sortFun = function(a,b){
+              a = a[2];
+              b = b[2];
+              return a - b;
+            }
+
+            unmatched_in.sort(sortFun);
+            unmatched_out.sort(sortFun);
+ 
+
+            console.log("UNMATCHED_IN ", unmatched_in);
+            console.log("UNMATCHED_Out ", unmatched_out);
+
             var removed = 0;
+            //Remove hashes that appear in inputs and outputs
             for (var i =0; i < unmatched_out.length; i++){
-                var j = unmatched_in.indexOf(unmatched_out[i]);
-                if ( j > -1){
-                    unmatched_in.splice(j,1);
-                    totals.splice(j,1);
+                var index = -1;
+                for (var j = 0; j < unmatched_in.length; j++){
+                  var diff = (parseFloat(unmatched_in[j][1]) / parseFloat(-1*(unmatched_out[i][1])));
+                  if ( diff >= .9 && diff <= 1.1){
+                    index = j;
+                    break;
+                  }
+                }
+                if ( index > -1){
+                    unmatched_in.splice(index,1);
                     removed+=1;
                 }
             }
-            console.log(unmatched_out);
-            console.log(unmatched_in);
-            console.log(removed);
+            console.log("unmatched out: ", unmatched_out);
+            console.log("unmatched in: ",unmatched_in);
+            console.log("removed: ", removed);
             if (removed != unmatched_out.length){
                 console.log("SOMETHING WRONG, SOME JUNK IN ADDRESS");
                 return;
             }
             for (var i = 0; i < unmatched_in.length; i++){
                 console.log("THIS IS ID");
-                console.log(unmatched_in[i]);
+                console.log(unmatched_in[i][1]);
                 console.log("ADDING UNTRACKED DEPOSIT");
                 exports.createOrUpdateDeposit({
                   source: {id: -1},
@@ -223,8 +240,8 @@ exports.queryBlockChain = function(addr, uid){
                   memo: "Deposit to Address: " + addr,
                   type: "Deposit",
                   confirmations: 0,
-                  amount: totals[i],
-                  depositId: unmatched_in[i],
+                  amount: unmatched_in[i][1],
+                  depositId: unmatched_in[i][0],
                 }, function(err, result){
                     if (err) console.log("ERROR NEW DEPOSIT");
                     else console.log("NO ERROR WITH NEW DEPOSIT");
@@ -439,7 +456,7 @@ exports.completeDeposit = pool.pooled(function(client, data, callback) {
      if (err) {
        _rollback(client, err, callback);
      } else {
-       client.query("UPDATE transactions set status='complete' where blockchain_id=$1", [data.depositId], function(err, result){
+       client.query("UPDATE transactions set status='Complete' where blockchain_id=$1", [data.depositId], function(err, result){
          if (err){
            _rollback(client, err, callback);
          } else {
