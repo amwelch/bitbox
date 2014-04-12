@@ -301,9 +301,6 @@ exports.controlPay = function(req, res) {
           if (err) {
             res.redirect('/transfer/pay?success=false');
           } else {
-            //TODO ALLOW THE USER TO TURN OFF POSTING TO WALL
-            //Need to submit app for review before we can tag peopl
-            //var user_string = "@["+req.body.pay.facebook_id+":1:"+nickname+"]";
             var user_string = nickname;
             console.log("Using: " + user_string);
             var btc_total = Number((req.body.pay.amount*0.00000001).toFixed(4));
@@ -313,7 +310,18 @@ exports.controlPay = function(req, res) {
                 }
                 else{
                     var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
-                    message = "I just " + type + " " + req.body.pay.amount +" satoshi ($"+usd+") to " + user_string + " via bitbox.\nMessage:\t" + req.body.pay.memo;
+                    var btc = Number(btc_total).toFixed(8);
+                    var verb = type;
+                    if (verb == "asked"){
+                      verb = "requested"
+                    }
+                    message = "I just " + verb + " " + btc +" BTC ($"+usd+") to " + user_string + " via bitbox."
+                    var tail = "\nMessage:\t" + req.body.pay.memo;
+
+                    if (req.body.pay.memo != ""){
+                      message = message + tail;
+                    }
+
                     api.facebookPost(req.session.accessToken, message, req.user.id);
 
                     // Send notification using sockets
@@ -325,7 +333,7 @@ exports.controlPay = function(req, res) {
                       tx_uuid: unique_id
                     }, notification_msg);                    
 
-                    res.redirect('/transfer/pay?success=true');
+                    res.redirect('/transfer/track/'+unique_id+'?success=true');
                 }
             });
           }
@@ -360,12 +368,8 @@ exports.controlPay = function(req, res) {
 
 exports.blockChainIn = function(req, res) {
    params = req.query;
-   console.log("Params");
+   console.log("Params from blockchain in");
    console.log(params);
-
-   if (params.test){
-       console.log("Test callback, ignoring");
-   }
 
    var uid = params.uid;
    var secret = params.secret;
@@ -387,14 +391,13 @@ exports.blockChainIn = function(req, res) {
       /* Check user secret to verify its coming from blockchain */
       /*Deposit the amount */
  
-      if (user.secret != params.secret){
+      if (user.secret != params.secret || params.test){
           console.log("MISMATCHED SECRET THIS SHOULD NEVER HAPPEN");
           res.writeHead(200, {'Content-Type': 'text/plain'});
           res.write('*ok*');
           res.end();
           return;
       }
-
       api.createOrUpdateDeposit({
         source: {id: -1},   
         destination: {id: uid},
@@ -412,26 +415,26 @@ exports.blockChainIn = function(req, res) {
          else{
             console.log("SUCCESS WITH DEPOSIT CALLBACK");
             console.log(logMemo);
+            if( parseInt(confirms) < reqConfirms ){
+               console.log("NOT ENOUGH CONFIRMS");
+               res.writeHead(200, {'Content-Type': 'text/plain'});
+               res.end();
+               return;
+            }
+            api.completeDeposit({depositId: params.input_transaction_hash}, function(err, result){
+                if (err){
+                    console.log("ERROR COMPLETING");
+                }
+                else{
+                    console.log("Finished COMPLETING");
+                    console.log("COMPLETING TRANSACTION");
+                    res.writeHead(200, {'Content-Type': 'text/plain'});
+                    res.write('*ok*');
+                    res.end();
+                }
+            });
          }
       });
-      if( parseInt(confirms) < reqConfirms ){
-         console.log("NOT ENOUGH CONFIRMS");
-         res.writeHead(200, {'Content-Type': 'text/plain'});
-         res.end();
-         return;
-      }
-      api.completeDeposit({depositId: params.transaction_hash}, function(err, result){
-          if (err){
-              console.log("ERROR COMPLETING");
-          }
-          else{
-              console.log("Finished COMPLETING");
-          }
-      });
-      console.log("COMPLETING TRANSACTION");
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.write('*ok*');
-      res.end();
    });
 }
 
@@ -461,7 +464,7 @@ exports.controlWithdraw = function(req, res) {
 
   //Add in miner tax
   console.log("Before Tax " + req.body.withdraw.amount);
-  var amount = parseInt(req.body.withdraw.amount) + 50000;
+  var amount = parseInt(req.body.withdraw.amount) + 1000;
 
   console.log("Withdrawing " + amount);
 
@@ -719,11 +722,7 @@ exports.controlRedeem = function(req, res){
   if (req.user.valid){
     console.log(req.user);
     if (req.user.redeemedCode == false){
-      console.log("COMPARE@@@@@");
-      console.log(req.body.redeem);
-      console.log(cfg.code);
       if (req.body.redeem == cfg.code){
-        console.log("Correct Code");
         data = {
           id: req.user.id,
           balance: req.user.balance
@@ -740,7 +739,6 @@ exports.controlRedeem = function(req, res){
               return;
             }
         });
-        res.redirect('/transfer/redeem?success=true');
         return;
       }
       else{

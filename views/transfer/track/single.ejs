@@ -10,7 +10,15 @@
 
 </style>
 <div class="history"> 
-  <h4 style="text-align: left;"><%= transaction.source_name %> to <%= transaction.destination_name %>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span></h4>
+  <% if (is_source) { %>
+  <h4 style="text-align: left;">
+    <%= transaction.source_name %> to <a href="#" id="<%= transaction.destination_fbid %>" class="external"><%= transaction.destination_name %></a>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
+  </h4>
+  <% } else { %>
+  <h4 style="text-align: left;">
+    <a href="#" class="external" id="<%= transaction.source_fbid %>"><%= transaction.source_name %></a> to <%= transaction.destination_name %>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
+  </h4>
+  <% } %>
   <% if (transaction.memo.length > 0) { %><h5 style="text-align: left;"><i>"<%= transaction.memo %>"</i></h5><% } %>
   <br>
   <div class="table-responsive">
@@ -34,6 +42,7 @@
     <form name="approve" action="/transfer/track/<%= transaction.uuid %>/refund" method="POST" style="display: inline;">
       <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Refund"></input>
     </form>
+    <br><br>
   <% } else if (transaction.status == 'Requested' && is_source) { %>
     <form name="approve" action="/transfer/track/<%= transaction.uuid %>/approve" method="POST" style="display: inline;">
       <input type="submit" class="btn btn-lg btn-success" role="button" name="form-submit" value="Approve"></input>
@@ -41,20 +50,34 @@
     <form name="decline" action="/transfer/track/<%= transaction.uuid %>/decline" method="POST" style="display: inline;">
       <input type="submit" class="btn btn-lg btn-cancel" role="button" name="form-submit" value="Decline"></input>
     </form>
+    <br><br>
   <% } else if (transaction.status == 'Requested' && !is_source) { %>
     <form name="approve" action="/transfer/track/<%= transaction.uuid %>/cancel" method="POST" style="display: inline;">
       <input type="submit" class="btn btn-lg" role="button" name="form-submit" value="Cancel"></input>
     </form>
+    <br><br>
   <% } else if (transaction.status == 'Refunded') { %>
   <% } else if (transaction.status == 'Declined') { %>
   <% } %>
-
   <% if (transaction.type == 'Payment') { %>
   <% } else if (transaction.type == 'Deposit') { %>
-      <h5>Confirmations</h5>
+      <label>Confirmations</label><br>
       <h5><%= transaction.confirmations %></h5>
   <% } else if (transaction.type == 'Withdrawal') { %>
-      <h5>Confirmations</h5>
+      <label>Amount</label><br>
       <h5><%= transaction.confirmations %></h5>
   <% } %>
 </div>
+<script>
+APP_FB_INIT = function() {
+  document.getElementsByClassName('external')[0].addEventListener('click', function(event) {
+    var friend = event.target.id;
+    FB.ui({
+      method: 'send',
+      display: 'popup',
+      to: friend,
+      link: 'https://bit-box.org/transfer/track/<%= transaction.uuid %>',
+    });
+  });
+}
+</script>

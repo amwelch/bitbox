@@ -22,8 +22,7 @@
     }
     setImage();
     var showWarning = function(){
-        console.log("Showing warning");
-        var message = "<b>NOTE:</b> Currency conversions are provided as a convenience. Rates are updated every hour at the latest, but should not be taken as an exact representation.\n\nWe recommend using BTC or Satoshis as that is the true representation of the value.";
+        var message = "<b>NOTE:</b> Currency conversions are provided as a convenience. Rates are updated every hour at the latest, but should not be taken as an exact representation.\n\nWe recommend using BTC as that is the true representation of the value.";
         var dialog = BootstrapDialog.show({
             message: message,
             title: "Note",
@@ -38,7 +37,6 @@
         });
     }
     var setCurrency = function(name){
-        console.log("SHOWING WARNING");
         $.cookie('currency-display', name,{ path: '/', expires: 30});
     }
     $("#CA-select").click(function(e){
@@ -47,7 +45,6 @@
         showWarning();
     });
     $("#EU-select").click(function(e){
-        console.log("SETTNIG EU");
         e.preventDefault();
         setCurrency("eu");
         showWarning();

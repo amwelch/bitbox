@@ -153,6 +153,10 @@ var postLater = function(req, res) {
   res.redirect(req.url);
 };
 
+var homepage = function(req, res) {
+  res.redirect('/');
+}
+
 //  Facebook Login. Loops back to ./callback
 app.get('/liftoff/login/facebook', function(req, res, next){
     var scope = ['email'];
@@ -162,7 +166,7 @@ app.get('/liftoff/login/facebook', function(req, res, next){
         }
     }   
     passport.authenticate('facebook', { 
-      scope: ['email'],
+      scope: scope,
       display: 'popup',
       authType: 'reauthenticate'
     })(req, res, next);
@@ -172,7 +176,7 @@ app.get('/liftoff/login/facebook', function(req, res, next){
 //  Loopback from FB login. Attempts to get Access Token.
 app.get('/liftoff/login/facebook/callback', 
   passport.authenticate('facebook', {
-    successRedirect: '/',
+    successRedirect: '/transfer/pay#action',
     failureRedirect: '/lobby' 
   })
 );
@@ -221,8 +225,8 @@ app.post('/accounts/identity', postLater);
 
 
 app.get('/lobby', routes.lobby);
-app.get('/liftoff/login', routes.index);
-app.get('/liftoff', routes.index);
+app.get('/liftoff/login', homepage);
+app.get('/liftoff', homepage);
 app.get('/', routes.index);
 
 var port = process.env.PORT || cfg.app.port;

@@ -96,7 +96,11 @@ END $wrapper$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION log_transactions() RETURNS TRIGGER AS $wrapper$
 BEGIN
-    INSERT INTO transaction_logs (transaction_id, status) VALUES (NEW.id, NEW.status);
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO transaction_logs (transaction_id, status) VALUES (NEW.id, NEW.status);
+    ELSEIF (TG_OP = 'UPDATE' AND OLD.status != NEW.status) THEN
+        INSERT INTO transaction_logs (transaction_id, status) VALUES (NEW.id, NEW.status);
+    END IF;
     RETURN NEW;
 END $wrapper$ LANGUAGE 'plpgsql';
 
