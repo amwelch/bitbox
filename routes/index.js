@@ -421,7 +421,7 @@ exports.blockChainIn = function(req, res) {
                res.end();
                return;
             }
-            api.completeDeposit({depositId: params.transaction_hash}, function(err, result){
+            api.completeDeposit({depositId: params.input_transaction_hash}, function(err, result){
                 if (err){
                     console.log("ERROR COMPLETING");
                 }
