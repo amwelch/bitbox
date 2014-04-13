@@ -51,7 +51,7 @@ exports.sendNotification = function(data, notification_msg) {
           console.log("ERROR GETTING USER in sendNotification");
         } else {
           notify_msg = src_user.nickname + notification_msg;
-          api.saveNotification({id: dst_user.id, msg: notify_msg, type: data.type, tx_uuid: data.tx_uuid}, function(err, result) {
+          api.saveNotification({id: dst_user.id, msg: notify_msg, tx_uuid: data.tx_uuid}, function(err, result) {
             if(err) {
               console.log(err);
             }
@@ -67,4 +67,19 @@ exports.sendNotification = function(data, notification_msg) {
       });
     }
   });
+}
+
+exports.sendNotificationMsg = function(data) {  
+  api.saveNotification({id: data.dst_id, msg: data.msg, tx_uuid: data.tx_uuid}, function(err, result) {
+    if(err) {
+      console.log(err);
+    }
+    else {
+      console.log("Notification saved succesfully")
+    }
+  });
+  if (connections[data.dst_id] != undefined) {            
+    // Send the notification only if the socket to the dst user is open
+    connections[data.dst_id].emit('notification', {msg: data.msg, tx_uuid: data.tx_uuid, seen: false}); 
+  }      
 }

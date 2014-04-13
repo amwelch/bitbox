@@ -653,6 +653,12 @@ exports.transfer = pool.pooled(function(client, data, callback) {
   });
 });
 
+exports.notificationSeen = pool.pooled(function(client, data, callback) {
+  client.query("UPDATE notifications SET seen = true WHERE user_id = $1 AND tx_uuid = $2", [data.user_id, data.transaction_uuid], function(err, result) {  
+    callback(err, null);
+  });
+});
+
 exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
   client.query("SELECT transactions.*, source.nickname AS source_name, destination.nickname AS destination_name, "+
     "source.facebook_id AS source_fbid, destination.facebook_id AS destination_fbid "+
@@ -666,39 +672,35 @@ exports.getTransactionByUuid = pool.pooled(function(client, data, callback) {
     } else {
       console.log(result.rows);
       if (result.rows.length == 1) {
-        history = result.rows[0];
+        history = result.rows[0];        
 
-        client.query("UPDATE notifications SET seen = true WHERE user_id = $1 AND tx_uuid = $2", [data.user_id, data.transaction_uuid], function(err, result) {
+        rValue = {
+          date: history.last_updated,
+          type: history.type,
+          source_id: history.source,
+          source_name: history.source_name,
+          source_fbid: history.source_fbid,
+          destination_id: history.destination,
+          destination_name: history.destination_name,
+          destination_fbid: history.destination_fbid,
+          status: history.status,
+          amount: history.amount,
+          confirmations: history.confirmations,
+          memo: history.memo,
+          uuid: history.uuid
+        };
 
-          rValue = {
-            date: history.last_updated,
-            type: history.type,
-            source_id: history.source,
-            source_name: history.source_name,
-            source_fbid: history.source_fbid,
-            destination_id: history.destination,
-            destination_name: history.destination_name,
-            destination_fbid: history.destination_fbid,
-            status: history.status,
-            amount: history.amount,
-            confirmations: history.confirmations,
-            memo: history.memo,
-            uuid: history.uuid
-          };
-
-          client.query("SELECT transaction_logs.generated, transaction_logs.status "+
-            "FROM transaction_logs, transactions "+
-            "WHERE transactions.uuid=$1 AND transactions.id=transaction_logs.transaction_id "+
-            "ORDER BY transaction_logs.id DESC", [data.transaction_uuid], function(err, result) {
-              if (err) {
-                callback(err, null);
-              } else {
-                rValue.history = result.rows;
-                callback(null, rValue);
-              }
-          });
+        client.query("SELECT transaction_logs.generated, transaction_logs.status "+
+          "FROM transaction_logs, transactions "+
+          "WHERE transactions.uuid=$1 AND transactions.id=transaction_logs.transaction_id "+
+          "ORDER BY transaction_logs.id DESC", [data.transaction_uuid], function(err, result) {
+            if (err) {
+              callback(err, null);
+            } else {
+              rValue.history = result.rows;
+              callback(null, rValue);
+            }
         });
-
       } else {
         callback("INVALID ROW LENGTH", null);
       }
@@ -798,10 +800,9 @@ exports.redeem = pool.pooled(function(client, user, callback){
 
 exports.saveNotification = pool.pooled(function(client, data, callback) {
   console.log("----------------->>>>Saving notification");
-  client.query("INSERT INTO notifications (user_id, type, msg, tx_uuid) VALUES ($1,$2,$3,$4)", 
+  client.query("INSERT INTO notifications (user_id, msg, tx_uuid) VALUES ($1,$2,$3)", 
     [
       data.id,
-      data.type,
       data.msg,
       data.tx_uuid
     ], function(err) {

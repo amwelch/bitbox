@@ -74,8 +74,8 @@ socket.on('old_notifications', function(data) {
 		divider.className = "divider";
 
 		// Add it to the list:
-		notifications.appendChild(item);
-		notifications.appendChild(divider);
+		notifications.insertBefore(divider, notifications.firstChild);
+		notifications.insertBefore(item, notifications.firstChild);
 	}
 
 });

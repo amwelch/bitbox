@@ -133,6 +133,17 @@ exports.controlTransferSingle = function(req, res) {
 exports.viewTransferSingle = function(req, res) {
   var transaction_uuid = req.params.id;
   if (req.user.valid) {
+    api.notificationSeen({
+      user_id: req.user.id,
+      transaction_uuid: transaction_uuid
+    }, function(err, result) {
+      if(err) {
+        console.log(err);
+      }
+      else {
+        console.log("Transaction seen");
+      }      
+    });
     api.getTransactionByUuid({
       user_id: req.user.id, 
       transaction_uuid: transaction_uuid
@@ -207,15 +218,12 @@ exports.viewTransferList = function(req, res) {
 };
 
 exports.viewNotificationsList = function(req, res) {
-  console.log("||||||||||||||||||GETTING Notifications");
   if (req.user.valid) {
     api.getNotifications({id: req.user.id}, function(err, result) {
       if (err) {
-        console.log("||||||||||||||||||EROOR");
         console.log(err);
         res.redirect("/");
       } else {
-        console.log("||||||||||||||||||Notifications");
         console.log(result.rows);
         render(req, res, {
           base: 'transfer',
@@ -343,7 +351,7 @@ exports.controlPay = function(req, res) {
                     api.facebookPost(req.session.accessToken, message, req.user.id);
 
                     // Send notification using sockets
-                    notification_msg = " just " + type + " you " + req.body.pay.amount +" satoshi ($"+usd+").";
+                    notification_msg = " " + type + " you " + btc +" BTC ($"+usd+").";
                     sio.sendNotification({
                       dst_fb_id: req.body.pay.facebook_id, 
                       src_id: req.user.id,
@@ -647,6 +655,25 @@ exports.transactionCancel = function(req, res) {
   });
 }
 
+function notifyStatus(status, nickname, txn) {
+  REDIS.get("bitbox_btc_to_usd", function(err, conversion){
+    if(err){
+        console.log("ERROR IS err: " + err);
+    }
+    else{
+      var btc_total = Number((txn.amount*0.00000001).toFixed(4));
+      var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
+      var btc = Number(btc_total).toFixed(8);
+      var notification_msg = nickname + " " + status + " your request for " + btc + " BTC ($"+usd+").";
+      sio.sendNotificationMsg({
+        dst_id: txn.destination_id, 
+        tx_uuid: txn.uuid,
+        msg: notification_msg
+      });          
+    }
+  });
+}
+
 exports.transactionApprove = function(req, res) {
   var transaction_uuid = req.params.id;
   api.approveTransaction({
@@ -657,6 +684,17 @@ exports.transactionApprove = function(req, res) {
     if (err) {
       res.redirect('/transfer/track/'+transaction_uuid+'?success=false');
     } else {
+      api.getTransactionByUuid({
+        user_id: req.user.id, 
+        transaction_uuid: transaction_uuid
+      }, function(err, txn) {
+        if(err) {
+          console.log(err);
+        }
+        else {
+          notifyStatus("accepted",req.user.nickname, txn);
+        }
+      });
       res.redirect('/transfer/track/'+transaction_uuid+'?success=true');
     }
   });
@@ -673,6 +711,17 @@ exports.transactionDecline = function(req, res) {
       console.log(err);
       res.redirect('/transfer/track/'+transaction_uuid+'?success=false');
     } else {
+      api.getTransactionByUuid({
+        user_id: req.user.id, 
+        transaction_uuid: transaction_uuid
+      }, function(err, txn) {
+        if(err) {
+          console.log(err);
+        }
+        else {
+          notifyStatus("declined",req.user.nickname, txn);
+        }
+      });
       res.redirect('/transfer/track/'+transaction_uuid+'?success=true');
     }
   });
@@ -688,6 +737,18 @@ exports.transactionRefund = function(req, res) {
     if (err) {
       res.redirect('/transfer/track/'+transaction_uuid+'?success=false');
     } else {
+      api.getTransactionByUuid({
+        user_id: req.user.id, 
+        transaction_uuid: transaction_uuid
+      }, function(err, txn) {
+        if(err) {
+          console.log(err);
+        }
+        else {
+          txn.destination_id = txn.source_id;
+          notifyStatus("refunded",req.user.nickname, txn);
+        }
+      });
       res.redirect('/transfer/track/'+transaction_uuid+'?success=true');
     }
   });
