@@ -10,16 +10,20 @@
 
 </style>
 <div class="history"> 
-  <% if (is_source) { %>
+  <% if (is_source && transaction.destination_id != -1) { %>
   <h4 style="text-align: left;">
     <%= transaction.source_name %> to <a href="#" id="<%= transaction.destination_fbid %>" class="external"><%= transaction.destination_name %></a>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
   </h4>
-  <% } else { %>
+  <% } else if (!is_source && transaction.source_id != -1){ %>
   <h4 style="text-align: left;">
     <a href="#" class="external" id="<%= transaction.source_fbid %>"><%= transaction.source_name %></a> to <%= transaction.destination_name %>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
   </h4>
+  <% } else { %>
+  <h4 style="text-align: left;">
+    <%= transaction.source_name %> to <%= transaction.destination_name %>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
+  </h4>
   <% } %>
-  <% if (transaction.memo.length > 0) { %><h5 style="text-align: left;"><i>"<%= transaction.memo %>"</i></h5><% } %>
+  <% if (transaction.memo) { %><h5 style="text-align: left;"><i>"<%= transaction.memo %>"</i></h5><% } %>
   <br>
   <div class="table-responsive">
     <table class="table" style="max-width: 480px;">
@@ -68,11 +72,7 @@
 </div>
 <script>
 APP_FB_INIT = function() {
-  var name =  <%= transaction.destination_name %>;
-  if (name == "Bitcoin Network"){
-    $("<%= transaction.destination_fbid %>").removeAttr('href');
-  }
-  else{
+  if (document.getElementsByClassName('external').length > 0) {
     document.getElementsByClassName('external')[0].addEventListener('click', function(event) {
       var friend = event.target.id;
       FB.ui({
@@ -83,5 +83,5 @@ APP_FB_INIT = function() {
       });
     });
   }
-}
+};
 </script>
