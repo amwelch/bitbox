@@ -10,16 +10,20 @@
 
 </style>
 <div class="history"> 
-  <% if (is_source) { %>
+  <% if (is_source && transaction.destination_id != -1) { %>
   <h4 style="text-align: left;">
     <%= transaction.source_name %> to <a href="#" id="<%= transaction.destination_fbid %>" class="external"><%= transaction.destination_name %></a>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
   </h4>
-  <% } else { %>
+  <% } else if (!is_source && transaction.source_id != -1){ %>
   <h4 style="text-align: left;">
     <a href="#" class="external" id="<%= transaction.source_fbid %>"><%= transaction.source_name %></a> to <%= transaction.destination_name %>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
   </h4>
+  <% } else { %>
+  <h4 style="text-align: left;">
+    <%= transaction.source_name %> to <%= transaction.destination_name %>: <span class="currency"><%= transaction.amount %></span>&nbsp;<span class="denomination">Satoshi</span>
+  </h4>
   <% } %>
-  <% if (transaction.memo.length > 0) { %><h5 style="text-align: left;"><i>"<%= transaction.memo %>"</i></h5><% } %>
+  <% if (transaction.memo) { %><h5 style="text-align: left;"><i>"<%= transaction.memo %>"</i></h5><% } %>
   <br>
   <div class="table-responsive">
     <table class="table" style="max-width: 480px;">
@@ -64,20 +68,20 @@
       <label>Confirmations</label><br>
       <h5><%= transaction.confirmations %></h5>
   <% } else if (transaction.type == 'Withdrawal') { %>
-      <label>Amount</label><br>
-      <h5><%= transaction.confirmations %></h5>
   <% } %>
 </div>
 <script>
 APP_FB_INIT = function() {
-  document.getElementsByClassName('external')[0].addEventListener('click', function(event) {
-    var friend = event.target.id;
-    FB.ui({
-      method: 'send',
-      display: 'popup',
-      to: friend,
-      link: 'https://bit-box.org/transfer/track/<%= transaction.uuid %>',
+  if (document.getElementsByClassName('external').length > 0) {
+    document.getElementsByClassName('external')[0].addEventListener('click', function(event) {
+      var friend = event.target.id;
+      FB.ui({
+        method: 'send',
+        display: 'popup',
+        to: friend,
+        link: 'https://bit-box.org/transfer/track/<%= transaction.uuid %>',
+      });
     });
-  });
-}
+  }
+};
 </script>

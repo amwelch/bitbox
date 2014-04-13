@@ -244,6 +244,7 @@ if (ENVIRONMENT == 'prod'){
     console.log('Production BitBox server listening on port ' + port);
   });
   io = require('socket.io').listen(httpsServer);
+
 }
 else{
   var httpServer = http.createServer(app);
@@ -257,10 +258,10 @@ else{
 
  //  ------- Sockets Configuration -------
 // Sockets used for notifications
-io.enable('browser client minification');  // send minified client
-io.enable('browser client etag');          // apply etag caching logic based on version number
-io.enable('browser client gzip');          // gzip the file
+//io.enable('browser client minification');  // send minified client
+//io.enable('browser client etag');          // apply etag caching logic based on version number
+//io.enable('browser client gzip');          // gzip the file
 io.set('log level', 1);                              // reduce logging
-io.set('flash policy port', port);       //override policy port  
+//io.set('flash policy port', port);       //override policy port  
 
 io.sockets.on('connection', sio.socket_connection);
