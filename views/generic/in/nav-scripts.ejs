@@ -103,6 +103,9 @@
     $("body").find(".currency").each(function () {
       //  parsing satoshis
       var val = parseInt($(this).html());
+      if (isNaN(val)){
+        val = parseInt($($(this).html()).html());
+      }
       val = currencyOutput(val);
       $(this).html(val);
     });
