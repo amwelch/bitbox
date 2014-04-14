@@ -338,10 +338,12 @@ exports.controlPay = function(req, res) {
                     var usd = Number((parseFloat(conversion) * btc_total).toFixed(2));
                     var btc = Number(btc_total).toFixed(8);
                     var verb = type;
+                    var preposition = "to";
                     if (verb == "asked"){
-                      verb = "requested"
+                      verb = "requested";
+                      preposition = "from";
                     }
-                    message = "I just " + verb + " " + btc +" BTC ($"+usd+") to " + user_string + " via bitbox."
+                    message = "I just " + verb + " " + btc +" BTC ($"+usd+") " + preposition +" " + user_string + " via bitbox."
                     var tail = "\nMessage:\t" + req.body.pay.memo;
 
                     if (req.body.pay.memo != ""){
