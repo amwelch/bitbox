@@ -66,12 +66,12 @@ Add Python support and populate conversion rates in redis:
 
 `sudo pip install redis`
 
-`python misc/conversion_rates.py`
+`python misc/populate_conversion.py`
 
    Run the application using:
 
 `node app dev`
 
-##You can access it a http://localhost:3000
+##You can access the app at http://localhost:3000
 
 	
