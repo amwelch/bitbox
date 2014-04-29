@@ -1,9 +1,9 @@
 #BitBox installation guide OS X
 
-0. Install Xcode
+1. Install Xcode
 Xcode includes C++ support necessary to run many of the programs in this guide. We do not use Xcode at all, but it must be installed. You can install it from the Mac App Store.
 
-1. Get the code
+2. Get the code
 
 The application has many dependencies on other programs. In order to easily acquire these programs, we use one program, called Homebrew, to fetch them all. To get Homebrew, run in Terminal:
 `ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)”`
@@ -25,7 +25,7 @@ You will now have a folder in /Users/bob called credism. To access that folder r
 
 `cd credism`
 
-2. Running the code
+3. Running the code
 
 With Homebrew installed, we can now install the dependencies necessary to run the application. 
 
