@@ -7,7 +7,7 @@
 
    The application has many dependencies on other programs. In order to easily acquire these programs, we use one program, called Homebrew, to fetch them all. To get Homebrew, run in Terminal:
 
-`ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)”`
+`ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"`
 
 `brew doctor`
 
